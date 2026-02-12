@@ -199,20 +199,16 @@ const DomainTab = () => {
             description: '保證 Clipboard (剪貼簿) 在全應用程式中只有一個實例，並統一管理複製內容。',
             mermaid: `classDiagram
     class Clipboard {
-        -instance
         -_content
         +notifier
-        +set(component)
+        -static instance
+        +static getInstance()
+        +set(content)
         +get()
         +hasContent()
         +clear()
     }
-    
-    class Singleton {
-        <<pattern>>
-    }
-
-    Clipboard --|> Singleton : 實作`
+    `
         },
         {
             id: 'mediator',
@@ -284,6 +280,21 @@ const DomainTab = () => {
         +execute()
         +undo()
     }
+
+    class CopyCommand {
+        -clipboard
+        -component
+        +execute()
+        +undo()
+    }
+
+    class PasteCommand {
+        -destinationDir
+        -clipboard
+        -pastedComponent
+        +execute()
+        +undo()
+    }
     
     class CommandInvoker {
         -undoStack[]
@@ -297,6 +308,8 @@ const DomainTab = () => {
     BaseCommand <|-- DeleteCommand : 繼承
     BaseCommand <|-- TagCommand : 繼承
     BaseCommand <|-- SortCommand : 繼承
+    BaseCommand <|-- CopyCommand : 繼承
+    BaseCommand <|-- PasteCommand : 繼承
     CommandInvoker o-- BaseCommand : 管理`
         },
         {
@@ -329,6 +342,55 @@ const DomainTab = () => {
     BaseStrategy <|-- AttributeSortStrategy : 繼承
     BaseStrategy <|-- LabelSortStrategy : 繼承
     DirectoryComposite ..> BaseStrategy : 使用`
+        },
+        {
+            id: 'facade',
+            name: 'Facade',
+            stage: '9. 統一介面',
+            description: '提供一個簡易的單一介面 (ExplorerFacade) 來操作複雜的子系統 (Command, Visitor, Mediator)，降低 Client 與系統的耦合度。',
+            mermaid: `classDiagram
+    class ExplorerFacade {
+        -root
+        -invoker
+        -clipboard
+        -mediator
+        +totalItems()
+        +calculateSize()
+        +searchFiles()
+        +exportXml()
+        +undo()
+        +redo()
+        +tagItem()
+        +deleteItem()
+        +copyItem()
+        +pasteItem()
+        +sortItems()
+        +findItem()
+        +findParent()
+    }
+
+    class CommandInvoker {
+        +execute(cmd)
+    }
+    
+    class Clipboard {
+        +set(content)
+        +get()
+    }
+    
+    class TagMediator {
+        +attach()
+        +detach()
+    }
+    
+    class DirectoryComposite {
+        +accept(visitor)
+    }
+
+    ExplorerFacade --> CommandInvoker : 委派命令
+    ExplorerFacade --> Clipboard : 操作剪貼簿
+    ExplorerFacade --> TagMediator : 管理標籤
+    ExplorerFacade --> DirectoryComposite : 持有 Root`
         }
     ];
 

@@ -26,7 +26,7 @@ const App = () => {
 
       <div className="max-w-full mx-auto">
         <header className="mb-6 text-center">
-          <h1 className="text-2xl lg:text-3xl font-black text-slate-800 tracking-tight text-center">檔案管理系統設計模式教學 v2.0</h1>
+          <h1 className="text-2xl lg:text-3xl font-black text-slate-800 tracking-tight text-center">檔案管理系統設計模式教學 v3000</h1>
           <p className="text-slate-500 text-sm lg:text-base font-medium text-center italic mt-1 font-bold text-blue-600 text-center">從 if - else 到抽象、封裝與介面，以架構思維實踐高品質程式碼</p>
         </header>
 

@@ -49,11 +49,15 @@ export class ConsoleObserver extends BaseObserver {
 export class DashboardObserver extends BaseObserver {
     constructor(updateStatsFn, total) { super(); this.updateStatsFn = updateStatsFn; this.total = total; }
     update(data) {
+        // [Refactor] 允許輸入資料為 { stats: ... } 結構，或直接為 stats 本身
+        // 這樣 Facade 不需要為了配合不同 Observer 而將資料展開 (Flatten)
+        const source = data.stats || data;
+
         this.updateStatsFn({
-            name: data.currentNode || '-',
-            count: data.count || 0,
+            name: source.currentNode || '-',
+            count: source.count || 0,
             total: this.total,
-            type: data.type || '-'
+            type: source.type || '-'
         });
     }
 }

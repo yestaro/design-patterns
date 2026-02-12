@@ -90,22 +90,47 @@ export class XmlExportVisitor extends BaseVisitor {
 /**
  * FinderVisitor
  * 
- * [功能] 根據 ID 尋找特定節點。
- * [優點] 取代 ad-hoc 的遞迴搜尋函式，統一使用 Visitor Pattern 走訪結構。
+ * [功能] 通用節點搜尋器。
+ * [特色] 同時尋找「節點本身」與「節點的父目錄」。
+ * [優化] 利用遍歷過程自動綁定 Parent，無需額外掃描子節點。
  */
 export class FinderVisitor extends BaseVisitor {
-    constructor(targetId) { super(); this.targetId = targetId; this.foundNode = null; }
-    visitFile(file) {
-        if (file.id === this.targetId) this.foundNode = file;
+    constructor(targetId) {
+        super();
+        this.targetId = targetId;
+        this.foundSelf = null;
+        this.foundParent = null;
     }
-    visitDirectory(dir) {
-        if (this.foundNode) return; // 已找到則提早結束 (優化)
-        if (dir.id === this.targetId) { this.foundNode = dir; return; }
 
-        // 繼續往子層找
+    visitFile(file) {
+        if (file.id === this.targetId) {
+            this.foundSelf = file;
+        }
+    }
+
+    visitDirectory(dir) {
+        // 如果都找到了，提早結束
+        if (this.foundSelf && this.foundParent) return;
+
+        // 1. 檢查自己是否為目標
+        if (dir.id === this.targetId) {
+            this.foundSelf = dir;
+            // 這裡無法得知 Parent，因為是在這一層被發現的，Parent 只有在上層遞迴這層時才知道
+        }
+
+        // 2. 遍歷子節點尋找目標與判定 Parent
         for (let child of dir.getChildren()) {
-            if (this.foundNode) break;
+            // 如果都找到了，可以提早結束迴圈
+            if (this.foundSelf && this.foundParent) break;
+
             child.accept(this);
+
+            // [關鍵優化 logic]
+            // 如果 child accept 後，發現這個 child 就是我們在找的 target (foundSelf === child)，
+            // 那麼當前的 dir 肯定就是它的 Parent。
+            if (!this.foundParent && this.foundSelf && this.foundSelf.id === child.id) {
+                this.foundParent = dir;
+            }
         }
     }
 }

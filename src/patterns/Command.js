@@ -27,12 +27,12 @@ export class BaseCommand {
  * Undo 時只需將該物件 add 回父目錄即可。
  */
 export class DeleteCommand extends BaseCommand {
-    constructor(targetId, parentDir, forceUpdate) {
+    constructor(targetId, parentDir) {
         super("刪除項目"); this.targetId = targetId; this.parentDir = parentDir;
-        this.targetEntry = parentDir.getChildren().find(c => c.id === targetId); this.forceUpdate = forceUpdate;
+        this.targetEntry = parentDir.getChildren().find(c => c.id === targetId);
     }
-    execute() { this.parentDir.remove(this.targetId); this.forceUpdate(); }
-    undo() { this.parentDir.add(this.targetEntry); this.forceUpdate(); }
+    execute() { this.parentDir.remove(this.targetId); }
+    undo() { this.parentDir.add(this.targetEntry); }
 }
 
 /**
@@ -43,12 +43,11 @@ export class DeleteCommand extends BaseCommand {
  * 它的存在讓「貼標籤」和「移除標籤」這些動作變成可被記錄和復原的物件。
  */
 export class TagCommand extends BaseCommand {
-    constructor(tagMediator, fileId, labelName, forceUpdate, isAttach = true) {
+    constructor(tagMediator, fileId, labelName, isAttach = true) {
         super(isAttach ? `貼上標籤(${labelName})` : `移除標籤(${labelName})`);
         this.tagMediator = tagMediator;
         this.fileId = fileId;
         this.labelName = labelName;
-        this.forceUpdate = forceUpdate;
         this.isAttach = isAttach;
     }
     execute() {
@@ -57,7 +56,6 @@ export class TagCommand extends BaseCommand {
         } else {
             this.tagMediator.detach(this.fileId, this.labelName);
         }
-        this.forceUpdate();
     }
     undo() {
         if (this.isAttach) {
@@ -65,7 +63,6 @@ export class TagCommand extends BaseCommand {
         } else {
             this.tagMediator.attach(this.fileId, this.labelName);
         }
-        this.forceUpdate();
     }
 }
 
@@ -78,10 +75,10 @@ export class TagCommand extends BaseCommand {
  * 2. 狀態同步: 執行後會更新 UI (setUIState) 並觸發 forceUpdate。
  */
 export class SortCommand extends BaseCommand {
-    constructor(root, oldStrategy, newStrategy, forceUpdate, setUIState, oldUIState, newUIState) {
+    constructor(root, oldStrategy, newStrategy, setUIState, oldUIState, newUIState) {
         super(`${newUIState.attr} 排序策略`);
         this.root = root; this.oldStrategy = oldStrategy; this.newStrategy = newStrategy;
-        this.forceUpdate = forceUpdate; this.setUIState = setUIState;
+        this.setUIState = setUIState;
         this.oldUIState = oldUIState; this.newUIState = newUIState;
     }
     applyToTree(strategy) {
@@ -91,8 +88,8 @@ export class SortCommand extends BaseCommand {
         };
         this.root.accept(visitor);
     }
-    execute() { this.applyToTree(this.newStrategy); this.setUIState(this.newUIState); this.forceUpdate(); }
-    undo() { this.applyToTree(this.oldStrategy); this.setUIState(this.oldUIState); this.forceUpdate(); }
+    execute() { this.applyToTree(this.newStrategy); this.setUIState(this.newUIState); }
+    undo() { this.applyToTree(this.oldStrategy); this.setUIState(this.oldUIState); }
 }
 
 export class CopyCommand extends BaseCommand {
@@ -103,7 +100,7 @@ export class CopyCommand extends BaseCommand {
         // 使用 Visitor Pattern 尋找物件，取代 ad-hoc 遞迴
         const finder = new FinderVisitor(targetId);
         root.accept(finder);
-        this.component = finder.foundNode;
+        this.component = finder.foundSelf;
     }
 
     execute() {
@@ -119,11 +116,10 @@ export class CopyCommand extends BaseCommand {
 }
 
 export class PasteCommand extends BaseCommand {
-    constructor(destinationDir, clipboard, forceUpdate) {
+    constructor(destinationDir, clipboard) {
         super("貼上項目");
         this.destinationDir = destinationDir;
         this.clipboard = clipboard;
-        this.forceUpdate = forceUpdate;
         this.pastedComponent = null;
     }
 
@@ -134,14 +130,12 @@ export class PasteCommand extends BaseCommand {
             // 2. 加入目的地
             this.destinationDir.add(component);
             this.pastedComponent = component; // 記住它以便 Undo
-            this.forceUpdate();
         }
     }
 
     undo() {
         if (this.pastedComponent) {
             this.destinationDir.remove(this.pastedComponent.id);
-            this.forceUpdate();
         }
     }
 }
