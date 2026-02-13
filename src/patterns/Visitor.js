@@ -2,7 +2,7 @@
 // --- [Visitor Implementation] ---
 // =============================================================================
 
-import { Subject, BaseObserver } from './Observer';
+import { Subject, BaseObserver, NotificationEvent } from './Observer';
 
 /**
  * BaseVisitor (訪問者介面)
@@ -24,7 +24,7 @@ export class BaseVisitor {
      */
     changeState(message, currentNode) {
         this.processedCount++;
-        this.notifier.notify({ message, currentNode: currentNode.name, count: this.processedCount, type: currentNode.type });
+        this.notifier.notify(new NotificationEvent('visitor', 'progress', message, { currentNode: currentNode.name, count: this.processedCount, nodeType: currentNode.type }));
     }
 
     visitFile(file) { }

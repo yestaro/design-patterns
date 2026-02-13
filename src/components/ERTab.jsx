@@ -4,7 +4,7 @@ import { Database, Layers, TableProperties, Eye, Search } from 'lucide-react';
 const ERTab = () => {
     return (
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-10 animate-in slide-in-from-bottom duration-500 text-left">
-            <h3 className="text-2xl font-bold mb-6 text-slate-800 border-b border-slate-200 pb-4 text-center">混合 ER 模型 (Hybrid Model: JSON + EAV)</h3>
+            <h3 className="text-xl font-black mb-6 text-slate-800 border-b border-slate-200 pb-4">混合 ER 模型 (Hybrid Model: JSON + EAV)</h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mt-6">
                 {/* Entries 主表 */}
                 <div className="space-y-4">

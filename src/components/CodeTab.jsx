@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { Code, Layers2, Zap, Activity, DatabaseZap, RotateCcw, ArrowRightLeft, Share2, Play, Workflow, Boxes, Component, Box } from 'lucide-react';
+import { Code, Layers2, Zap, Activity, DatabaseZap, RotateCcw, ArrowRightLeft, Share2, Play, Workflow, Boxes, Component, Box, AppWindow, Copy } from 'lucide-react';
 import mermaid from 'mermaid';
+import CodeBlock from './CodeBlock';
 
 const CodeTab = () => {
     const [activeTab, setActiveTab] = React.useState('composite');
+
     useEffect(() => {
         mermaid.initialize({
             startOnLoad: false,
@@ -11,17 +13,23 @@ const CodeTab = () => {
             securityLevel: 'loose',
             fontFamily: 'Inter, system-ui, sans-serif',
             themeVariables: {
-                loopBorder: '#64748b', // 加深 loop/alt 區塊邊框顏色
+                loopBorder: '#64748b',
                 loopTextColor: '#0f172a'
             }
         });
 
-        const renderDiagrams = async () => {
-            const mermaidElements = document.querySelectorAll('.mermaid');
-            mermaidElements.forEach(el => el.removeAttribute('data-processed'));
-            await mermaid.run({ querySelector: '.mermaid' });
-        };
-        renderDiagrams();
+        // 延遲渲染，確保 DOM 已就緒，避免 getBBox 錯誤
+        const timer = setTimeout(async () => {
+            try {
+                const els = document.querySelectorAll('.mermaid');
+                els.forEach(el => el.removeAttribute('data-processed'));
+                await mermaid.run({ querySelector: '.mermaid' });
+            } catch (e) {
+                console.warn('[Mermaid] render skipped:', e.message);
+            }
+        }, 100);
+
+        return () => clearTimeout(timer);
     }, []);
 
     const customStyles = `
@@ -30,6 +38,457 @@ const CodeTab = () => {
         .labelText { fill: #0f172a !important; font-weight: bold !important; }
         .activation0 { fill: #f1f5f9 !important; stroke: #94a3b8 !important; }
     `;
+
+    const patterns = [
+        {
+            id: 'composite',
+            icon: Workflow,
+            label: 'Composite',
+            title: '1. 抽象能力與結構 (Composite)',
+            positiveCode: `// 正面：多型注入 (只認抽象介面 EntryComponent)
+class DirectoryComposite extends EntryComponent {
+  // 重點：不論未來新增 Image、Word、PDF 格式，
+  // Directory 程式碼不需要修改支援。
+  add(component) {
+    this.#children.push(component);
+    this.#applySort();
+  }
+}`,
+            negativeCode: `// 反面：硬編碼具體類型 (Hardcoded Adders)
+class Directory {
+  addFile(File f) { ... }
+  addDir(Directory d) { ... }
+  addImage(Image i) { ... } // 痛點：每加一型就要改核心
+  addWord(Word doc) { ... } // 痛點：不斷膨脹
+  // Directory 淪為類型檢查的垃圾場。
+}`
+        },
+        {
+            id: 'visitor',
+            icon: Zap,
+            label: 'Visitor',
+            title: '2. 行為插件化與多功能支援 (Visitor)',
+            positiveCode: `// 正面：只需 accept，切換 Visitor 實例即可
+// 1. 匯出功能 (對應反面 exportXML 邏輯)
+root.accept(new XmlExportVisitor());
+// 2. 搜尋功能 (對應反面 handleSearch 邏輯)
+root.accept(new FileSearchVisitor("API"));
+
+// 3. 關鍵實作：結構類別，也需定義 accept 介面
+class EntryComponent {
+  accept(visitor) {
+    throw new Error("必須實作 accept");
+  }
+}`,
+            negativeCode: `// 反面：手動撰寫重複的遞迴遍歷
+function exportXML(node) {
+  if(node.isDir) node.children.forEach(c => exportXML(c));
+  else handleXML(node); // 痛點：重複遞迴遍歷
+}
+
+function search(node, k) {
+  if(node.isDir) node.children.forEach(c => search(c, k));
+  else handleSearch(node, k); // 若不想重複遍歷，就得多傳參數判斷
+}`
+        },
+        {
+            id: 'observer',
+            icon: Activity,
+            label: 'Observer',
+            title: '3. 視圖同步：框架無關通訊 (Observer)',
+            positiveCode: `// 正面：通知器廣播機制 (this.notifier.notify)
+class FileSearchVisitor {
+  // 使用組合 (Has-a) Observer Pattern
+  this.notifier = new Subject(); 
+  visitFile(f) {
+    if (f.name.toLowerCase().includes(this.keyword)) {
+      this.foundIds.push(f.id); 
+      this.notifier.notify({ msg: \`搜尋中: \${f.name}\` });
+    }
+  }
+}
+// 任務物件不認識 UI，換前端框架 React 到 Vue 一行不改。`,
+            negativeCode: `// 反面：強耦合的框架狀態呼叫
+function handleSearch(node, keyword) {
+  if (node.name.includes(keyword)) found.push(node.id);
+  // 痛點 1：商業邏輯中混雜著 UI 更新，綁死特定框架
+  setReactState(\`搜尋中: \${node.name}\`);
+  document.getElementById('progressBar').value = 50;
+  // 痛點 2：手動處理遞迴 (Recursion Hell)
+  if (node.children) node.children.forEach(c => handleSearch(c, keyword));
+}`
+        },
+        {
+            id: 'prototype',
+            icon: Copy,
+            label: 'Prototype',
+            title: '4. 原型與複製 (Prototype)',
+            positiveCode: `// 正面：自身負責複製 (clone)
+// 1. Client 不需知道具體屬性，只需呼叫 clone()
+const copy = original.clone();
+
+// 2. 各類別實作自己的複製邏輯
+class DirectoryComposite {
+  clone() {
+    // 關鍵：屬性複製 (name)，但 ID 須產生新的
+    const newDir = new DirectoryComposite(uuid(), this.name);
+    // 遞迴複製所有子節點
+    this.children.forEach(c => newDir.add(c.clone()));
+    return newDir;
+  }
+}`,
+            negativeCode: `// 反面：外部手動構建 (Manual Construction)
+// Client 必須知道物件的所有初始化參數
+const copy = new Directory(orig.name, orig.created);
+
+// 痛點 1: 漏了一個屬性就複製不完全
+// 痛點 2: 若是遞迴結構，Client 得自己實作遞迴
+orig.children.forEach(c => {
+  if(c.isDir) copy.add(new Directory(c.name...));
+  else copy.add(new File(c.name...));
+});`
+        },
+        {
+            id: 'flyweight',
+            icon: Boxes,
+            label: 'Flyweight',
+            title: '5. 資源共享與實體工廠 (Flyweight + Factory)',
+            positiveCode: `// 正面：工廠類別實作 (Factory.getLabel)
+// 1. 取得唯一實體 (Flyweight)，標籤實體全域共享
+const label1 = LabelFactory.getLabel('Urgent');
+// 2. 統一都由工廠，取得標籤
+const label2 = LabelFactory.getLabel('Work');
+
+// 3. 關鍵實作：統一由工廠取得實體
+class LabelFactory {
+  const labels = {{ 'Urgent': 'bg-red-500' }, ...};
+  getLabel(name) {
+    if(!this.labels[name]) {
+      this.labels[name] = new Label(name, color);
+    }
+    return this.labels[name]; // 共享實體
+  }
+}`,
+            negativeCode: `// 反面：類別污染與記憶體浪費
+// 1. 重複實例化 (Memory Leak)
+file1.tags.push(new Label('Urgent', 'bg-red-500'));
+file1.tags.push(new Label('Work', 'bg-blue-500'));
+
+// 2. 每次使用者又選不同的檔案就會 new 一次 Label。
+fileX.tags.push(new Label('Urgent', 'bg-red-500'));
+fileX.tags.push(new Label('Personal', 'bg-green-500'));
+
+// 痛點：若 1000 個檔案標註 Urgent，就 new 了 1000 次。
+// 記憶體浪費嚴重，且無法統一管理標籤外觀。`
+        },
+        {
+            id: 'singleton',
+            icon: Box,
+            label: 'Singleton',
+            title: '5. 全域單例與狀態管理 (Singleton)',
+            positiveCode: `// 正面：確保唯一實例
+// 1. 禁止直接 new，會拋出錯誤
+const c1 = new Clipboard(); // Error!
+// 2. 只能透過靜態方法取得唯一實體
+const c2 = Clipboard.getInstance();
+
+// 3. 關鍵實作：只允許一個靜態實體
+class Clipboard {
+  static instance = null;
+  constructor() {
+    // 強制禁止直接 new，保護單例完整性
+    if (Clipboard.instance) throw new Error("Use getInstance()");
+    this._content = null;
+    Clipboard.instance = this;
+  }
+  static getInstance() {
+    if (!Clipboard.instance) new Clipboard();
+    return Clipboard.instance;
+  }
+}`,
+            negativeCode: `// 反面：多頭馬車與狀態斷裂
+// 1. Toolbar 元件自己 new 一個
+class Toolbar {
+  onCopy(file) {
+    const cb = new Clipboard(); // 實體 A
+    cb.set(file);
+  }
+}
+
+// 2. ContextMenu 元件也自己 new 一個
+class ContextMenu {
+  onPaste() {
+    const cb = new Clipboard(); // 實體 B
+    const item = cb.get(); // null! 兩個剪貼簿不互通
+  }
+}
+
+// 3. 解決方案？Props Drilling 地獄，只能被迫把 instance 從最上層一路傳下來...
+// <App clipboard={cb}>`
+        },
+        {
+            id: 'mediator',
+            icon: DatabaseZap,
+            label: 'Mediator',
+            title: '6. 標籤管理：高速反向索引 (Mediator)',
+            positiveCode: `// 正面：中介雙向映射表 (TagMediator)
+// 1. 透過中介者貼標籤，不污染 File 物件。
+tagMediator.attach(file.id, label.name);
+// 2. 反向查詢：不用遞迴，O(1) 取得所有 "Work" 檔案
+const files = tagMediator.getFiles('Work');
+
+// 3. 關鍵實作：透過中介者介面，建立雙向映射表
+class TagMediator {
+  constructor() {
+    this.labelToFiles = new Map(); // 反向索引技術
+  }
+  attach(id, name) { this.labelToFiles.get(name).add(id); }
+  getFiles(name) { return this.labelToFiles.get(name); }
+}`,
+            negativeCode: `// 反面：屬性入侵與暴力掃描 (O(N))
+// 1. 直接修改檔案類別結構 (汚染 - 檔案應該只負責檔案的事情，無 tags 屬性)
+file.tags = [];
+
+// 2. 直接貼到該檔案的 tags 陣列中 (汚染)
+file.tags.push(new Label('Work', 'bg-blue-500'));
+file.tags.push(new Label('Urgent', 'bg-red-500'));
+
+// 痛點：如果要查詢「哪些檔案貼了 Work」？
+const results = files.filter(f => f.tags.includes('Work'));
+
+// 災難：這是一個 O(N) 暴力掃描。又要再遞迴遍歷所有檔案。`
+        },
+        {
+            id: 'command',
+            icon: RotateCcw,
+            label: 'Command',
+            title: '7. 行為物件化與復原 (Command)',
+            positiveCode: `// 正面：操作封裝與統一介面
+// 1. 統一介面管理
+commandInvoker.execute(new DeleteCommand(...));
+commandInvoker.execute(new SortCommand(...));
+// 2. 撤銷
+commandInvoker.undo();                                        
+
+// 3. 關鍵實作：將動作封裝成統一介面
+class DeleteCommand {
+  execute() {
+    this.backup = this.dir.getChildren().find(c => c.id === this.id);
+    this.dir.remove(this.id);
+  }
+  undo() {
+    this.dir.add(this.backup);
+  }
+}`,
+            negativeCode: `// 反面：直接呼叫與全域快照
+// 1. 直接呼叫不同方法 (無統一介面)
+directory.remove(id); // 刪除
+directory.sort();     // 排序
+
+// 2. 上一步怎麼辦？只能備份整棵樹
+history.push(JSON.stringify(tree));
+
+// 災難：無法只"復原排序"而不影響"刪除"。`
+        },
+        {
+            id: 'strategy',
+            icon: ArrowRightLeft,
+            label: 'Strategy',
+            title: '8. 策略切換與注入 (Strategy)',
+            positiveCode: `// 正面：策略注入 (隨插隨用)
+// 1. 依標籤排序
+const s1 = new LabelSortStrategy(tagManager, 'asc');
+commandInvoker.execute(new SortCommand(root, s1));
+// 2. 依名稱排序 (抽換策略，但執行邏輯一致)
+const s2 = new AttributeSortStrategy('name', 'asc');
+// 呼叫 SortCommand 的程式碼不變，只要決定注入 s1 或 s2
+commandInvoker.execute(new SortCommand(root, s2));`,
+            negativeCode: `// 反面：巢狀判斷語法 (Condition Hell)
+function handleSort(type) {
+  if(type === 'name') ...
+  else if(type === 'size') ...
+  else if(type === 'tag') ...
+  // 痛點：每加一條規則，就要大改核心遍歷邏輯。
+}`
+        },
+        {
+            id: 'decorator',
+            icon: Component,
+            label: 'Decorator',
+            title: '9. 行為裝飾與可組合擴展 (Decorator)',
+            positiveCode: `// 正面：多維度裝飾器鏈 (疊加)
+// 1. 建立基礎 Observer
+let observer = new ConsoleObserver(addLog);
+// 2. 維度一：圖標 (Icon)
+observer = new IconDecorator(observer, '刪除', '⛔');
+// 3. 維度二：顏色 (Color)
+observer = new HighlightDecorator(observer, '[Error]', 'text-red-400');
+
+// 4. 關鍵實作：透過包裝 (Boxing) 保留原物件介面
+class HighlightDecorator extends BaseDecorator {
+  update(event) {
+    // 先執行額外行為
+    if (event.msg.includes(this.keyword)) event.color = this.color;
+    // 再呼叫被包裝者 (傳遞責任)
+    this.wrapped.update(event);
+  }
+}
+
+// 結果：維度自動疊加 (⛔ + 紅色 + …)
+// 優點：各維度獨立擴展，互不干擾。`,
+            negativeCode: `// 反面：爆炸的條件判斷 (Logic Explosion)
+// 痛點：若有 N 個維度，組合爆炸！
+// 想要 "Icon" + "Color"，需要寫判定
+// 想要 "Color" + "Bold"，要再寫一次
+
+const style = [];
+let icon = '';
+
+// 所有邏輯混雜，違反 OCP (修改功能需改動此函數)
+if (log.includes('刪除')) {
+  icon = '🗑️';
+  style.push('font-bold'); // 若要紅字還要再判斷
+} else if (log.includes('[Error]')) {
+  style.push('text-red-400');
+  style.push('font-bold');
+  icon = '❌';
+}
+
+// 難以維護：要新增一種樣式，需修改核心邏輯，
+// 且難以實現「既是刪除又是錯誤」的組合效果。`
+        },
+        {
+            id: 'facade',
+            icon: AppWindow,
+            label: 'Facade',
+            title: '10. 簡易使用 (Facade)',
+            positiveCode: `// 正面：外觀模式 (Facade) - 封裝複雜性與統一入口
+class FileSystemFacade {
+  constructor(root) {
+    // 1. 整合檔案管理功能
+    this.root = root;
+    this.invoker = commandInvokerInstance;
+    this.mediator = tagMediator;
+    this.clipboard = Clipboard.getInstance();
+  }
+
+  // --- Visitor: 唯讀分析 (隱藏 accept/visitor 細節) ---
+  async searchFiles(keyword) {
+    const visitor = new FileSearchVisitor(keyword);
+    await this._runVisitor(visitor);
+    return visitor.foundIds;
+  }
+  async calculateSize() {
+    const visitor = new SizeCalculatorVisitor();
+    await this._runVisitor(visitor);
+    return visitor.totalSize;
+  }
+  async exportXml() {
+    const visitor = new XmlExportVisitor();
+    await this._runVisitor(visitor);
+    return visitor.xml;
+  }
+
+  // --- Command: 狀態變更 (封裝建構參數) ---
+  deleteItem(id) {
+    const parent = this.findParent(id); // 內部查找父節點
+    if (parent) this.invoker.execute(new DeleteCommand(id, parent));
+  }
+  tagItem(id, label) {
+    this.invoker.execute(new TagCommand(this.mediator, id, label));
+  }
+  copyItem(id) {
+    this.invoker.execute(new CopyCommand(id, this.root));
+  }
+  pasteItem(targetId) {
+    const target = this.findItem(targetId);
+    if (this.clipboard.hasContent()) {
+      this.invoker.execute(new PasteCommand(target));
+    }
+  }
+  undo() { this.invoker.undo(); }
+  redo() { this.invoker.redo(); }
+
+  // --- Strategy: 策略選擇 (自動判斷) ---
+  sortItems(attr) {
+    const strategy = (attr === 'label')
+      ? new LabelSortStrategy(this.mediator)
+      : new AttributeSortStrategy(attr);
+    this.invoker.execute(new SortCommand(this.root, strategy));
+  }
+
+  // --- Helpers (內部邏輯封裝) ---
+  findItem(id) {
+    const visitor = new FinderVisitor(id);
+    this.root.accept(visitor);
+    return visitor.foundSelf;
+  }
+}
+`,
+            negativeCode: `// 反面：上帝函式 (麵條式代碼)
+let files = []; // 全域變數，以陣列記錄樹狀結構
+
+// 反面教材：上帝函式 (God Function) - 所有邏輯混雜在一個迴圈
+function godProcessing(type, args) {
+  // [Observer] 耦合 UI，每多一個 UI 要更新，這裏就得再改
+  const updateUI = (msg) => document.getElementById('status').innerText = msg;
+  let result = (type === 'size') ? 0 : (type === 'xml') ? '<root>' : [];
+
+  // 試圖用一個通用迴圈處理所有邏輯 (The "One Loop" Fallacy)
+  function traverse(nodes, depth) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      // 0. [Observer] 耦合 UI，其實還要判斷那些 type, args 才需要更新
+      updateUI(\`Processing \${node.name}...\`);
+
+      // 1. [Visitor] 搜尋 (依賴 type 變數判斷)
+      if (type === 'search' && node.name.includes(args.kw)) result.push(node);
+
+      // 2. [Visitor] XML 匯出
+      else if (type === 'xml') result += \`&lt;node name="\${node.name}"&gt;\`;
+
+      // 3. [Visitor] 計算大小
+      else if (type === 'size' && node.type === 'file') result += node.size;
+
+      // 4. [Command] 刪除 (直接修改陣列，非常危險)
+      else if (type === 'delete' && node.id === args.id) {
+        nodes.splice(i, 1); i--; // 恐怖的索引操作
+      }
+
+      // 5. [Mediator] 貼標籤 (直接修改物件屬性)
+      else if (type === 'tag' && node.id === args.id) {
+        if (!node.tags) node.tags = []; node.tags.push(args.label);
+      }
+
+      // 6. [Strategy] 排序 (僵化)
+      else if (type === 'sort' && node.children) {
+        if (args.attr === 'name') node.children.sort((a,b) => a.name.localeCompare(b.name));
+        else if (args.attr === 'size') node.children.sort((a,b) => a.size - b.size);
+        else if (args.attr === 'tag') node.children.sort((a,b) => (a.tags?.[0] || '').localeCompare(b.tags?.[0] || ''));
+        // 每次新增一種排序都要改核心代碼 (違反 OCP)
+      }
+
+      // 7. [Singleton] 複製 (全域變數污染)
+      else if (type === 'copy' && node.id === args.id) {
+        window.tempClipboard = JSON.parse(JSON.stringify(node)); // 隨便掛在 window
+      }
+      else if (type === 'paste' && node.id === args.parentId) {
+        if (window.tempClipboard) node.children.push(window.tempClipboard);
+      }
+
+      // [Recursion] 遞迴邏輯也混在一起
+      if (node.children) {
+        traverse(node.children, depth + 1);
+        if (type === 'xml') result += \`&lt;/node&gt;\`;
+      }
+    }
+  }
+  traverse(files, 0);
+  return type === 'xml' ? result + '&lt;/root&gt;' : result;
+}
+`
+        }
+    ];
 
     return (
         <div className="bg-white rounded-2xl p-8 border border-slate-200 min-h-[605px] text-left">
@@ -302,51 +761,51 @@ const CodeTab = () => {
 
                         </div>
                         {/* SOLID 原則檢核表 */}
-                        <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 mt-8 text-left">
-                            <h4 className="font-bold text-blue-800 mb-4 flex items-center gap-2 text-left">
-                                <span className="text-xl">🛡️</span> 設計原則檢核 (SOLID Checklist)
+                        <div className="bg-indigo-600 text-white p-8 rounded-3xl shadow-xl mt-8 text-left">
+                            <h4 className="font-black text-xl mb-6 flex items-center gap-2 text-left">
+                                <span className="text-2xl">🛡️</span> 設計原則檢核 (SOLID Checklist)
                             </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 text-sm text-slate-700 text-left items-start">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 text-base text-indigo-50 text-left items-start">
                                 {/* Left Column: S, O, L */}
-                                <div className="space-y-6">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-black text-blue-600 text-lg w-8">SRP</span>
-                                            <span><b>職責分離</b>：Visitor 專注業務，Subject 專注通訊 (Visitor vs Subject)。</span>
+                                <div className="space-y-8">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-4">
+                                            <span className="font-black text-indigo-200 text-2xl w-12 flex-shrink-0">SRP</span>
+                                            <span className="text-lg leading-relaxed"><b>職責分離</b>：Mediator (管理關聯)、Visitor (分析業務)、Subject (通訊廣播)。</span>
                                         </div>
-                                        <span className="text-[11px] uppercase text-slate-400 font-bold tracking-wider pl-11">Single Responsibility Principle</span>
+                                        <span className="text-xs uppercase text-indigo-300 font-bold tracking-wider pl-16">Single Responsibility Principle</span>
                                     </div>
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-black text-blue-600 text-lg w-8">OCP</span>
-                                            <span><b>擴展開放</b>：新增功能不需修改舊有核心代碼 (Command / Visitor)。</span>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-4">
+                                            <span className="font-black text-indigo-200 text-2xl w-12 flex-shrink-0">OCP</span>
+                                            <span className="text-lg leading-relaxed"><b>擴展開放</b>：新增 Visitor (業務功能) 或 Strategy (演算策略) 不需修改原類別。</span>
                                         </div>
-                                        <span className="text-[11px] uppercase text-slate-400 font-bold tracking-wider pl-11">Open Closed Principle</span>
+                                        <span className="text-xs uppercase text-indigo-300 font-bold tracking-wider pl-16">Open Closed Principle</span>
                                     </div>
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-black text-blue-600 text-lg w-8">LSP</span>
-                                            <span><b>替換原則</b>：不同類型 File/Folder (Composite) 與排序方式 Sort (Strategy) 皆可替換。</span>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-4">
+                                            <span className="font-black text-indigo-200 text-2xl w-12 flex-shrink-0">LSP</span>
+                                            <span className="text-lg leading-relaxed"><b>替換原則</b>：Command (如 Copy/Paste) 與 Observer (如 Console/Dash) 皆可替換。</span>
                                         </div>
-                                        <span className="text-[11px] uppercase text-slate-400 font-bold tracking-wider pl-11">Liskov Substitution Principle</span>
+                                        <span className="text-xs uppercase text-indigo-300 font-bold tracking-wider pl-16">Liskov Substitution Principle</span>
                                     </div>
                                 </div>
 
                                 {/* Right Column: I, D */}
-                                <div className="space-y-6">
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-black text-blue-600 text-lg w-8">ISP</span>
-                                            <span><b>介面隔離</b>：不強迫實作無用的介面方法 (Command vs Visitor)。</span>
+                                <div className="space-y-8">
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-4">
+                                            <span className="font-black text-indigo-200 text-2xl w-12 flex-shrink-0">ISP</span>
+                                            <span className="text-lg leading-relaxed"><b>介面隔離</b>：Entry 僅定義共通行為，不強迫 File 實作 Directory 專有 add/remove 。</span>
                                         </div>
-                                        <span className="text-[11px] uppercase text-slate-400 font-bold tracking-wider pl-11">Interface Segregation Principle</span>
+                                        <span className="text-xs uppercase text-indigo-300 font-bold tracking-wider pl-16">Interface Segregation Principle</span>
                                     </div>
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-black text-blue-600 text-lg w-8">DIP</span>
-                                            <span><b>依賴反轉</b>：依賴抽象介面而非具體實作 (Invoker 依賴 Command)。</span>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-start gap-4">
+                                            <span className="font-black text-indigo-200 text-2xl w-12 flex-shrink-0">DIP</span>
+                                            <span className="text-lg leading-relaxed"><b>依賴反轉</b>：Decorator 依賴抽象 Observer，Invoker 依賴抽象 Command。</span>
                                         </div>
-                                        <span className="text-[11px] uppercase text-slate-400 font-bold tracking-wider pl-11">Dependency Inversion Principle</span>
+                                        <span className="text-xs uppercase text-indigo-300 font-bold tracking-wider pl-16">Dependency Inversion Principle</span>
                                     </div>
                                 </div>
                             </div>
@@ -360,17 +819,7 @@ const CodeTab = () => {
 
                     {/* Tab Navigation */}
                     <div className="flex flex-wrap gap-2 mb-8 p-1 bg-slate-100 rounded-xl">
-                        {[
-                            { id: 'composite', icon: Workflow, label: 'Composite' },
-                            { id: 'visitor', icon: Zap, label: 'Visitor' },
-                            { id: 'observer', icon: Activity, label: 'Observer' },
-                            { id: 'flyweight', icon: Boxes, label: 'Flyweight' },
-                            { id: 'singleton', icon: Box, label: 'Singleton' },
-                            { id: 'mediator', icon: DatabaseZap, label: 'Mediator' },
-                            { id: 'command', icon: RotateCcw, label: 'Command' },
-                            { id: 'strategy', icon: ArrowRightLeft, label: 'Strategy' },
-                            { id: 'synergy', icon: Layers2, label: 'Architecture Synergy' },
-                        ].map(tab => (
+                        {patterns.map(tab => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
@@ -387,464 +836,31 @@ const CodeTab = () => {
 
                     <div className="min-h-[500px]">
 
-                        {/* 1. Composite */}
-                        {activeTab === 'composite' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><Workflow size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">1. 抽象能力與結構 (Composite)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：多型注入 (只認抽象介面 EntryComponent)</p>
-                                        <span className="text-blue-400">class</span> DirectoryComposite <span className="text-blue-400">extends</span> EntryComponent &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// 重點：不論未來新增 Image、Word、PDF 格式，</span><br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// Directory 程式碼不需要修改支援。</span><br />
-                                        &nbsp;&nbsp;<span className="text-pink-400">add(EntryComponent component)</span> &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;this.#children.push(component);<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;this.#applySort();<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;
+                        {/* Pattern Content - Rendered from Configuration */}
+                        {patterns.map(pattern => (
+                            activeTab === pattern.id && (
+                                <div key={pattern.id} className="space-y-6 text-left animate-in fade-in duration-300">
+                                    <div className="flex items-center gap-3 mb-2 text-left">
+                                        <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left">
+                                            <pattern.icon size={24} />
+                                        </div>
+                                        <h3 className="text-xl font-black text-slate-800 text-left">
+                                            {pattern.title}
+                                        </h3>
                                     </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：硬編碼具體類型 (Hardcoded Adders)</p>
-                                        <span className="text-blue-400">class</span> Directory &#123;<br />
-                                        &nbsp;&nbsp;addFile(File f) &#123; ... &#125;<br />
-                                        &nbsp;&nbsp;addDir(Directory d) &#123; ... &#125;<br />
-                                        &nbsp;&nbsp;addImage(Image i) &#123; ... &#125; <span className="text-red-400">// 痛點：每加一型就要改核心</span><br />
-                                        &nbsp;&nbsp;addWord(Word doc) &#123; ... &#125; <span className="text-red-400">// 痛點：不斷膨脹</span><br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// Directory 淪為類型檢查的垃圾場。</span><br />
-                                        &#125;
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
+                                        {/* Positive Example */}
+                                        <div className="bg-slate-900 p-8 rounded-3xl text-slate-300 border-l-8 border-green-500 shadow-xl text-left overflow-hidden">
+                                            <CodeBlock code={pattern.positiveCode} />
+                                        </div>
+                                        {/* Negative Example */}
+                                        <div className="bg-slate-900 p-8 rounded-3xl text-slate-300 border-l-8 border-red-500 text-left overflow-hidden">
+                                            <CodeBlock code={pattern.negativeCode} />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* 2. Visitor */}
-                        {activeTab === 'visitor' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><Zap size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">2. 行為插件化與多功能支援 (Visitor)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：只需 accept，切換 Visitor 實例即可</p>
-                                        <span className="text-gray-500">// 1. 匯出功能 (對應反面 exportXML 邏輯)</span><br />
-                                        root.<span className="text-pink-400">accept</span>(new XmlExportVisitor());<br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. 搜尋功能 (對應反面 handleSearch 邏輯)</span><br />
-                                        root.<span className="text-pink-400">accept</span>(new FileSearchVisitor("API"));<br />
-                                        <br />
-                                        <span className="text-gray-500">// 價值：遞迴引擎固化，增加功能不需重寫遍歷邏輯。</span>
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：手動撰寫重複的遞迴遍歷</p>
-                                        <span className="text-blue-400">function</span> exportXML(node) &#123;<br />
-                                        &nbsp;&nbsp;if(node.isDir) node.children.forEach(c =&gt; exportXML(c));<br />
-                                        &nbsp;&nbsp;else handleXML(node); <span className="text-red-400">// 痛點：重複遞迴遍歷</span><br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-blue-400">function</span> search(node, k) &#123;<br />
-                                        &nbsp;&nbsp;if(node.isDir) node.children.forEach(c =&gt; search(c, k));<br />
-                                        &nbsp;&nbsp;else handleSearch(node, k); <span className="text-red-400">// 若不想重複遍歷，就得多傳參數判斷</span><br />
-                                        &#125;
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 3. Observer */}
-                        {activeTab === 'observer' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><Activity size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">3. 視圖同步：框架無關通訊 (Observer)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：通知器廣播機制 (this.notifier.notify)</p>
-                                        <span className="text-blue-400">class</span> FileSearchVisitor &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// 使用組合 (Has-a) Observer Pattern</span><br />
-                                        &nbsp;&nbsp;this.notifier = new Subject(); <br />
-                                        &nbsp;&nbsp;visitFile(f) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;if (f.name.toLowerCase().includes(this.keyword)) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.foundIds.push(f.id); <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-400">this.notifier.notify</span>(&#123; msg: `搜尋中: $&#123;f.name&#125;` &#125;);<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <span className="text-gray-500">// 任務物件不認識 UI，換前端框架 React 到 Vue 一行不改。</span>
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：強耦合的框架狀態呼叫</p>
-                                        <span className="text-blue-400">function</span> handleSearch(node, keyword) &#123;<br />
-                                        &nbsp;&nbsp;if (node.name.includes(keyword)) found.push(node.id);<br />
-                                        &nbsp;&nbsp;<span className="text-red-400">// 痛點 1：商業邏輯中混雜著 UI 更新，綁死特定框架</span><br />
-                                        &nbsp;&nbsp;setReactState(`搜尋中: $&#123;node.name&#125;`);<br />
-                                        &nbsp;&nbsp;document.getElementById('progressBar').value = 50;<br />
-                                        &nbsp;&nbsp;<span className="text-red-400">// 痛點 2：手動處理遞迴 (Recursion Hell)</span><br />
-                                        &nbsp;&nbsp;if (node.children) node.children.forEach(c =&gt; handleSearch(c, keyword));<br />
-                                        &#125;
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 4. Flyweight + Factory */}
-                        {activeTab === 'flyweight' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><Boxes size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">4. 資源共享與實體工廠 (Flyweight + Factory)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：工廠類別實作 (Factory.getLabel)</p>
-                                        <span className="text-blue-400">class</span> LabelFactory &#123;<br />
-                                        &nbsp;&nbsp;const labels = &#123;&#123; 'Urgent': 'bg-red-500' &#125;, ...&#125;;<br />
-                                        &nbsp;&nbsp;<span className="text-pink-400">getLabel(name) &#123;</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;if(!this.labels[name]) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this.labels[name] = new Label(name, color);<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;return this.labels[name]; <span className="text-gray-500">// 共享實體</span><br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 1. 取得唯一實體 (Flyweight)，標籤實體全域共享</span><br />
-                                        <span className="text-blue-400">const</span> label = <span className="text-pink-400">LabelFactory.getLabel('Urgent');</span><br />
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：類別污染與記憶體浪費</p>
-                                        <span className="text-gray-500">// 1. 重複實例化 (Memory Leak)</span><br />
-                                        file1.tags.push(<span className="text-blue-400">new Label('Urgent', 'bg-red-500')</span>);<br />
-                                        file1.tags.push(new Label('Work', 'bg-blue-500'));<br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. 每次使用者又選不同的檔案就會 new 一次 Label。</span><br />
-                                        fileX.tags.push(<span className="text-blue-400">new Label('Urgent', 'bg-red-500')</span>);<br />
-                                        fileX.tags.push(new Label('Personal', 'bg-green-500'));<br />
-                                        <br />
-                                        <span className="text-red-400">// 痛點：若 1000 個檔案標註 Urgent，就 new 了 1000 次。</span><br />
-                                        <span className="text-red-400">// 記憶體浪費嚴重，且無法統一管理標籤外觀。</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 5. Singleton */}
-                        {activeTab === 'singleton' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><Box size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">5. 全域單例與狀態管理 (Singleton)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：確保唯一實例</p>
-                                        <span className="text-blue-400">class</span> Clipboard &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">static</span> instance = null;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">constructor</span>() &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 強制禁止直接 new，保護單例完整性</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-400">if (Clipboard.instance) throw new Error("Use getInstance()");</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;this._content = null;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;Clipboard.instance = this;<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">static getInstance</span>() &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-400">if (!Clipboard.instance) new Clipboard();</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;return Clipboard.instance;<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 1. 禁止直接 new，會拋出錯誤</span><br />
-                                        <span className="text-blue-400">const</span> c1 = new Clipboard(); <span className="text-red-400">// Error!</span><br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. 只能透過靜態方法取得唯一實體</span><br />
-                                        <span className="text-blue-400">const</span> c2 = Clipboard.getInstance();<br />
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：多頭馬車與狀態斷裂</p>
-                                        <span className="text-gray-500">// 1. Toolbar 元件自己 new 一個</span><br />
-                                        <span className="text-blue-400">class</span> Toolbar &#123;<br />
-                                        &nbsp;&nbsp;onCopy(file) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> cb = new Clipboard(); <span className="text-red-400">// 實體 A</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;cb.set(file);<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. ContextMenu 元件也自己 new 一個</span><br />
-                                        <span className="text-blue-400">class</span> ContextMenu &#123;<br />
-                                        &nbsp;&nbsp;onPaste() &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> cb = new Clipboard(); <span className="text-red-400">// 實體 B</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> item = cb.get(); <span className="text-red-400">// null! 兩個剪貼簿不互通</span><br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 3. 解決方案？Props Drilling 地獄，只能被迫把 instance 從最上層一路傳下來...</span><br />
-                                        &lt;App clipboard=&#123;cb&#125;&gt;<br />
-                                        &nbsp;&nbsp;&lt;Toolbar clipboard=&#123;cb&#125; /&gt;<br />
-                                        &nbsp;&nbsp;&lt;Content clipboard=&#123;cb&#125; /&gt;<br />
-                                        &lt;/App&gt;
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 6. Mediator */}
-                        {activeTab === 'mediator' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><DatabaseZap size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">6. 標籤管理：高速反向索引 (Mediator)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：中介雙向映射表 (TagMediator)</p>
-                                        <span className="text-blue-400">class</span> TagMediator &#123;<br />
-                                        &nbsp;&nbsp;constructor() &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-400">this.labelToFiles = new Map();</span> <span className="text-gray-500">// 反向索引技術</span><br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">attach(id, name)</span> &#123; this.labelToFiles.get(name).add(id); &#125;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">getFiles(name)</span> &#123; return this.labelToFiles.get(name); &#125;<br />
-                                        &#125;<br />
-                                        <span className="text-gray-500">// 1. 透過中介者貼標籤，不污染 File 物件。</span><br />
-                                        tagMediator.attach(file.id, label.name);<br />
-                                        <span className="text-gray-500">// 2. 反向查詢：不用遞迴，O(1) 取得所有 "Work" 檔案</span><br />
-                                        <span className="text-blue-400">const</span> files = <span className="text-pink-400">tagMediator.getFiles('Work');</span><br />
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：屬性入侵與暴力掃描 (O(N))</p>
-                                        <span className="text-gray-500">// 1. 直接修改檔案類別結構 (汚染 - 檔案應該只負責檔案的事情，無 tags 屬性)</span><br />
-                                        <span className="text-blue-400">file.tags = [];</span><br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. 直接貼到該檔案的 tags 陣列中 (汚染)</span><br />
-                                        file.tags.push(new Label('Work', 'bg-blue-500'));<br />
-                                        file.tags.push(new Label('Urgent', 'bg-red-500'));<br />
-                                        <br />
-                                        <span className="text-red-400">// 痛點：如果要查詢「哪些檔案貼了 Work」？</span><br />
-                                        <span className="text-blue-400">const</span> results = files.filter(f =&gt; f.tags.includes('Work'));<br />
-                                        <br />
-                                        <span className="text-red-400">// 災難：這是一個 O(N) 暴力掃描。又要再遞迴遍歷所有檔案。</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 7. Command */}
-                        {activeTab === 'command' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><RotateCcw size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">7. 行為物件化與復原 (Command)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md::text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：操作封裝與統一介面</p>
-                                        <span className="text-blue-400">class</span> DeleteCommand &#123;<br />
-                                        &nbsp;&nbsp;execute() &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;this.backup = this.dir.getChildren().find(c =&gt; c.id === this.id);<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;this.dir.<span className="text-pink-400">remove</span>(this.id);<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;undo() &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;this.dir.<span className="text-pink-400">add</span>(this.backup);<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 1. 統一介面管理</span><br />
-                                        commandInvoker.execute(<span className="text-pink-400">new DeleteCommand(...)</span>);<br />
-                                        commandInvoker.execute(<span className="text-pink-400">new SortCommand(...)</span>);<br />
-                                        <span className="text-gray-500">// 2. 撤銷</span><br />
-                                        commandInvoker.undo();
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：直接呼叫與全域快照</p>
-                                        <span className="text-gray-500">// 1. 直接呼叫不同方法 (無統一介面)</span><br />
-                                        directory.remove(id); <span className="text-gray-500">// 刪除</span><br />
-                                        directory.sort();     <span className="text-gray-500">// 排序</span><br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. 上一步怎麼辦？只能備份整棵樹</span><br />
-                                        <span className="text-blue-400">history.push(JSON.stringify(tree));</span><br />
-                                        <br />
-                                        <span className="text-red-400">// 災難：無法只"復原排序"而不影響"刪除"。</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 8. Strategy */}
-                        {activeTab === 'strategy' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-3 mb-2 text-left">
-                                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left"><ArrowRightLeft size={24} /></div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">8. 策略切換與注入 (Strategy)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：策略注入 (隨插隨用)</p>
-                                        <span className="text-gray-500">// A. 依標籤排序</span><br />
-                                        <span className="text-blue-400">const</span> s1 = <span className="text-pink-400">new LabelSortStrategy(tagManager, 'asc')</span>;<br />
-                                        commandInvoker.execute(new SortCommand(root, s1));<br />
-                                        <span className="text-gray-500">// B. 依名稱排序 (抽換策略，但執行邏輯一致)</span><br />
-                                        <span className="text-blue-400">const</span> s2 = <span className="text-pink-400">new AttributeSortStrategy('name', 'asc')</span>;<br />
-                                        <span className="text-gray-500">// 呼叫 SortCommand 的程式碼不變，可被管理</span><br />
-                                        commandInvoker.execute(new SortCommand(root, s2));<br />
-
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：巢狀判斷語法 (Condition Hell)</p>
-                                        <span className="text-blue-400">function</span> handleSort(type) &#123;<br />
-                                        &nbsp;&nbsp;if(type === 'name') ...<br />
-                                        &nbsp;&nbsp;else if(type === 'size') ...<br />
-                                        &nbsp;&nbsp;else if(type === 'tag') ...<br />
-                                        &nbsp;&nbsp;<span className="text-red-400">// 痛點：每加一條規則，就要大改核心遍歷邏輯。</span><br />
-                                        &#125;
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-
-
-                        {activeTab === 'synergy' && (
-                            <div className="space-y-6 text-left animate-in fade-in duration-300">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="p-3 bg-indigo-100 rounded-xl">
-                                        <Layers2 size={24} className="text-indigo-600" />
-                                    </div>
-                                    <h3 className="text-xl font-black text-slate-800 text-left">8. 整體使用情境 (Architecture Synergy)</h3>
-                                </div>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-green-500 shadow-xl text-left">
-                                        <p className="text-green-400 mb-4 font-black text-left">// 正面：模式協同 (Explorer Tools)</p>
-                                        <span className="text-gray-500">// 1. 基礎設施與配置 (Global Configuration)</span><br />
-                                        <span className="text-gray-500">// Factory: 統一管理行為物件的創建 (Abstract Factory 雛形)</span><br />
-                                        <span className="text-blue-400">class</span> BehaviorFactory &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">static</span> visitorRegistry = &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'xml'</span>: () =&gt; <span className="text-pink-400">new XmlExportVisitor()</span>,<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'size'</span>: () =&gt; <span className="text-pink-400">new SizeCalculatorVisitor()</span>,<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'search'</span>: (args) =&gt; <span className="text-pink-400">new FileSearchVisitor(args.keyword)</span><br />
-                                        &nbsp;&nbsp;&#125;;<br />
-                                        <br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">static</span> commandRegistry = &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'tag'</span>: (args) =&gt; <span className="text-pink-400">new TagCommand</span>(tagMediator, args.id, args.label),<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'delete'</span>: (args) =&gt; <span className="text-pink-400">new DeleteCommand</span>(args.id, args.parent),<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'copy'</span>: (args) =&gt; <span className="text-pink-400">new CopyCommand</span>(args.id),<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'paste'</span>: (args) =&gt; <span className="text-pink-400">new PasteCommand</span>(args.parentId),<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'sort'</span>: (args) =&gt; &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> strategy = <span className="text-pink-400">new LabelSortStrategy(tagMediator, 'asc')</span>;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">return</span> <span className="text-pink-400">new SortCommand(root, strategy)</span>;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;&#125;;<br />
-                                        <br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">static</span> createVisitor(type, args) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> factory = this.visitorRegistry[type];<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">return</span> factory ? factory(args) : null;<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        <br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">static</span> createCommand(type, args) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> factory = this.commandRegistry[type];<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">return</span> factory ? factory(args) : null;<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 2. 系統單例初始化</span><br />
-                                        <span className="text-blue-400">const</span> root = new DirectoryComposite('Root');     <span className="text-gray-500">// Composite</span><br />
-                                        <span className="text-blue-400">const</span> tagMediator = new TagMediator();             <span className="text-gray-500">// Mediator (Global)</span><br />
-                                        <span className="text-blue-400">const</span> commandInvoker = new CommandInvoker();     <span className="text-gray-500">// Command (Global)</span><br />
-                                        <span className="text-gray-500">// [Observer] 訂閱 Command 執行通知 (解耦，包含 Tag/Delete 等所有操作)</span><br />
-                                        commandInvoker.<span className="text-pink-400">notifier.subscribe</span>(new ConsoleObserver());<br />
-                                        <br />
-                                        <span className="text-gray-500">// 3. 功能執行邏輯 (Business Logic)</span><br />
-                                        <span className="text-blue-400">function</span> runAnalysis(type, args) &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// A. 透過工廠建立 Visitor</span><br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">const</span> visitor = BehaviorFactory.createVisitor(type, args);<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">if</span> (!visitor) <span className="text-blue-400">return</span>;<br />
-                                        <br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// B. 訂閱 Observer (解耦 UI 更新)</span><br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">const</span> consoleObs = new ConsoleObserver();<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">const</span> dashboardObs = new DashboardObserver();<br />
-                                        &nbsp;&nbsp;visitor.<span className="text-pink-400">notifier.subscribe</span>(consoleObs);<br />
-                                        &nbsp;&nbsp;visitor.<span className="text-pink-400">notifier.subscribe</span>(dashboardObs);<br />
-                                        <br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// C. 執行 (Double Dispatch)</span><br />
-                                        &nbsp;&nbsp;root.<span className="text-pink-400">accept</span>(visitor);<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-blue-400">function</span> executeCommand(type, args) &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// 透過工廠方法建立 Command</span><br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">const</span> cmd = BehaviorFactory.createCommand(type, args);<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">if</span> (cmd) commandInvoker.execute(cmd);<br />
-                                        &#125;<br />
-                                        <br />
-                                        <span className="text-gray-500">// 4. 歷史回溯 (Undo/Redo)</span><br />
-                                        <span className="text-blue-400">function</span> handleUndo() &#123; commandInvoker.undo(); &#125;<br />
-                                        <span className="text-blue-400">function</span> handleRedo() &#123; commandInvoker.redo(); &#125;
-                                    </div>
-                                    <div className="bg-slate-900 p-8 rounded-3xl text-xs md:text-sm font-mono text-slate-300 border-l-8 border-red-500 text-left">
-                                        <p className="text-red-400 mb-4 font-black text-left">// 反面：上帝函式 (麵條式代碼)</p>
-                                        <span className="text-blue-400">let</span> files = []; <span className="text-gray-500">// 全域變數，以陣列記錄樹狀結構</span><br />
-                                        <br />
-                                        <span className="text-gray-500">// 反面教材：上帝函式 (God Function) - 所有邏輯混雜在一個迴圈</span><br />
-                                        <span className="text-blue-400">function</span> godProcessing(type, args) &#123;<br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// [Observer] 耦合 UI，每多一個 UI 要更新，這裏就得再改</span><br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">const</span> updateUI = (msg) =&gt; document.getElementById('status').innerText = msg;<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">let</span> result = (type === 'size') ? 0 : (type === 'xml') ? '&lt;root&gt;' : [];<br />
-                                        <br />
-                                        &nbsp;&nbsp;<span className="text-gray-500">// 試圖用一個通用迴圈處理所有邏輯 (The "One Loop" Fallacy)</span><br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">function</span> traverse(nodes, depth) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">for</span> (<span className="text-blue-400">let</span> i = 0; i &lt; nodes.length; i++) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">const</span> node = nodes[i];<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 0. [Observer] 耦合 UI，其實還要判斷那些 type, args 才需要更新</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">updateUI(`Processing $&#123;node.name&#125;...`);</span><br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 1. [Visitor] 搜尋 (依賴 type 變數判斷)</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">if</span> (type === 'search' && node.name.includes(args.kw)) result.push(node);<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 2. [Visitor] XML 匯出</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'xml') result += `&lt;node name="$&#123;node.name&#125;"&gt;`;<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 3. [Visitor] 計算大小</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'size' && node.type === 'file') result += node.size;<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 4. [Command] 刪除 (直接修改陣列，非常危險)</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'delete' && node.id === args.id) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nodes.splice(i, 1); i--; <span className="text-gray-500">// 恐怖的索引操作</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 5. [Mediator] 貼標籤 (直接修改物件屬性)</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'tag' && node.id === args.id) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">if (!node.tags) node.tags = []; node.tags.push(args.label);</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 6. [Strategy] 排序 (僵化)</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'sort' && node.children) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">if (args.attr === 'name') node.children.sort((a,b) =&gt; a.name.localeCompare(b.name));</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">else if (args.attr === 'size') node.children.sort((a,b) =&gt; a.size - b.size);</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">else if (args.attr === 'tag') node.children.sort((a,b) =&gt; (a.tags?.[0] || '').localeCompare(b.tags?.[0] || ''));</span><span className="text-gray-500">// 每次新增一種排序都要改核心代碼 (違反 OCP)</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// 7. [Singleton] 複製 (全域變數污染)</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'copy' && node.id === args.id) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">window.tempClipboard = JSON.parse(JSON.stringify(node));</span> <span className="text-gray-500">// 隨便掛在 window</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">else if</span> (type === 'paste' && node.id === args.parentId) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-red-400">if (window.tempClipboard) node.children.push(window.tempClipboard);</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        <br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-500">// [Recursion] 遞迴邏輯也混在一起，順便處理 XML 結尾標籤</span><br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">if</span> (node.children) &#123;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;traverse(node.children, depth + 1);<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-400">if</span> (type === 'xml') result += `&lt;/node&gt;`;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&#125;<br />
-                                        &nbsp;&nbsp;&#125;<br />
-                                        <br />
-                                        &nbsp;&nbsp;traverse(files, 0);<br />
-                                        &nbsp;&nbsp;<span className="text-blue-400">return</span> type === 'xml' ? result + '&lt;/root&gt;' : result;<br />
-                                        &#125;<br />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
+                            )
+                        ))}
                     </div>
                 </section>
 

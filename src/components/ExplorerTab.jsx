@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     RotateCcw, RotateCw, LayoutList, SortAsc, SortDesc, Tag, Trash2,
     Folder, User, Calculator, FileJson, Search, X, Activity, File, FileText, Image as ImageIcon
 } from 'lucide-react';
 import { DirectoryComposite, WordDocument, ImageFile, PlainText } from '../patterns/Composite';
-import { clipboardInstance } from '../patterns/Singleton';
+import { Clipboard } from '../patterns/Singleton';
 import { commandInvokerInstance } from '../patterns/Command';
-import { ExplorerFacade } from '../patterns/Facade';
+import { FileSystemFacade } from '../patterns/Facade';
 import { ConsoleObserver, DashboardObserver } from '../patterns/Observer';
+import { HighlightDecorator, IconDecorator, BoldDecorator } from '../patterns/Decorator';
 
 const RenderTree = ({ entry, facade, selectedId, setSelectedId, setLiveStats, matchedIds, forceUpdate }) => {
     const isSelected = selectedId === entry.id;
@@ -128,23 +129,64 @@ const ExplorerTab = () => {
     const forceUpdate = () => setUpdateTick(t => t + 1);
 
     // 初始化 Facade
-    const facade = useMemo(() => new ExplorerFacade(compositeRoot), [compositeRoot]);
+    const facade = useMemo(() => new FileSystemFacade(compositeRoot), [compositeRoot]);
+
+    // [Decorator] 建立共用的多維度裝飾器鏈，所有日誌來源都經過它
+    // useRef 確保 Decorator 鏈在 React 重新渲染時不會被重複建立，只建立一次
+    //
+    // 三個維度：Icon → Color → Bold，各自獨立疊加
+    // 例如 "[Command] 執行 刪除項目" 同時拿到：🗑️ + text-red-400 + font-bold
+    const highlightLoggerRef = useRef(null);
+    if (!highlightLoggerRef.current) {
+        let logger = new ConsoleObserver((logEntry) => setVisitorLogs(prev => [...prev, logEntry]));
+
+        // Dimension 1: Bold (哪些關鍵字要粗體)
+        logger = new BoldDecorator(logger, ['[符合]', '[Undo]', '[Redo]', '[System]', '[Clipboard]', '[Command]', '[Error]']);
+
+        // Dimension 2: Color (哪些關鍵字要什麼顏色，先到先贏)
+        logger = new HighlightDecorator(logger, '[符合]', 'text-green-400');
+        logger = new HighlightDecorator(logger, '[Undo]', 'text-yellow-400');
+        logger = new HighlightDecorator(logger, '[Redo]', 'text-orange-400');
+        logger = new HighlightDecorator(logger, '[Selection]', 'text-indigo-300');
+        logger = new HighlightDecorator(logger, '[System]', 'text-blue-300');
+        logger = new HighlightDecorator(logger, '[Clipboard]', 'text-purple-400');
+        logger = new HighlightDecorator(logger, '[Command]', 'text-cyan-400');
+        logger = new HighlightDecorator(logger, '刪除', 'text-red-400');
+
+        // Dimension 3: Icon (哪些關鍵字要什麼圖標，先到先贏)
+        logger = new IconDecorator(logger, '刪除', '⛔');
+        logger = new IconDecorator(logger, '[符合]', '🔍');
+        logger = new IconDecorator(logger, '[Undo]', '↩️');
+        logger = new IconDecorator(logger, '[Redo]', '↪️');
+        logger = new IconDecorator(logger, '貼上標籤', '🏷️');
+        logger = new IconDecorator(logger, '移除標籤', '🧹');
+        logger = new IconDecorator(logger, '[Command]', '⚡');
+        logger = new IconDecorator(logger, '[Clipboard]', '📋');
+        logger = new IconDecorator(logger, '[System]', '🔧');
+        logger = new IconDecorator(logger, '[Error]', '❌');
+
+        highlightLoggerRef.current = logger;
+    }
 
     useEffect(() => {
-        // 訂閱剪貼簿變動 (用於更新 Console Log 與 UI 按鈕狀態)
+        // 訂閱剪貼簿變動
         const clipboardObs = {
-            update: (data) => {
-                if (data.type === 'clipboard_set') {
-                    setVisitorLogs(prev => [...prev, data.message]);
-                    forceUpdate(); // 更新 UI (啟用/禁用按鈕)
+            update: (event) => {
+                if (event.source === 'clipboard' && event.type === 'set') {
+                    highlightLoggerRef.current.update(event);
+                    forceUpdate();
                 }
             }
         };
         const cmdObs = {
-            update: (data) => {
+            update: (event) => {
                 setHistory({ canUndo: commandInvokerInstance.undoStack.length > 0, canRedo: commandInvokerInstance.redoStack.length > 0 });
-                if (data.message) {
-                    setVisitorLogs(prev => [...prev, data.message]);
+                if (event.message) {
+                    highlightLoggerRef.current.update(event);
+                }
+                // [SRP 改善] 透過 Observer 通知更新排序狀態
+                if (event.data?.sortState) {
+                    setSortState(event.data.sortState);
                 }
                 forceUpdate();
             }
@@ -152,9 +194,7 @@ const ExplorerTab = () => {
 
         commandInvokerInstance.notifier.subscribe(cmdObs);
 
-        // 雖然 Facade 內部已經有 clipboardInstance，但為了監聽 clipboard 變化(UI按鈕狀態)，這裡還是需要訂閱
-        // 若 Facade 提供一個 onClipboardChange hook 會更好，但目前這樣也行。
-        const clipboard = clipboardInstance;
+        const clipboard = Clipboard.getInstance();
         clipboard.notifier.subscribe(clipboardObs);
 
         return () => {
@@ -164,7 +204,7 @@ const ExplorerTab = () => {
     }, []);
 
     const handleSort = (attr) => {
-        facade.sortItems(attr, sortState, (newState) => setSortState(newState));
+        facade.sortItems(attr, sortState);
     };
 
     /**
@@ -180,14 +220,11 @@ const ExplorerTab = () => {
         setMatchedIds([]);
 
         try {
-            // 1. [Helper] 先取得總節點數，供 DashboardObserver 使用
+            // 2. [Decorator] 使用共用的裝飾器鏈 + 建立 DashboardObserver
             const totalNodes = facade.totalItems();
-
-            // 2. [Factory] 建立觀察者實例 (將 UI 更新邏輯注入 Observer)
-            const consoleObserver = new ConsoleObserver((msg) => setVisitorLogs(prev => [...prev, msg]));
             const dashboardObserver = new DashboardObserver((stats) => setLiveStats(stats), totalNodes);
 
-            const observers = [consoleObserver, dashboardObserver];
+            const observers = [highlightLoggerRef.current, dashboardObserver];
 
             // 3. [Dependency Injection] 將 Observer 注入並執行具體操作
             // [Flexible] 這裡不關心 Action 回傳什麼，因為具體呈現邏輯已經移交給 Action 內部處理
@@ -195,7 +232,7 @@ const ExplorerTab = () => {
 
         } catch (error) {
             console.error(error);
-            setVisitorLogs(prev => [...prev, `[Error] ${error.message}`]);
+            setVisitorLogs(prev => [...prev, { message: `[Error] ${error.message}`, highlight: 'text-red-400 font-bold' }]);
         } finally {
             setIsProcessing(false);
         }
@@ -226,9 +263,9 @@ const ExplorerTab = () => {
 
                         {/* Paste Button */}
                         <button
-                            disabled={!clipboardInstance.hasContent()}
+                            disabled={!Clipboard.getInstance().hasContent()}
                             onClick={() => facade.pasteItem(selectedId)}
-                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!clipboardInstance.hasContent() ? 'text-slate-300' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!Clipboard.getInstance().hasContent() ? 'text-slate-300' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
                             title="貼上 (Paste)"
                         >
                             <FileText size={14} /> 貼上
@@ -381,9 +418,15 @@ const ExplorerTab = () => {
             <div className="lg:col-span-3 bg-slate-900 rounded-2xl p-4 h-[572px] flex flex-col shadow-inner border border-slate-800 overflow-hidden text-left">
                 <div className="text-blue-400 mb-3 border-b border-slate-800 pb-2 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-left"><div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse text-left"></div> Console</div>
                 <div className="flex-1 overflow-y-auto space-y-1 pr-2 dark-scrollbar text-left">
-                    {visitorLogs.map((log, i) => (
-                        <div key={i} className={`py-1 text-[10px] lg:text-[11px] leading-relaxed border-b border-slate-800/40 flex gap-2 ${log.includes('[符合]') ? 'text-green-400 font-bold' : log.includes('[Undo]') ? 'text-yellow-400 font-bold' : log.includes('[Redo]') ? 'text-orange-400 font-bold' : log.includes('[Selection]') ? 'text-indigo-300 italic' : log.includes('[System]') ? 'text-blue-300 italic font-bold' : 'text-slate-300'}`}><span>{log}</span></div>
-                    ))}
+                    {visitorLogs.map((log, i) => {
+                        const entry = typeof log === 'object' ? log : { message: log };
+                        return (
+                            <div key={i} className={`py-1 text-[10px] lg:text-[11px] leading-relaxed border-b border-slate-800/40 flex gap-2 ${entry.highlight || 'text-slate-300'} ${entry.bold ? 'font-bold' : ''}`}>
+                                <span>{entry.icon && `${entry.icon} `}{entry.message}</span>
+                            </div>
+                        );
+                    })}
+
                     {results && <div className="mt-4 p-3 bg-blue-500/20 text-blue-200 rounded text-xs lg:text-sm font-bold border border-blue-500/30 text-left">{results}</div>}
                     <div ref={consoleEndRef} />
                 </div>

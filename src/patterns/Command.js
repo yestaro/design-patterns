@@ -2,8 +2,9 @@
 // --- [Command Implementation] ---
 // =============================================================================
 
-import { Subject } from './Observer';
+import { Subject, NotificationEvent } from './Observer';
 import { FinderVisitor } from './Visitor';
+import { Clipboard } from './Singleton';
 
 /**
  * BaseCommand (命令介面)
@@ -13,7 +14,7 @@ import { FinderVisitor } from './Visitor';
  * 統一的方式來參數化、佇列化、記錄請求，並支援可復原的操作。
  */
 export class BaseCommand {
-    constructor(name) { this.name = name; }
+    constructor(name) { this.name = name; this.isUndoable = true; }
     execute() { throw new Error("Method not implemented"); }
     undo() { throw new Error("Method not implemented"); }
 }
@@ -71,15 +72,14 @@ export class TagCommand extends BaseCommand {
  *
  * 封裝了排序的操作。
  * [特色]
- * 1. 支援 Undo: 記住了舊的策略 (oldStrategy) 與舊的 UI 狀態。
- * 2. 狀態同步: 執行後會更新 UI (setUIState) 並觸發 forceUpdate。
+ * 1. 支援 Undo: 記住了舊的策略 (oldStrategy) 與舊的排序狀態。
+ * 2. 純業務邏輯: 不直接操作 UI，排序狀態透過 CommandInvoker 的 Observer 通知機制傳遞給 UI。
  */
 export class SortCommand extends BaseCommand {
-    constructor(root, oldStrategy, newStrategy, setUIState, oldUIState, newUIState) {
-        super(`${newUIState.attr} 排序策略`);
+    constructor(root, oldStrategy, newStrategy, oldSortState, newSortState) {
+        super(`${newSortState.attr} 排序策略`);
         this.root = root; this.oldStrategy = oldStrategy; this.newStrategy = newStrategy;
-        this.setUIState = setUIState;
-        this.oldUIState = oldUIState; this.newUIState = newUIState;
+        this.oldSortState = oldSortState; this.newSortState = newSortState;
     }
     applyToTree(strategy) {
         const visitor = {
@@ -88,15 +88,13 @@ export class SortCommand extends BaseCommand {
         };
         this.root.accept(visitor);
     }
-    execute() { this.applyToTree(this.newStrategy); this.setUIState(this.newUIState); }
-    undo() { this.applyToTree(this.oldStrategy); this.setUIState(this.oldUIState); }
+    execute() { this.applyToTree(this.newStrategy); }
+    undo() { this.applyToTree(this.oldStrategy); }
 }
 
 export class CopyCommand extends BaseCommand {
-    constructor(targetId, root, clipboard) {
+    constructor(targetId, root) {
         super("複製項目");
-        this.clipboard = clipboard;
-
         // 使用 Visitor Pattern 尋找物件，取代 ad-hoc 遞迴
         const finder = new FinderVisitor(targetId);
         root.accept(finder);
@@ -105,7 +103,7 @@ export class CopyCommand extends BaseCommand {
 
     execute() {
         if (this.component) {
-            this.clipboard.set(this.component);
+            Clipboard.getInstance().set(this.component);
         }
     }
 
@@ -116,16 +114,15 @@ export class CopyCommand extends BaseCommand {
 }
 
 export class PasteCommand extends BaseCommand {
-    constructor(destinationDir, clipboard) {
+    constructor(destinationDir) {
         super("貼上項目");
         this.destinationDir = destinationDir;
-        this.clipboard = clipboard;
         this.pastedComponent = null;
     }
 
     execute() {
         // 1. 從剪貼簿取得"副本" (Prototype Pattern)
-        const component = this.clipboard.get();
+        const component = Clipboard.getInstance().get();
         if (component) {
             // 2. 加入目的地
             this.destinationDir.add(component);
@@ -156,30 +153,28 @@ export class CommandInvoker {
      */
     execute(command) {
         command.execute();
-        // 只有會改變狀態的命令才入堆疊 (CopyCommand 不改變檔案系統狀態，這裡視需求而定)
-        // 但如果希望 Undo 能"復原貼上"，那 Paste 必須入堆疊。
-        // CopyCommand 通常不入 Undo Stack。
-        if (!(command instanceof CopyCommand)) {
+        // 透過 isUndoable 屬性判斷是否入堆疊，取代 instanceof 檢查 (LSP 改善)
+        if (command.isUndoable) {
             this.undoStack.push(command);
             this.redoStack = [];
         }
 
-        this.notifier.notify({
-            type: 'command_executed',
-            name: command.name,
-            message: `[Command] 執行 ${command.name}` // for logging
-        });
+        this.notifier.notify(new NotificationEvent(
+            'command', 'executed',
+            `[Command] 執行 ${command.name}`,
+            { name: command.name, sortState: command.newSortState || null }
+        ));
     }
 
     undo() {
         if (this.undoStack.length === 0) return null;
         const cmd = this.undoStack.pop(); cmd.undo(); this.redoStack.push(cmd);
 
-        this.notifier.notify({
-            type: 'command_undone',
-            name: cmd.name,
-            message: `[Undo] 恢復 ${cmd.name}`
-        });
+        this.notifier.notify(new NotificationEvent(
+            'command', 'undone',
+            `[Undo] 恢復 ${cmd.name}`,
+            { name: cmd.name, sortState: cmd.oldSortState || null }
+        ));
         return cmd;
     }
 
@@ -187,11 +182,11 @@ export class CommandInvoker {
         if (this.redoStack.length === 0) return null;
         const cmd = this.redoStack.pop(); cmd.execute(); this.undoStack.push(cmd);
 
-        this.notifier.notify({
-            type: 'command_redone',
-            name: cmd.name,
-            message: `[Redo] 執行 ${cmd.name}`
-        });
+        this.notifier.notify(new NotificationEvent(
+            'command', 'redone',
+            `[Redo] 執行 ${cmd.name}`,
+            { name: cmd.name, sortState: cmd.newSortState || null }
+        ));
         return cmd;
     }
 }

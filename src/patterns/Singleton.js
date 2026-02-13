@@ -1,4 +1,4 @@
-import { Subject } from "./Observer";
+import { Subject, NotificationEvent } from "./Observer";
 
 // =============================================================================
 // --- [Singleton] 單例模式 ---
@@ -12,7 +12,7 @@ import { Subject } from "./Observer";
  * 
  * [改進] 使用 Observer 模式通知狀態變更，而非直接 console.log
  */
-class Clipboard {
+export class Clipboard {
     static instance = null;
 
     constructor() {
@@ -38,11 +38,11 @@ class Clipboard {
     set(component) {
         this._content = component;
         // 通知訂閱者 (例如 ExplorerTab，雖然目前它是靠 forceUpdate，但這是更 decoupled 的做法)
-        this.notifier.notify({
-            type: 'clipboard_set',
-            name: component.name,
-            message: `[Clipboard] Copied: ${component.name}`
-        });
+        this.notifier.notify(new NotificationEvent(
+            'clipboard', 'set',
+            `[Clipboard] Copied: ${component.name}`,
+            { name: component.name }
+        ));
     }
 
     /**
@@ -62,9 +62,6 @@ class Clipboard {
 
     clear() {
         this._content = null;
-        this.notifier.notify({ type: 'clipboard_cleared' });
+        this.notifier.notify(new NotificationEvent('clipboard', 'cleared', '[Clipboard] Cleared'));
     }
 }
-
-// 全域唯一實例
-export const clipboardInstance = Clipboard.getInstance();

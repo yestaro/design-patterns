@@ -8,15 +8,15 @@ import { LabelSortStrategy, AttributeSortStrategy } from './Strategy';
 import { DirectoryComposite } from './Composite';
 import { tagMediator } from './Mediator';
 import { NodeCountVisitor, SizeCalculatorVisitor, FileSearchVisitor, XmlExportVisitor, FinderVisitor } from './Visitor';
-import { clipboardInstance } from './Singleton';
+import { Clipboard } from './Singleton';
 
 // ...
 
-export class ExplorerFacade {
+export class FileSystemFacade {
     constructor(root) {
         this.root = root;
         this.invoker = commandInvokerInstance;
-        this.clipboard = clipboardInstance;
+        this.clipboard = Clipboard.getInstance();
         this.mediator = tagMediator;
     }
 
@@ -72,15 +72,15 @@ export class ExplorerFacade {
         const buffer = [];
 
         const collector = {
-            update: (data) => {
+            update: (event) => {
                 buffer.push({
-                    message: data.message, // 這是 Raw Log
+                    message: event.message,
                     // 包裝成完整資訊供 Dashboard 使用
                     stats: {
-                        name: data.currentNode || '-',
-                        count: data.count || 0,
+                        currentNode: event.data?.currentNode || '-',
+                        count: event.data?.count || 0,
                         total: totalNodes,
-                        type: data.type || '-'
+                        nodeType: event.data?.nodeType || '-'
                     }
                 });
             }
@@ -145,7 +145,7 @@ export class ExplorerFacade {
     }
 
     copyItem(id) {
-        this.invoker.execute(new CopyCommand(id, this.root, this.clipboard));
+        this.invoker.execute(new CopyCommand(id, this.root));
     }
 
     pasteItem(targetId) { // targetId 可以是當前選中的目錄 ID，或檔案 ID (則貼到其父目錄)
@@ -160,11 +160,11 @@ export class ExplorerFacade {
         }
 
         if (destinationDir && this.clipboard.hasContent()) {
-            this.invoker.execute(new PasteCommand(destinationDir, this.clipboard));
+            this.invoker.execute(new PasteCommand(destinationDir));
         }
     }
 
-    sortItems(attribute, currentSortState, setSortStateCallback) {
+    sortItems(attribute, currentSortState) {
         // currentSortState: { attr: 'name', dir: 'asc' }
         const nextDir = (currentSortState.attr === attribute && currentSortState.dir === 'asc') ? 'desc' : 'asc';
 
@@ -182,13 +182,12 @@ export class ExplorerFacade {
                 this.root,
                 oldStrategy,
                 newStrategy,
-                setSortStateCallback, // 這裡需要 callback 來更新 React State
-                currentSortState,
-                nextState
+                currentSortState,  // 純資料：舊排序狀態
+                nextState          // 純資料：新排序狀態
             )
         );
 
-        return nextState; // 回傳新狀態供 UI 更新 (雖然 SortCommand 也會更新，但這樣雙重確保)
+        return nextState;
     }
 
     // =========================================================================
