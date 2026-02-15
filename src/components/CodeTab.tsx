@@ -18,6 +18,7 @@ interface PatternItem {
 
 const CodeTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('composite');
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     mermaid.initialize({
@@ -42,7 +43,7 @@ const CodeTab: React.FC = () => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [activeTab]);
+  }, []);
 
   const customStyles = `
         .loopLine { stroke: #64748b !important; stroke-width: 2px !important; stroke-dasharray: 4 !important; }
@@ -56,7 +57,7 @@ const CodeTab: React.FC = () => {
       id: 'composite',
       icon: Workflow,
       label: 'Composite + Prototype',
-      title: '1. 結構與複製 (Composite + Prototype)',
+      title: '結構與複製 (Composite + Prototype)',
       positiveCode: `// 正面：結構遞迴與自我複製 (多型注入，只認抽象介面 EntryComponent)
 abstract class EntryComponent {
   public id: string,
@@ -108,7 +109,7 @@ function cloneDir(orig: any): any {
       id: 'visitor',
       icon: Zap,
       label: 'Visitor',
-      title: '2. 行為分離 (Visitor)',
+      title: '行為分離 (Visitor)',
       positiveCode: `// 正面：行為插件化，結構不需要改動
 // 只要實施 accept，就能動態注入不同功能 (搜尋、匯出、統計)
 root.accept(new XmlExporterTemplate());
@@ -141,7 +142,7 @@ function exportXML(node) {
       id: 'template',
       icon: Play,
       label: 'Template',
-      title: '3. 行為骨架 (Template Method)',
+      title: '行為骨架 (Template Method)',
       positiveCode: `// 正面：封裝不變流程 (走訪)，開放變化細節 (標籤格式)
 abstract class BaseExporterTemplate extends BaseVisitor {
   // [Template Method] 實作 Visitor 的遞迴走訪、但多加處理縮排深度、字元脫逸等細節。
@@ -178,7 +179,7 @@ function exportToMarkdown(dir: any): string {
       id: 'observer',
       icon: Activity,
       label: 'Observer',
-      title: '4. 解耦通訊 (Observer)',
+      title: '解耦通訊 (Observer)',
       positiveCode: `// 正面：通知器廣播機制，UI 與核心完全解耦
 class FileSearchVisitor implements IVisitor {
   private notifier: Subject = new Subject(); // 使用組合 (Has-a) Observer Pattern
@@ -203,10 +204,11 @@ function search(node: any, kw: string): void {
       id: 'decorator',
       icon: Component,
       label: 'Decorator',
-      title: '5. 裝飾鏈條 (Decorator)',
+      title: '裝飾鏈條 (Decorator)',
       positiveCode: `// 正面：多維度裝飾，動態組合行為
 let observer: IObserver = new ConsoleObserver(addLog);
 // 維度疊加：先加圖標，再加顏色
+observer = new IconDecorator(observer, '[Command]', '⚡');
 observer = new IconDecorator(observer, '刪除', '⛔');
 observer = new HighlightDecorator(observer, '[Error]', 'text-red-400');
 
@@ -221,7 +223,7 @@ class HighlightDecorator extends BaseDecorator {
   }  
 }`,
       negativeCode: `// 反面：企圖用一堆參數來控制所有樣式，結果邏輯互相打架。
-function notify(msg: string, level: string, withIcon: boolean) {
+function notify(msg: string, action: number, level: string, withIcon: boolean) {
   // 痛點：邏輯耦合，宣告所有可能用到的變數
   let prefix = "";
   let color = "text-gray-500";
@@ -229,10 +231,12 @@ function notify(msg: string, level: string, withIcon: boolean) {
   // 痛點：巢狀地獄開始了...
   if (level === 'error') {
     color = "text-red-500";
-    if (withIcon) prefix = "❌ ";
+    if (action === 1) prefix = "⚡";
+    else if (action === 2) prefix = "↩️";
+    if (withIcon) prefix += "❌ ";
   } else if (level === 'warning') {
     color = "text-yellow-500";
-    if (withIcon) prefix = "⚠️ ";
+    // 略…
   }
 }`
     },
@@ -278,7 +282,7 @@ function MonitorDashboard({ event }: { event: any }) {
       id: 'command',
       icon: RotateCcw,
       label: 'Command',
-      title: '7. 行為物件化 (Command)',
+      title: '行為物件化 (Command)',
       positiveCode: `// 正面：將動作打包成可紀錄、可復原的物件
 class DeleteCommand implements ICommand {
   private backup: EntryComponent | undefined;
@@ -319,7 +323,7 @@ function onPasteClick(targetId: string) {
       id: 'strategy',
       icon: ArrowRightLeft,
       label: 'Strategy',
-      title: '8. 策略注入 (Strategy)',
+      title: '策略注入 (Strategy)',
       positiveCode: `// 正面：動態注入演算策略，演算法與執行者解耦
 
 // 抽換策略物件，但 Command 本身不需要修改
@@ -345,8 +349,8 @@ function sort(nodes: any[], type: 'name' | 'tag', tagManager?: any) {
     {
       id: 'flyweight',
       icon: Boxes,
-      label: 'Flyweight',
-      title: '9. 資源共享 (Flyweight + Factory)',
+      label: 'Flyweight + Factory',
+      title: '資源共享 (Flyweight + Factory)',
       positiveCode: `// 正面：工廠控管實體，達成資源共享
 
 // 1. 取得唯一實體 (Flyweight)，標籤實體全域共享
@@ -380,7 +384,7 @@ fileX.tags.push(new Label('Personal', 'bg-green-500'));
       id: 'mediator',
       icon: DatabaseZap,
       label: 'Mediator',
-      title: '10. 關係管理 (Mediator)',
+      title: '關係管理 (Mediator)',
       positiveCode: `// 正面：中介者管理多對多關聯，避免網狀依賴
 
 // 1. 透過中介者貼標籤，不污染 File 物件。
@@ -414,7 +418,7 @@ const results = files.filter(f => f.tags.includes('Work'));
       id: 'singleton',
       icon: Box,
       label: 'Singleton',
-      title: '11. 全域狀態 (Singleton)',
+      title: '全域狀態 (Singleton)',
       positiveCode: `// 正面：唯一入口，保證狀態全域一致
 
 // 1. 禁止直接 new，會拋出錯誤
@@ -458,7 +462,7 @@ class ContextMenu {
       id: 'facade',
       icon: AppWindow,
       label: 'Facade',
-      title: '12. 統一介面 (Facade)',
+      title: '統一介面 (Facade)',
       positiveCode: `// 正面：外觀模式 (Facade) - 封裝複雜性與統一入口
 class FileSystemFacade {
   constructor(root) {
@@ -900,23 +904,73 @@ function godProcessing(type, args) {
 
         {/* 5. 功能對照表 */}
         <section>
-          <h2 className="text-xl font-black text-slate-800 mb-10 border-l-4 border-blue-600 pl-4 text-left">5. 類別設計 vs 傳統直覺</h2>
+          <h2 className="text-xl font-black text-slate-800 mb-4 border-l-4 border-blue-600 pl-4 text-left">5. 類別設計 vs 傳統直覺</h2>
 
-          {/* Tab Navigation */}
-          <div className="flex flex-wrap gap-2 mb-8 p-1 bg-slate-100 rounded-xl">
-            {patterns.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold transition-all ${activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                  : 'bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:ring-blue-300'
-                  }`}
-              >
-                <tab.icon size={16} />
-                {tab.label}
-              </button>
-            ))}
+          {/* Tab Navigation: MacOS Dock Effect */}
+          <div className="relative mb-8">
+            <div
+              className="flex justify-center items-end gap-3 h-40 px-6 relative z-10"
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {patterns.map((tab, index) => {
+                const isActive = activeTab === tab.id;
+
+                // Calculate Fisheye Scale
+                let scale = 1;
+                let translateY = 0;
+                let zIndex = 0;
+
+                if (hoveredIndex !== null) {
+                  const dist = Math.abs(hoveredIndex - index);
+                  if (dist === 0) {
+                    scale = 1.4; translateY = -30; zIndex = 20;
+                  } else if (dist === 1) {
+                    scale = 1.2; translateY = -15; zIndex = 10;
+                  } else if (dist === 2) {
+                    scale = 1.05; translateY = -8; zIndex = 5;
+                  }
+                } else if (isActive) {
+                  scale = 1.15; translateY = -12; zIndex = 10;
+                }
+
+                // Color Map for inactive state (Subtle tint)
+                const colorMap: Record<string, string> = {
+                  composite: 'text-amber-300', visitor: 'text-emerald-300', template: 'text-indigo-300',
+                  observer: 'text-pink-300', decorator: 'text-cyan-300', adapter: 'text-orange-300',
+                  command: 'text-red-300', strategy: 'text-purple-300', flyweight: 'text-lime-300',
+                  mediator: 'text-teal-300', singleton: 'text-stone-300', facade: 'text-sky-300'
+                };
+                const subtleColor = colorMap[tab.id] || 'text-slate-300';
+
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    className="group relative flex flex-col items-center justify-end transition-all duration-200 ease-out p-2 mx-1"
+                    style={{
+                      transform: `scale(${scale}) translateY(${translateY}px)`,
+                      zIndex
+                    }}
+                    title={tab.label}
+                  >
+                    <div className={`p-4 rounded-3xl shadow-xl border flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-400 shadow-blue-500/50 w-20 h-20' : 'bg-white border-slate-200 w-20 h-20 hover:border-blue-200'}`}>
+                      <tab.icon size={36} className={`transition-all duration-300 ${isActive ? 'text-white' : subtleColor}`} />
+                    </div>
+
+                    {/* Tooltip Label */}
+                    <span className={`absolute -bottom-12 whitespace-nowrap px-3 py-1 text-slate-500 text-xs font-bold transition-all duration-200 pointer-events-none ${hoveredIndex === index || isActive ? 'opacity-100 text-slate-800 scale-110 -translate-y-1' : 'opacity-60 scale-90'}`}>
+                      {tab.label}
+                    </span>
+
+                    {/* Active Indicator */}
+                    {isActive && <div className="absolute -bottom-4 w-10 h-1.5 bg-blue-500/50 rounded-full blur-md"></div>}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Dock Shelf Separator */}
+            <div className="absolute bottom-6 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent z-0"></div>
           </div>
 
           <div className="min-h-[500px]">

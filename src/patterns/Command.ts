@@ -120,6 +120,7 @@ export class CopyCommand extends BaseCommand {
 
     constructor(targetId: string, root: EntryComponent) {
         super("複製項目");
+        this.isUndoable = false;
         const finder = new FinderVisitor(targetId);
         root.accept(finder);
         this.component = finder.foundSelf;
