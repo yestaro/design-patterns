@@ -2,20 +2,15 @@
 // --- [Infrastructure] 設計模式介面與基礎 ---
 // =============================================================================
 
-import { DirectoryComposite } from './Composite';
+import { EntryComponent, ISortStrategy } from './Composite';
+import type { TagMediator } from './Mediator';
 
 /**
- * BaseStrategy (策略介面)
- *
- * 定義演算法家族的共同介面。
- * [為什麼?] 符合這介面的任何新演算法 (如用修改日期排序)，
- * 都可以直接抽換進入系統，而不需修改使用它的 Client (DirectoryComposite)。
+ * BaseStrategy (策略基底)
  */
-export class BaseStrategy {
-    constructor(direction = 'asc') {
-        this.direction = direction;
-    }
-    sort(entries) { throw new Error("必須實作 sort 方法"); }
+export abstract class BaseStrategy implements ISortStrategy {
+    constructor(public direction: 'asc' | 'desc' = 'asc') { }
+    abstract sort(entries: EntryComponent[]): void;
 }
 
 // =============================================================================
@@ -24,22 +19,24 @@ export class BaseStrategy {
 
 /**
  * AttributeSortStrategy (屬性排序策略)
- * 根據名稱、大小或副檔名進行排序。
  */
 export class AttributeSortStrategy extends BaseStrategy {
-    constructor(attribute, direction = 'asc') {
+    constructor(public attribute: string, direction: 'asc' | 'desc' = 'asc') {
         super(direction);
-        this.attribute = attribute;
     }
 
-    sort(entries) {
+    override sort(entries: EntryComponent[]): void {
         entries.sort((a, b) => {
-            let valA = a[this.attribute], valB = b[this.attribute];
+            let valA: string | number = '';
+            let valB: string | number = '';
 
-            // 特別處理副檔名 (extension)
+            // 優先使用擴充後的內部屬性
             if (this.attribute === 'extension') {
-                valA = (a instanceof DirectoryComposite) ? "" : a.name.split('.').pop().toLowerCase();
-                valB = (b instanceof DirectoryComposite) ? "" : b.name.split('.').pop().toLowerCase();
+                valA = a.extension;
+                valB = b.extension;
+            } else if (this.attribute === 'name' || this.attribute === 'size' || this.attribute === 'created' || this.attribute === 'type') {
+                valA = a[this.attribute as keyof EntryComponent] as string | number;
+                valB = b[this.attribute as keyof EntryComponent] as string | number;
             }
 
             if (valA < valB) return this.direction === 'asc' ? -1 : 1;
@@ -51,22 +48,17 @@ export class AttributeSortStrategy extends BaseStrategy {
 
 /**
  * LabelSortStrategy (標籤排序策略)
- *
- * 這是較複雜的策略，它需要依賴 TagMediator 來查詢資料。
- * [靈活性] 策略物件可以攜帶自己的依賴與參數 (如 tagMediator)，
- * 這些細節對 Client (DirectoryComposite) 是隱藏的。
  */
 export class LabelSortStrategy extends BaseStrategy {
-    constructor(tagMediator, direction = 'asc') {
+    constructor(private tagMediator: TagMediator, direction: 'asc' | 'desc' = 'asc') {
         super(direction);
-        this.tagMediator = tagMediator;
     }
 
-    sort(entries) {
+    override sort(entries: EntryComponent[]): void {
         entries.sort((a, b) => {
             const labelsA = this.tagMediator.getLabels(a.id);
             const labelsB = this.tagMediator.getLabels(b.id);
-            // 簡化邏輯：取第一個標籤名稱來比較，無標籤者排最後
+
             const valA = labelsA.length > 0 ? labelsA[0].name : "zzzzzzzz";
             const valB = labelsB.length > 0 ? labelsB[0].name : "zzzzzzzz";
 

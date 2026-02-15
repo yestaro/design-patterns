@@ -1,10 +1,11 @@
 import React from 'react';
 import { Database, Layers, TableProperties, Eye, Search } from 'lucide-react';
 
-const ERTab = () => {
+const ERTab: React.FC = () => {
     return (
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-10 animate-in slide-in-from-bottom duration-500 text-left">
-            <h3 className="text-xl font-black mb-6 text-slate-800 border-b border-slate-200 pb-4">混合 ER 模型 (Hybrid Model: JSON + EAV)</h3>
+        <div className="bg-white rounded-2xl p-8 border border-slate-200 text-left text-base">
+            <h2 className="text-xl font-black mb-6 flex items-center gap-2"><Database className="text-blue-600" /> 混合 ER 模型 (Hybrid Model: JSON + EAV)</h2>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mt-6">
                 {/* Entries 主表 */}
                 <div className="space-y-4">
@@ -99,9 +100,9 @@ const ERTab = () => {
                     </div>
                 </div>
 
-                <div className="p-6 bg-slate-900 rounded-3xl text-white text-base shadow-xl border border-slate-700">
+                <div className="p-6 bg-slate-900 rounded-3xl text-white text-base shadow-xl border border-slate-700 text-left">
                     <h4 className="text-blue-400 font-bold mb-4 flex items-center gap-2 italic tracking-wider">混合架構 (Hybrid) 教學引導</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 leading-relaxed">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 leading-relaxed text-left">
                         <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
                             <p className="font-bold text-amber-400 mb-2">● 為何要重複存屬性？</p>
                             <p className="text-sm opacity-80">**Entries 表的 JSON** 用於「前端呈現」。只需一次查詢主表即可得到快照，大幅減少資料庫查詢次數。</p>

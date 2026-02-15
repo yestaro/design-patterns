@@ -1,37 +1,46 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     RotateCcw, RotateCw, LayoutList, SortAsc, SortDesc, Tag, Trash2,
-    Folder, User, Calculator, FileJson, Search, X, Activity, File, FileText, Image as ImageIcon
+    Folder, File, FileText, User, Calculator, FileJson, Search, X, Activity, Copy, ClipboardPaste, Image as ImageIcon,
+    Calendar
 } from 'lucide-react';
-import { DirectoryComposite, WordDocument, ImageFile, PlainText } from '../patterns/Composite';
+import { DirectoryComposite, EntryComponent, WordDocument, ImageFile, PlainText } from '../patterns/Composite';
 import { Clipboard } from '../patterns/Singleton';
-import { commandInvokerInstance } from '../patterns/Command';
+import { commandInvokerInstance, SortState } from '../patterns/Command';
 import { FileSystemFacade } from '../patterns/Facade';
-import { ConsoleObserver, DashboardObserver } from '../patterns/Observer';
+import { ConsoleObserver, IObserver, LogEntry, NotificationEvent } from '../patterns/Observer';
+import { DashboardObserver, DashboardAdapter } from '../patterns/Adapter';
 import { HighlightDecorator, IconDecorator, BoldDecorator } from '../patterns/Decorator';
+import RoadmapDialog from './RoadmapDialog';
 
-const RenderTree = ({ entry, facade, selectedId, setSelectedId, setLiveStats, matchedIds, forceUpdate }) => {
+interface RenderTreeProps {
+    entry: EntryComponent;
+    facade: FileSystemFacade;
+    selectedId: string | null;
+    setSelectedId: (id: string | null) => void;
+    setLiveStats: (stats: DashboardAdapter) => void;
+    matchedIds: string[];
+    forceUpdate: () => void;
+}
+
+const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setSelectedId, setLiveStats, matchedIds, forceUpdate }) => {
     const isSelected = selectedId === entry.id;
     const isMatched = matchedIds.includes(entry.id);
 
-    // 使用 attributes 取得 UI 資訊
     const { iconType, ...otherAttrs } = entry.attributes;
 
-    // 真正的泛用化：遍歷所有 attributes 屬性並自動顯示其值
     const infoString = Object.entries(otherAttrs)
         .map(([key, value]) => `, ${key}: ${value}`)
         .join('');
 
-    // Map iconType string to component
-    const iconMap = {
+    const iconMap: Record<string, any> = {
         'Folder': Folder,
         'FileText': FileText,
         'ImageIcon': ImageIcon,
         'File': File
     };
-    let Icon = iconMap[iconType] || File;
+    const Icon = iconMap[iconType] || File;
 
-    // 使用 Facade 取得標籤
     const labels = facade.getLabels(entry.id);
 
     return (
@@ -40,12 +49,12 @@ const RenderTree = ({ entry, facade, selectedId, setSelectedId, setLiveStats, ma
                 onClick={(e) => {
                     e.stopPropagation();
                     setSelectedId(entry.id);
-                    setLiveStats({ name: entry.name, count: 1, total: 1, type: entry.type });
+                    setLiveStats({ name: entry.name, count: 1, total: 1, type: entry.type } as DashboardAdapter);
                 }}
-                className={`flex items-center p-2 rounded-lg transition-all cursor-pointer ${isSelected ? 'bg-blue-600 text-white shadow-md' : isMatched ? 'bg-blue-50 ring-1 ring-blue-200 shadow-sm' : 'hover:bg-gray-100'}`}
+                className={`flex items-center py-2 pr-2 pl-2 border-l-2 transition-all cursor-pointer ${isSelected ? 'bg-blue-50 border-blue-500 shadow-sm' : 'border-transparent'} ${isMatched ? 'bg-amber-50 ring-1 ring-amber-200 shadow-sm' : 'hover:bg-gray-100'}`}
             >
-                <Icon className={`mr-2 h-4 w-4 ${entry instanceof DirectoryComposite ? (isSelected ? 'text-white' : 'text-yellow-500') : (isSelected ? 'text-white' : 'text-blue-500')}`} />
-                <span className={`text-sm ${isSelected ? 'font-black' : isMatched ? 'font-bold text-blue-700' : 'font-medium text-slate-700'}`}>
+                <Icon className={`mr-2 h-4 w-4 ${entry instanceof DirectoryComposite ? 'text-yellow-500' : 'text-blue-500'}`} />
+                <span className={`text-sm ${isMatched ? 'font-bold text-amber-700' : 'font-medium text-slate-700'}`}>
                     {entry.name}
                     <span className="ml-1 text-[10px] opacity-60">
                         ({Number(entry.size)} KB{infoString})
@@ -87,63 +96,58 @@ const RenderTree = ({ entry, facade, selectedId, setSelectedId, setLiveStats, ma
     );
 };
 
-const ExplorerTab = () => {
-    const [visitorLogs, setVisitorLogs] = useState([]);
-    const [liveStats, setLiveStats] = useState({ name: '-', count: 0, total: 0, type: '-' });
-    const [results, setResults] = useState(null);
+const ExplorerTab: React.FC = () => {
+    const [visitorLogs, setVisitorLogs] = useState<LogEntry[]>([]);
+    const [liveStats, setLiveStats] = useState<DashboardAdapter>({ name: '-', count: 0, total: 0, type: '-' } as DashboardAdapter);
+    const [results, setResults] = useState<React.ReactNode | null>(null);
     const [searchKeyword, setSearchKeyword] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [matchedIds, setMatchedIds] = useState([]);
-    const [selectedId, setSelectedId] = useState(null);
-    const [updateTick, setUpdateTick] = useState(0);
+    const [matchedIds, setMatchedIds] = useState<string[]>([]);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [, setUpdateTick] = useState(0);
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
 
     // Console Auto-scroll
-    const consoleEndRef = React.useRef(null);
+    const consoleEndRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [visitorLogs, results]);
+
     const [history, setHistory] = useState({ canUndo: false, canRedo: false });
-    const [sortState, setSortState] = useState({ attr: 'none', dir: 'asc' });
+    const [sortState, setSortState] = useState<SortState>({ attr: 'none', dir: 'asc' });
+
+    const forceUpdate = () => setUpdateTick(t => t + 1);
 
     const compositeRoot = useMemo(() => {
         const root = new DirectoryComposite('root', '我的根目錄', '2025-01-01');
         const d1 = new DirectoryComposite('d1', '專案文件', '2025-01-10');
 
-        // 使用具體的檔案類型
-        d1.add(new WordDocument('f1', '需求規格書.docx', 500, '2025-01-10', 35));
-        d1.add(new WordDocument('f_api', 'API介面定義.docx', 120, '2025-01-12', 12));
-        d1.add(new ImageFile('f2', '系統架構圖.png', 2048, '2025-01-10', 1920, 1080));
+        d1.add(new WordDocument('f1', '產品開發規畫.docx', 500, '2025-01-10', 35));
+        d1.add(new WordDocument('f_api', 'API介面定義書.docx', 120, '2025-01-12', 12));
+        d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-10', 1920, 1080));
 
-        const d2 = new DirectoryComposite('d2', '個人筆記', '2025-01-15');
-        d2.add(new PlainText('f3', '待辦清單.txt', 1, '2025-01-15', 'UTF-8'));
+        const d2 = new DirectoryComposite('d2', '個人備份', '2025-01-15');
+        d2.add(new PlainText('f3', '密碼記事.txt', 1, '2025-01-15', 'UTF-8'));
 
-        const d2_1 = new DirectoryComposite('d2_1', '2025備份', '2025-01-20');
-        d2_1.add(new WordDocument('f4', '會議記錄.docx', 200, '2025-01-20', 5));
+        const d2_1 = new DirectoryComposite('d2_1', '2025旅遊', '2025-01-20');
+        d2_1.add(new WordDocument('f4', '行程規劃.docx', 200, '2025-01-20', 5));
         d2.add(d2_1);
 
-        root.add(d1); root.add(d2);
+        root.add(d1);
+        root.add(d2);
         root.add(new PlainText('f5', 'README.txt', 0.5, '2025-01-01', 'ASCII'));
+
         return root;
     }, []);
 
-    const forceUpdate = () => setUpdateTick(t => t + 1);
-
-    // 初始化 Facade
     const facade = useMemo(() => new FileSystemFacade(compositeRoot), [compositeRoot]);
 
-    // [Decorator] 建立共用的多維度裝飾器鏈，所有日誌來源都經過它
-    // useRef 確保 Decorator 鏈在 React 重新渲染時不會被重複建立，只建立一次
-    //
-    // 三個維度：Icon → Color → Bold，各自獨立疊加
-    // 例如 "[Command] 執行 刪除項目" 同時拿到：🗑️ + text-red-400 + font-bold
-    const highlightLoggerRef = useRef(null);
+    const highlightLoggerRef = useRef<IObserver | null>(null);
     if (!highlightLoggerRef.current) {
-        let logger = new ConsoleObserver((logEntry) => setVisitorLogs(prev => [...prev, logEntry]));
+        let logger: IObserver = new ConsoleObserver((logEntry) => setVisitorLogs(prev => [...prev, logEntry]));
 
-        // Dimension 1: Bold (哪些關鍵字要粗體)
         logger = new BoldDecorator(logger, ['[符合]', '[Undo]', '[Redo]', '[System]', '[Clipboard]', '[Command]', '[Error]']);
 
-        // Dimension 2: Color (哪些關鍵字要什麼顏色，先到先贏)
         logger = new HighlightDecorator(logger, '[符合]', 'text-green-400');
         logger = new HighlightDecorator(logger, '[Undo]', 'text-yellow-400');
         logger = new HighlightDecorator(logger, '[Redo]', 'text-orange-400');
@@ -153,7 +157,6 @@ const ExplorerTab = () => {
         logger = new HighlightDecorator(logger, '[Command]', 'text-cyan-400');
         logger = new HighlightDecorator(logger, '刪除', 'text-red-400');
 
-        // Dimension 3: Icon (哪些關鍵字要什麼圖標，先到先贏)
         logger = new IconDecorator(logger, '刪除', '⛔');
         logger = new IconDecorator(logger, '[符合]', '🔍');
         logger = new IconDecorator(logger, '[Undo]', '↩️');
@@ -169,22 +172,23 @@ const ExplorerTab = () => {
     }
 
     useEffect(() => {
-        // 訂閱剪貼簿變動
-        const clipboardObs = {
-            update: (event) => {
+        const clipboardObs: IObserver = {
+            update: (event: NotificationEvent) => {
                 if (event.source === 'clipboard' && event.type === 'set') {
-                    highlightLoggerRef.current.update(event);
+                    highlightLoggerRef.current?.update(event);
                     forceUpdate();
                 }
             }
         };
-        const cmdObs = {
-            update: (event) => {
-                setHistory({ canUndo: commandInvokerInstance.undoStack.length > 0, canRedo: commandInvokerInstance.redoStack.length > 0 });
+        const cmdObs: IObserver = {
+            update: (event: NotificationEvent) => {
+                setHistory({
+                    canUndo: commandInvokerInstance.undoStack.length > 0,
+                    canRedo: commandInvokerInstance.redoStack.length > 0
+                });
                 if (event.message) {
-                    highlightLoggerRef.current.update(event);
+                    highlightLoggerRef.current?.update(event);
                 }
-                // [SRP 改善] 透過 Observer 通知更新排序狀態
                 if (event.data?.sortState) {
                     setSortState(event.data.sortState);
                 }
@@ -193,7 +197,6 @@ const ExplorerTab = () => {
         };
 
         commandInvokerInstance.notifier.subscribe(cmdObs);
-
         const clipboard = Clipboard.getInstance();
         clipboard.notifier.subscribe(clipboardObs);
 
@@ -203,36 +206,26 @@ const ExplorerTab = () => {
         };
     }, []);
 
-    const handleSort = (attr) => {
+    const handleSort = (attr: string) => {
         facade.sortItems(attr, sortState);
     };
 
-    /**
-     * 通用分析執行器 (Wrapper)
-     * 負責處理與業務邏輯無關的 UI 狀態：Loading、Logs、Error Handling
-     * [架構優點] 將「做什麼 (Action)」與「怎麼做 (UI State flow)」分開，
-     * 徹底消除了 runTask 中的 switch/if-else 判斷。
-     */
-    const handleAnalysis = async (analysisAction) => {
+    const handleAnalysis = async (analysisAction: (obs: IObserver[]) => Promise<void>) => {
         setIsProcessing(true);
         setVisitorLogs([]);
         setResults(null);
         setMatchedIds([]);
 
         try {
-            // 2. [Decorator] 使用共用的裝飾器鏈 + 建立 DashboardObserver
             const totalNodes = facade.totalItems();
             const dashboardObserver = new DashboardObserver((stats) => setLiveStats(stats), totalNodes);
+            const observers: IObserver[] = [highlightLoggerRef.current!, dashboardObserver];
 
-            const observers = [highlightLoggerRef.current, dashboardObserver];
-
-            // 3. [Dependency Injection] 將 Observer 注入並執行具體操作
-            // [Flexible] 這裡不關心 Action 回傳什麼，因為具體呈現邏輯已經移交給 Action 內部處理
             await analysisAction(observers);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            setVisitorLogs(prev => [...prev, { message: `[Error] ${error.message}`, highlight: 'text-red-400 font-bold' }]);
+            setVisitorLogs(prev => [...prev, { message: `[Error] ${error.message}`, highlight: 'text-red-400 font-bold', icon: '', bold: false }]);
         } finally {
             setIsProcessing(false);
         }
@@ -243,64 +236,67 @@ const ExplorerTab = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-in fade-in duration-500 text-left">
             <div className="lg:col-span-9 space-y-4 text-left">
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 flex flex-wrap items-center gap-4 text-left">
-                    <div className="flex items-center gap-1.5 border-r pr-3">
-                        <button disabled={!history.canUndo} onClick={() => facade.undo()} className={`p-1.5 rounded-lg transition-all ${history.canUndo ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm' : 'text-slate-200'}`}><RotateCcw size={20} /></button>
-                        <button disabled={!history.canRedo} onClick={() => facade.redo()} className={`p-1.5 rounded-lg transition-all ${history.canRedo ? 'bg-blue-50 text-blue-600 hover:bg-blue-100 shadow-sm' : 'text-slate-200'}`}><RotateCw size={20} /></button>
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 px-4 py-2 flex flex-wrap items-center gap-4 text-left">
+                    <div className="font-bold text-left">
+                        <button
+                            onClick={() => setIsHelpOpen(true)}
+                            className="group relative flex items-center gap-3 px-4 py-0 h-8 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-200 font-black text-sm active:scale-95 border-b-4 border-orange-800 text-left"
+                        >
+                            <Calendar size={18} className="group-hover:rotate-12 transition-transform" />
+                            <span>課程綱要</span>
+                        </button>
                     </div>
-
-                    {/* Actions Group: Copy / Paste / Delete */}
-                    <div className="flex gap-1.5 border-r pr-3">
-                        {/* Copy Button */}
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch ml-4">
+                        <button disabled={!history.canUndo} onClick={() => facade.undo()} className={`h-8 w-8 rounded-lg transition-all flex items-center justify-center ${history.canUndo ? 'bg-slate-50 text-slate-600 hover:bg-blue-100' : 'text-slate-200'}`}><RotateCcw size={18} /></button>
+                        <button disabled={!history.canRedo} onClick={() => facade.redo()} className={`h-8 w-8 rounded-lg transition-all flex items-center justify-center ${history.canRedo ? 'bg-slate-50 text-slate-600 hover:bg-blue-100' : 'text-slate-200'}`}><RotateCw size={18} /></button>
+                    </div>
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch">
                         <button
                             disabled={!selectedId}
-                            onClick={() => facade.copyItem(selectedId)}
-                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!selectedId ? 'text-slate-300' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                            onClick={() => { if (selectedId) facade.copyItem(selectedId); }}
+                            className={`px-2.5 py-0 h-8 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!selectedId ? 'text-slate-300' : 'bg-slate-50 text-slate-700 hover:bg-blue-100'}`}
                             title="複製 (Copy)"
                         >
-                            <File size={14} /> 複製
+                            <Copy size={14} /> 複製
                         </button>
 
-                        {/* Paste Button */}
                         <button
-                            disabled={!Clipboard.getInstance().hasContent()}
+                            disabled={!facade.getClipboardStatus()}
                             onClick={() => facade.pasteItem(selectedId)}
-                            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!Clipboard.getInstance().hasContent() ? 'text-slate-300' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}
+                            className={`px-2.5 py-0 h-8 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${!facade.getClipboardStatus() ? 'text-slate-300' : 'bg-slate-50 text-slate-700 hover:bg-blue-100'}`}
                             title="貼上 (Paste)"
                         >
-                            <FileText size={14} /> 貼上
+                            <ClipboardPaste size={14} /> 貼上
                         </button>
 
-                        {/* Delete Button */}
                         <button
                             disabled={!selectedId || selectedId === 'root'}
                             onClick={() => {
-                                facade.deleteItem(selectedId);
+                                if (selectedId) facade.deleteItem(selectedId);
                                 setSelectedId(null);
                             }}
-                            className={`px-2 py-1 rounded-lg transition-all flex items-center gap-1 text-xs font-bold ${(!selectedId || selectedId === 'root') ? 'opacity-30 text-slate-300' : 'text-red-500 hover:bg-red-50'}`}
+                            className={`px-2.5 py-0 h-8 rounded-lg transition-all flex items-center gap-1 text-xs font-bold ${(!selectedId || selectedId === 'root') ? 'opacity-30 text-slate-300' : 'bg-red-50 text-red-600 hover:bg-red-100'}`}
                         >
                             <Trash2 size={14} /> 刪除
                         </button>
                     </div>
-                    <div className="flex items-center gap-1.5 border-r pr-4 text-left">
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 text-left self-stretch">
                         <LayoutList size={18} className="text-slate-400 mr-1" />
                         {[{ id: 'name', l: '名稱' }, { id: 'size', l: '大小' }, { id: 'extension', l: '類型' }, { id: 'label', l: '標籤' }].map(s => {
                             const active = sortState.attr === s.id;
                             return (
-                                <button key={s.id} onClick={() => handleSort(s.id)} className={`px-2.5 py-1 rounded-lg text-sm font-bold flex items-center gap-1 transition-all ${active ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
+                                <button key={s.id} onClick={() => handleSort(s.id)} className={`px-2.5 py-0 h-8 rounded-lg text-sm font-bold flex items-center gap-1 transition-all ${active ? 'bg-blue-100 text-blue-800' : 'bg-slate-50 text-slate-700 hover:bg-blue-100'}`}>
                                     {s.l} {active && (sortState.dir === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}
                                 </button>
                             )
                         })}
                     </div>
-                    <div className="flex items-center gap-2 flex-nowrap flex-1 text-left">
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch">
                         <Tag size={16} className="text-slate-400" />
-                        <div className="flex gap-4 text-left">
+                        <div className="flex gap-1.5 text-left">
                             {['Urgent', 'Work', 'Personal'].map(lbl => {
                                 const count = facade.mediator.getFiles(lbl).length;
-                                // 根據標籤名稱定義專屬顏色
-                                const colorMap = {
+                                const colorMap: Record<string, string> = {
                                     'Urgent': 'bg-red-50 hover:bg-red-100 text-red-600 border-red-100',
                                     'Work': 'bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-100',
                                     'Personal': 'bg-green-50 hover:bg-green-100 text-green-600 border-green-100'
@@ -311,8 +307,8 @@ const ExplorerTab = () => {
                                     <button
                                         key={lbl}
                                         disabled={!selectedId || selectedId === 'root'}
-                                        onClick={() => facade.tagItem(selectedId, lbl)}
-                                        className={`relative px-2 py-0.5 rounded text-[11px] font-bold border transition-all h-7 flex items-center ${(!selectedId || selectedId === 'root') ? 'opacity-30 border-slate-200 text-slate-400 cursor-not-allowed' : `${colorClass} shadow-sm`}`}
+                                        onClick={() => facade.tagItem(selectedId!, lbl)}
+                                        className={`relative px-2.5 py-0 h-8 rounded-lg text-xs font-bold border transition-all flex items-center ${(!selectedId || selectedId === 'root') ? 'opacity-30 border-slate-200 text-slate-400 cursor-not-allowed' : `${colorClass} shadow-sm`}`}
                                     >
                                         + {lbl}
                                         {count > 0 && (
@@ -324,11 +320,12 @@ const ExplorerTab = () => {
                                 );
                             })}
                         </div>
-
                     </div>
+
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                    <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left flex flex-col h-[500px]">
+                    <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left flex flex-col h-[520px]">
                         <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-left"><Folder className="text-yellow-500" size={18} /> 檔案階層 (Composite)</h3>
                         <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex-1 overflow-y-auto shadow-inner text-left custom-scrollbar text-left">
                             <RenderTree
@@ -342,7 +339,7 @@ const ExplorerTab = () => {
                             />
                         </div>
                     </div>
-                    <div className="md:col-span-1 space-y-4 flex flex-col h-[500px] text-left">
+                    <div className="md:col-span-1 space-y-4 flex flex-col h-[520px] text-left">
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4 text-left">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left"><User className="text-blue-600" size={18} /> 訪問者操作 (Visitor)</h3>
                             <div className="flex flex-col gap-2">
@@ -360,23 +357,30 @@ const ExplorerTab = () => {
                                         const xml = await facade.exportXml(obs);
                                         setResults(<pre className="text-left bg-slate-800 p-2 rounded text-amber-200 text-[10px] whitespace-pre-wrap break-all">{xml}</pre>);
                                     })}
-                                    className="py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl text-sm font-bold flex justify-between px-4 items-center transition-all text-left"
+                                    className="py-2.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl text-sm font-bold flex justify-between px-4 items-center transition-all text-left"
                                 >
-                                    <span>XML 匯出</span><FileJson size={18} />
+                                    <span>匯出 XML</span><FileJson size={18} />
                                 </button>
                             </div>
                             <div className="pt-1 text-left">
                                 <div className="flex flex-row gap-1.5 flex-nowrap items-center text-left">
                                     <div className="relative flex-1 min-w-0 text-left">
-                                        <input type="text" value={searchKeyword} onChange={e => setSearchKeyword(e.target.value)} onKeyDown={e => {
-                                            if (e.key === 'Enter' && searchKeyword) {
-                                                handleAnalysis(async (obs) => {
-                                                    const ids = await facade.searchFiles(searchKeyword, obs);
-                                                    setMatchedIds(ids);
-                                                    setResults(`找到 ${ids.length} 項`);
-                                                });
-                                            }
-                                        }} className="w-full px-2.5 py-1.5 pr-7 bg-slate-50 rounded-xl border border-slate-200 text-sm outline-none focus:ring-1 focus:ring-blue-400 truncate text-left" placeholder="輸入關鍵字..." />
+                                        <input
+                                            type="text"
+                                            value={searchKeyword}
+                                            onChange={e => setSearchKeyword(e.target.value)}
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter' && searchKeyword) {
+                                                    handleAnalysis(async (obs) => {
+                                                        const ids = await facade.searchFiles(searchKeyword, obs);
+                                                        setMatchedIds(ids);
+                                                        setResults(`找到 ${ids.length} 項`);
+                                                    });
+                                                }
+                                            }}
+                                            className="w-full px-2.5 py-1.5 pr-7 bg-slate-50 rounded-xl border border-slate-200 text-sm outline-none focus:ring-1 focus:ring-blue-400 truncate text-left"
+                                            placeholder="輸入關鍵字..."
+                                        />
                                         {(searchKeyword || matchedIds.length > 0) && <button onClick={() => { setSearchKeyword(''); setMatchedIds([]); }} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700"><X size={14} /></button>}
                                     </div>
                                     <button
@@ -386,7 +390,7 @@ const ExplorerTab = () => {
                                             setMatchedIds(ids);
                                             setResults(`找到 ${ids.length} 項`);
                                         })}
-                                        className="whitespace-nowrap px-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl font-bold text-sm py-1.5 transition-all flex items-center gap-1 text-left"
+                                        className="whitespace-nowrap px-3 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-bold text-sm py-1.5 transition-all flex items-center gap-1 text-left"
                                     >
                                         搜尋 <Search size={16} />
                                     </button>
@@ -397,12 +401,12 @@ const ExplorerTab = () => {
                             <h3 className="font-bold text-slate-800 flex items-center justify-between text-left"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-blue-500" /> 監控 (Observer)</div><span className="text-[10px] px-2 py-0.5 bg-blue-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
                             <div className="space-y-4">
                                 <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
-                                    <span className="text-xs text-slate-500 font-bold uppercase mb-1.5 text-left">目前節點</span>
+                                    <span className="text-sm text-slate-500 font-bold uppercase mb-1.5 text-left">目前節點</span>
                                     <span className="text-sm font-black text-blue-700 truncate text-left">{liveStats.name}</span>
                                 </div>
                                 <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
                                     <div className="flex justify-between items-center mb-2 text-left">
-                                        <span className="text-xs text-slate-500 font-bold uppercase text-left">掃描進度</span>
+                                        <span className="text-sm text-slate-500 font-bold uppercase text-left">掃描進度</span>
                                         <span className="text-sm font-black text-blue-600 text-left">{progressPercent}%</span>
                                     </div>
                                     <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner text-left">
@@ -415,22 +419,21 @@ const ExplorerTab = () => {
                     </div>
                 </div>
             </div>
-            <div className="lg:col-span-3 bg-slate-900 rounded-2xl p-4 h-[572px] flex flex-col shadow-inner border border-slate-800 overflow-hidden text-left">
-                <div className="text-blue-400 mb-3 border-b border-slate-800 pb-2 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-left"><div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse text-left"></div> Console</div>
-                <div className="flex-1 overflow-y-auto space-y-1 pr-2 dark-scrollbar text-left">
-                    {visitorLogs.map((log, i) => {
-                        const entry = typeof log === 'object' ? log : { message: log };
-                        return (
-                            <div key={i} className={`py-1 text-[10px] lg:text-[11px] leading-relaxed border-b border-slate-800/40 flex gap-2 ${entry.highlight || 'text-slate-300'} ${entry.bold ? 'font-bold' : ''}`}>
-                                <span>{entry.icon && `${entry.icon} `}{entry.message}</span>
-                            </div>
-                        );
-                    })}
 
+            <div className="lg:col-span-3 bg-slate-900 rounded-2xl p-4 h-[584px] flex flex-col shadow-inner border border-slate-800 overflow-hidden text-left">
+                <div className="text-blue-400 mb-3 border-b border-slate-800 pb-2 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 text-left"><div className="w-2 h-2 bg-green-500 rounded-full animate-pulse text-left"></div> Console</div>
+                <div className="flex-1 overflow-y-auto space-y-1 pr-2 dark-scrollbar text-left text-[10px] lg:text-[11px]">
+                    {visitorLogs.map((log, i) => (
+                        <div key={i} className="py-1 leading-relaxed border-b border-slate-800/40 text-slate-300">
+                            <span dangerouslySetInnerHTML={{ __html: log.message }} />
+                        </div>
+                    ))}
                     {results && <div className="mt-4 p-3 bg-blue-500/20 text-blue-200 rounded text-xs lg:text-sm font-bold border border-blue-500/30 text-left">{results}</div>}
                     <div ref={consoleEndRef} />
                 </div>
             </div>
+
+            <RoadmapDialog isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
         </div>
     );
 };
