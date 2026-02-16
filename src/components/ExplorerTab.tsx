@@ -107,6 +107,7 @@ const ExplorerTab: React.FC = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [, setUpdateTick] = useState(0);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
+    const [showRoadmap, setShowRoadmap] = useState(true);
 
     // Console Auto-scroll
     const consoleEndRef = useRef<HTMLDivElement>(null);
@@ -237,13 +238,13 @@ const ExplorerTab: React.FC = () => {
     return (
         <div className="flex flex-col gap-4 animate-in fade-in duration-500 text-left">
             {/* 上方：工具列 (3/4) + 課程綱要 (1/4) */}
-            <div className="grid grid-cols-4 gap-4">
-                <div className="col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 px-4 py-2 flex items-center gap-4 text-left overflow-x-auto">
-                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="col-span-1 md:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 px-4 py-2 flex items-center gap-4 text-left overflow-x-auto custom-scrollbar">
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
                         <button disabled={!history.canUndo} onClick={() => facade.undo()} className={`h-8 w-8 rounded-lg transition-all flex items-center justify-center ${history.canUndo ? 'bg-slate-50 text-slate-600 hover:bg-blue-100' : 'text-slate-200'}`}><RotateCcw size={18} /></button>
                         <button disabled={!history.canRedo} onClick={() => facade.redo()} className={`h-8 w-8 rounded-lg transition-all flex items-center justify-center ${history.canRedo ? 'bg-slate-50 text-slate-600 hover:bg-blue-100' : 'text-slate-200'}`}><RotateCw size={18} /></button>
                     </div>
-                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch">
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
                         <button
                             disabled={!selectedId}
                             onClick={() => { if (selectedId) facade.copyItem(selectedId); }}
@@ -273,18 +274,18 @@ const ExplorerTab: React.FC = () => {
                             <Trash2 size={14} /> 刪除
                         </button>
                     </div>
-                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 text-left self-stretch">
+                    <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 text-left self-stretch shrink-0">
                         <LayoutList size={16} className="text-slate-400 mr-1" />
                         {[{ id: 'name', l: '名稱' }, { id: 'size', l: '大小' }, { id: 'extension', l: '類型' }, { id: 'label', l: '標籤' }].map(s => {
                             const active = sortState.attr === s.id;
                             return (
-                                <button key={s.id} onClick={() => handleSort(s.id)} className={`px-2.5 py-0 h-8 rounded-lg text-sm font-bold flex items-center gap-1 transition-all ${active ? 'bg-blue-100 text-blue-800' : 'bg-slate-50 text-slate-700 hover:bg-blue-100'}`}>
+                                <button key={s.id} onClick={() => handleSort(s.id)} className={`px-2.5 py-0 h-8 rounded-lg text-sm font-bold flex items-center gap-1 transition-all whitespace-nowrap ${active ? 'bg-blue-100 text-blue-800' : 'bg-slate-50 text-slate-700 hover:bg-blue-100'}`}>
                                     {s.l} {active && (sortState.dir === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}
                                 </button>
                             )
                         })}
                     </div>
-                    <div className="flex items-center gap-1.5 self-stretch">
+                    <div className="flex items-center gap-1.5 self-stretch shrink-0">
                         <Tag size={16} className="text-slate-400" />
                         <div className="flex gap-1.5 text-left">
                             {['Urgent', 'Work', 'Personal'].map(lbl => {
@@ -316,21 +317,21 @@ const ExplorerTab: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="col-span-1">
+                <div className="col-span-1 md:col-span-1 h-14 md:h-auto">
                     <button
                         onClick={() => setIsHelpOpen(true)}
                         className="w-full h-full group flex items-center justify-center gap-3 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-200 font-black text-sm active:scale-95 border-b-4 border-orange-800 shadow-lg text-center"
                     >
                         <Calendar size={18} className="group-hover:rotate-12 transition-transform" />
-                        <span className="text-base tracking-wide">課程綱要</span>
+                        <span className="text-base tracking-wide">課程綱要 - Readme in a Week</span>
                     </button>
                 </div>
             </div>
 
             {/* 下方：檔案階層 (2/4) + 操作監控 (1/4) + Console (1/4) */}
-            <div className="grid grid-cols-4 gap-4 items-stretch h-[520px]">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-stretch h-auto md:h-[520px]">
                 {/* 1. 檔案階層 (2/4) */}
-                <div className="col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left flex flex-col h-full overflow-hidden">
+                <div className="col-span-1 md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left flex flex-col h-[400px] md:h-full overflow-hidden">
                     <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-left"><Folder className="text-yellow-500" size={18} /> 檔案階層 (Composite)</h3>
                     <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex-1 overflow-y-auto shadow-inner text-left custom-scrollbar">
                         <RenderTree
@@ -346,7 +347,7 @@ const ExplorerTab: React.FC = () => {
                 </div>
 
                 {/* 2. 操作與監控 (1/4) */}
-                <div className="col-span-1 flex flex-col gap-4 h-full overflow-hidden">
+                <div className="col-span-1 md:col-span-1 flex flex-col gap-4 h-auto md:h-full overflow-hidden">
                     {/* Visitor 操作 */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4 flex-none">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left"><User className="text-blue-600" size={18} /> 訪問者操作 (Visitor)</h3>
@@ -407,7 +408,7 @@ const ExplorerTab: React.FC = () => {
                     </div>
 
                     {/* Observer 監控 */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4 flex-1 flex flex-col justify-center space-y-4 overflow-hidden">
+                    <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4 flex-1 flex flex-col justify-center space-y-4 overflow-hidden min-h-[200px]">
                         <h3 className="font-bold text-slate-800 flex items-center justify-between text-left"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-blue-500" /> 監控 (Observer)</div><span className="text-[10px] px-2 py-0.5 bg-blue-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
                         <div className="space-y-4 overflow-y-auto pr-1 dark-scrollbar">
                             <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
@@ -431,7 +432,7 @@ const ExplorerTab: React.FC = () => {
                 </div>
 
                 {/* 3. Console (1/4) */}
-                <div className="col-span-1 bg-slate-900 rounded-2xl p-4 flex flex-col shadow-inner border border-slate-800 overflow-hidden h-full">
+                <div className="col-span-1 md:col-span-1 bg-slate-900 rounded-2xl p-4 flex flex-col shadow-inner border border-slate-800 overflow-hidden h-[300px] md:h-full">
                     <div className="text-blue-400 mb-3 border-b border-slate-800 pb-2 text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-left">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse text-left"></div> Console
                     </div>

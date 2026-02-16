@@ -146,6 +146,13 @@ export class PasteCommand extends BaseCommand {
     }
 
     override execute(): void {
+        // [Redo] 如果已經有貼上的物件參照，直接加回去 (不依賴當前剪貼簿)
+        if (this.pastedComponent) {
+            this.destinationDir.add(this.pastedComponent);
+            return;
+        }
+
+        // [Execute] 第一次執行，從剪貼簿取得
         const component = Clipboard.getInstance().get();
         if (component) {
             this.destinationDir.add(component);

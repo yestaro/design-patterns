@@ -241,7 +241,31 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="6. 關於 Life (生活中的抽象)"
+                        title="6. 關於 現代 Framework 與 Libraries"
+                        question="現代流行的 Framework (Angular, Spring) 或 Library (AutoMapper, Akka) 中，是否其實也有這些觀念的延伸？"
+                    >
+                        完全正確。技術會變，但「管理複雜度」的本質不變：
+
+                        <div className="mt-4 mb-2 font-bold text-blue-700">1. 應用框架 (Frameworks)</div>
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li><strong>Angular / Android / DOM / WinForms / WPF (Composite)</strong>：所有 UI 框架的 Component Tree (元件樹) 都是 Composite 的應用，將複雜的 UI 視為樹狀結構，讓容器與控制項一視同仁。</li>
+                            <li><strong>Angular (DI = Strategy + IoC)</strong>：Angular 核心的 Dependency Injection，讓你注入不同的 Service，這其實就是策略模式的應用，將依賴反轉，達成鬆散耦合。</li>
+                            <li><strong>Spring / .NET (AOP = Decorator / Proxy)</strong>：Spring AOP 的攔截器 (Interceptor) 或 .NET 的 Middleware，用來處理 Log 或權限，這就是裝飾者或代理模式的經典實踐。</li>
+                            <li><strong>Python (@Decorator)</strong>：Python 語言直接將裝飾者模式內建為語法糖 (<code>@wrapper</code>)，讓你不需要寫 Class 也能輕鬆擴充函式功能。</li>
+                        </ul>
+                        <div className="mt-6 mb-2 font-bold text-emerald-700">2. 通用函式庫 (Libraries)</div>
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li><strong>Akka / Orleans (Observer + Command)</strong>：Actor 模型將狀態與行為封裝，透過異步訊息溝通，解決高併發鎖 (Lock) 的問題。</li>
+                            <li><strong>Autofac (Factory + Strategy)</strong>：IoC Container 本質上就是「超級工廠」，負責物件生產與生命週期，並讓你輕鬆替換實作。</li>
+                            <li><strong>AutoMapper (Adapter + Prototype)</strong>：負責「物件轉換」，解決 DTO 與 Entity 資料不相容的問題，這就是 Adapter 模式的規模化自動版。</li>
+                            <li><strong>Dapper (Adapter)</strong>：Micro-ORM 將資料庫 Row Data 適配 (Adapt) 成強型別物件，解決關聯式資料與物件導向的阻抗不匹配。</li>
+                            <li><strong>MediatR (Mediator)</strong>：在 .NET 中實踐 Mediator 模式，讓 Controller 與 Service 徹底解耦，透過發送 Command/Query 來溝通。</li>
+                            <li><strong>RxJS (Observer + Iterator)</strong>：處理非同步資料流的標準庫，本質上就是觀察者模式加上迭代器模式，用來處理時間軸上的事件。</li>
+                        </ul>
+                    </ReflectionItem>
+
+                    <ReflectionItem
+                        title="7. 關於 Life (生活中的抽象)"
                         question="你每天用的「USB 插孔」跟「插座」。如果你買了一個國外的電器，插頭形狀不合怎麼辦？有對應的 Design Pattern 嗎？"
                     >
                         <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -251,7 +275,7 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="7. 關於 未來 (AI 與架構)"
+                        title="8. 關於 未來 (AI 與架構)"
                         question="AI 也懂所有的設計模式與軟體架構，為什麼 AI Coding 的時代依然需要懂設計模式的人？"
                     >
                         AI 擅長「解題」與「生成」，但軟體架構的本質是「在權衡 (Trade-offs) 中做出決策」：
@@ -385,7 +409,7 @@ const ReflectionTab: React.FC = () => {
                 <h4 className="text-2xl font-black text-slate-800 mb-8 border-l-4 border-blue-600 pl-4">AI 時代的開發新實踐：掌握「架構 Prompt」</h4>
 
                 <blockquote className="text-lg italic text-slate-600 mb-6 leading-relaxed text-left">
-                    "AI 可以是一個「理論級的架構大師」能跟你聊 OOP/FP 聊得天花亂墜，卻也是一個「缺乏視野的實習生」飛快地動手寫出屎山代碼，改了東壞了西。它能講出 OOP/FP 的道理，是因為那些道理被寫成了書；它 Coding 只想解決當前問題、完成任務，是因為沒人給它边界與規則。所以，你要能引導 AI，讓理論與實作能落地，連接兩者。"
+                    "AI 可以是一個「理論級的架構大師」能跟你聊 OOP/FP 聊得天花亂墜，卻也是一個「缺乏視野的實習生」飛快地動手寫出屎山代碼，改了東壞了西。它能講出 OOP/FP 的道理，是因為那些道理被寫成了書；它 Coding 只想解決當前問題、完成任務，是因為沒人給它邊界與規則。所以，你要能引導 AI，讓理論與實作能夠落地，連接兩者。"
                 </blockquote>
 
                 <h5 className="text-xl font-bold text-slate-800 mb-6">雙 AI 協作模式：架構師 vs. 實習生</h5>
