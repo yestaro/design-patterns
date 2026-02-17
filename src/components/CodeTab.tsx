@@ -466,7 +466,7 @@ const CodeTab: React.FC = () => {
         <section>
           <div className="bg-gradient-to-br from-indigo-50 to-white p-10 rounded-3xl border border-indigo-100 shadow-lg text-center relative overflow-hidden">
             <h2 className="text-3xl font-black mb-8 text-slate-800 tracking-tight">
-              結語：為什麼軟體需要架構與學設計模式？
+              為什麼軟體需要架構與學設計模式？
             </h2>
 
             <div className="max-w-4xl mx-auto space-y-8 text-lg text-slate-600 leading-relaxed">

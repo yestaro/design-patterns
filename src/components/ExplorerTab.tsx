@@ -239,7 +239,7 @@ const ExplorerTab: React.FC = () => {
         <div className="flex flex-col gap-4 animate-in fade-in duration-500 text-left">
             {/* 上方：工具列 (3/4) + 課程綱要 (1/4) */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="col-span-1 md:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 px-4 py-2 flex items-center gap-4 text-left overflow-x-auto custom-scrollbar">
+                <div className="col-span-1 md:col-span-3 bg-white rounded-xl shadow-sm border border-slate-200 px-4 py-2 flex flex-wrap items-center gap-4 gap-y-2 text-left">
                     <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
                         <button disabled={!history.canUndo} onClick={() => facade.undo()} className={`h-8 w-8 rounded-lg transition-all flex items-center justify-center ${history.canUndo ? 'bg-slate-50 text-slate-600 hover:bg-blue-100' : 'text-slate-200'}`}><RotateCcw size={18} /></button>
                         <button disabled={!history.canRedo} onClick={() => facade.redo()} className={`h-8 w-8 rounded-lg transition-all flex items-center justify-center ${history.canRedo ? 'bg-slate-50 text-slate-600 hover:bg-blue-100' : 'text-slate-200'}`}><RotateCw size={18} /></button>

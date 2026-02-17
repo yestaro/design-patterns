@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Network, Code, Layout, Database, Lightbulb,
+  Network, Code, Layout, Database, Sparkles,
 } from 'lucide-react';
 
 import ExplorerTab from './components/ExplorerTab';
@@ -36,7 +36,7 @@ const App: React.FC = () => {
             { id: 'domain', l: '領域模型', i: Layout },
             { id: 'er', l: '資料關聯', i: Database },
             { id: 'code', l: '實作解析', i: Code },
-            { id: 'reflection', l: '心得問答', i: Lightbulb }
+            { id: 'reflection', l: 'AI 時代', i: Sparkles }
           ].map(tab => (
             <button
               key={tab.id}

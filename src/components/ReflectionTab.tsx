@@ -186,7 +186,40 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="2. 關於 Facade (外觀模式)"
+                        title="2. 關於 Prototype (原型模式)"
+                        question="為什麼需要 Prototype？直接 new 一個新的不就好了嗎？還有你知道拷貝還有分「淺」與「深」嗎？"
+                    >
+                        物件參照 (Object Reference)：物件變數存的是「地址」而不是「內容」
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li>
+                                淺拷貝 (Shallow Copy)：
+                                只複製第一層屬性。如果有巢狀物件 (如 Directory 下的 children 陣列)，複製出來的新目錄，裡面的 children 還是指向舊的那群檔案。（相互影響）
+                            </li>
+                            <li>
+                                深拷貝 (Deep Copy)：
+                                遞迴複製所有層級。我們的 <code>DirectoryComposite</code> 必須實作深拷貝，這樣「複製貼上」出來的檔案樹，才是完全獨立的副本，互不影響。
+                            </li>
+                            <li>
+                                <span className="text-blue-600">實務上</span>，我們很少自己寫 clone，因屬性一多就容易漏改。為避免維護地獄，通常依賴套件來代勞
+                                <div className="bg-slate-100/50 p-4 rounded-xl border border-slate-200">
+                                    <strong className="text-slate-800 block mb-2 text-sm">🧰 語言實作大補帖 (Deep Copy in Practice)</strong>
+                                    <dl className="list-none space-y-3 text-sm">
+                                        <dt className="font-bold text-indigo-600 block">C# 的世界</dt>
+                                        <dd>
+                                            原生標準做法是實作 <code>ICloneable</code> 介面，但實務上常使用 <code>BinaryFormatter</code> 來暴力達成。✨ 推薦套件：AutoMapper, DeepCloner
+                                        </dd>
+                                        <dt className="font-bold text-blue-600 block">TypeScript 的世界：</dt>
+                                        <dd>
+                                            以往常用 <code>JSON.parse(JSON.stringify(obj))</code> 偷吃步，但會遺失方法與型別。現代瀏覽器已支援 <code>structuredClone()</code>。✨ 推薦套件：Lodash (.cloneDeep), class-transformer, Immer
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </li>
+                        </ul>
+                    </ReflectionItem>
+
+                    <ReflectionItem
+                        title="3. 關於 Facade (外觀模式)"
                         question="我在 UI 上，有事件的 function (例如：按鈕事件 onSearch, onCopy, onXmlExport) 對應 Visitor, Command 的使用，為什麼還需要獨立的 Facade Class？"
                     >
                         <ul className="list-disc pl-5 space-y-2">
@@ -206,7 +239,7 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="3. 關於 Decorator (裝飾者模式)"
+                        title="4. 關於 Decorator (裝飾者模式)"
                         question="範列的 Decorator 只是將 if 判斷關鍵字，然後輸出 style 包裝起來，值得為了這個多設計 class 嗎？"
                     >
                         這取決於「複雜度」與「組合性」。
@@ -217,7 +250,7 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="4. 關於 Strategy (策略模式)"
+                        title="5. 關於 Strategy (策略模式)"
                         question="為什麼我不傳 string/enum 進去用 if/else 就好，要大費周章寫 Strategy Class 再傳進去？"
                     >
                         核心差異在於「誰來承擔演算法的負擔」
@@ -234,14 +267,14 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="5. 關於 Flyweight (享元模式)"
+                        title="6. 關於 Flyweight (享元模式)"
                         question="我們說 LabelFactory 是為了享元 (Flyweight) 控制記憶體，但如果新來的同事直接 new Label('Urgent')，是不是你的 Flyweight 就失效了？"
                     >
                         你有想過，要把 Label 的 Constructor 變成私有的嗎 (private or internal)？禁止直接 new？架構不能只靠口頭約束，要有機制強制執行。
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="6. 關於 現代 Framework 與 Libraries"
+                        title="7. 關於 現代 Framework 與 Libraries"
                         question="現代流行的 Framework (Angular, Spring) 或 Library (AutoMapper, Akka) 中，是否其實也有這些觀念的延伸？"
                     >
                         完全正確。技術會變，但「管理複雜度」的本質不變：
@@ -265,7 +298,7 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="7. 關於 Life (生活中的抽象)"
+                        title="8. 關於 Life (生活中的抽象)"
                         question="你每天用的「USB 插孔」跟「插座」。如果你買了一個國外的電器，插頭形狀不合怎麼辦？有對應的 Design Pattern 嗎？"
                     >
                         <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -275,7 +308,7 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="8. 關於 未來 (AI 與架構)"
+                        title="9. 關於 未來 (AI 與架構)"
                         question="AI 也懂所有的設計模式與軟體架構，為什麼 AI Coding 的時代依然需要懂設計模式的人？"
                     >
                         AI 擅長「解題」與「生成」，但軟體架構的本質是「在權衡 (Trade-offs) 中做出決策」：

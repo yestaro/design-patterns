@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, HelpCircle, Calendar, User, Code, Bot, Panda, ChevronDown, ChevronUp } from 'lucide-react';
 
 // ... (interfaces)
@@ -23,7 +23,7 @@ const scheduleData: RoadmapItem[] = [
         target: '解決檔案與資料夾的「一致性」問題，支持巢狀目錄。並實現檔案樹的快速深拷貝。',
         core: '讓檔案與資料夾擁有相同介面 EntryComponent，實現無限層級的樹狀結構與統一處理邏輯。',
         color: 'from-blue-600 to-indigo-700',
-        context: '今天你與客戶進行了「雲端檔案管理系統」的需求訪談。以下是訪談的部分紀錄。',
+        context: '今天你與客戶進行了「檔案管理系統」的需求訪談。以下是訪談的部分紀錄。',
         transcript: [
             { speaker: '客戶', text: '我們有很多不同類型的檔案要分類管理，最常見的有 Word 文件、圖片，還有一些簡單的 純文字檔。' },
             { speaker: '你', text: '這些檔案在系統裡有什麼共同點嗎？' },
@@ -35,7 +35,7 @@ const scheduleData: RoadmapItem[] = [
             { speaker: '你', text: '所以目錄本身也有名字吧？' },
             { speaker: '客戶', text: '對，目錄也有名字。另外要注意，所有的檔案都必須放在某個目錄下面，不能孤零零地存在外面。' }
         ],
-        tasksTitle: '不論旗或堂，都是天地會兄弟',
+        tasksTitle: '不論舵或堂，都是天地會兄弟',
         tasks: [
             '請根據以上對話，掌握那些「名調」與「動詞」會建構成你的系統。',
             '推導出系統的 Domain Model（領域模型），並使用 UML 類別圖呈現。',
@@ -117,8 +117,8 @@ const scheduleData: RoadmapItem[] = [
         transcript: [
             { speaker: '客戶', text: '日誌顯示太長，容易漏看重要訊息。' },
             { speaker: '你', text: '好，我們用圖標、粗體、顏色等方式來改善，依命令來顯示不同樣式。' },
-            { speaker: '客戶', text: '那儀表版要顯示目前處理到那，與整體進度百分比。' },
-            { speaker: '你', text: '心裏…儀表版元件的使用參數跟訊息不太一樣，得處理一下。還是做得到。' },
+            { speaker: '客戶', text: '我還希望有個儀表版，可以顯示目前處理到那，與整體進度百分比。' },
+            { speaker: '你', text: '儀表版跟日誌訊息的 UI 差別有點大。（心想…元件的使用參數不太一樣），得處理一下。還是做得到。' },
         ],
         tasksTitle: '十七掌合在一起 - 降龍十八掌',
         tasks: [
@@ -135,11 +135,11 @@ const scheduleData: RoadmapItem[] = [
         color: 'from-indigo-600 to-violet-700',
         context: '終於要開始作「管理」功能，但怕客戶誤操作，所以要具備 Undo / Redo 的機制。',
         transcript: [
-            { speaker: '內部討論', text: '這一部份功能都很清楚，但就 Undo / Redo 的機制，大家有不同看法。' },
+            { speaker: '絕地會議', text: '這一部份功能都很清楚，但就 Undo / Redo 機制，會議上大家有不同看法。' },
             { speaker: '你', text: '我看過一種設計模式，叫 Memento 備忘錄模式，可以儲存不同狀態。' },
-            { speaker: '謎之聲', text: '如果是物件的狀態，可以用 Memento，但我們的功能，沒有編輯。檔案物件的屬性是不變的。' },
-            { speaker: '你', text: '懂了…還是用 Command Pattern，把每一個操作都封裝成一個物件，然後把這些物件儲存起來。' },
-            { speaker: '謎之聲', text: '排序有多種方式，每種排序，都是一種 Command 嗎？複製可以 Undo 嗎？剪貼簿要如何管理？預計完成？' },
+            { speaker: '尤達', text: 'Memento 的確是紀錄物件的狀態，但我們的功能，沒有編輯。檔案物件的狀態屬性是不變的。' },
+            { speaker: '你', text: 'なるほど…那就用 Command Pattern，把每一個操作都封裝成一樣的物件，然後把這些物件儲存起來。' },
+            { speaker: '尤達', text: '排序有多種方式，每種排序，都是一種 Command 嗎？複製可以 Undo 嗎？剪貼簿要如何管理？預計完成？' },
             { speaker: '你', text: '預計完成：Redo/Undo、複製、貼上、刪除、排序（依不同屬性）。' },
 
         ],
@@ -160,9 +160,9 @@ const scheduleData: RoadmapItem[] = [
         color: 'from-cyan-500 to-blue-600',
         context: '現代化管理須導入標籤概念，這比目錄靈活，日後也會拿來統計歸類，該怎麼設計？',
         transcript: [
-            { speaker: '謎之聲', text: '目錄是為了分類，但分類可不是只有目錄一種方式。' },
+            { speaker: '尤達', text: '目錄是為了分類，但分類可不是只有目錄一種方式。' },
             { speaker: '你', text: '沒錯，標籤可以讓管理更多樣靈活，跨階層，多對多，而且具有唯一性。' },
-            { speaker: '謎之聲', text: '是的，請從多對多與唯一性來思考。' },
+            { speaker: '尤達', text: '是的，請從多對多與唯一性來思考。' },
         ],
         tasksTitle: '現代設計，有標籤是很合理的',
         tasks: [
@@ -179,10 +179,10 @@ const scheduleData: RoadmapItem[] = [
         color: 'from-slate-700 to-slate-900',
         context: '最後一里路了，乾淨與簡單的系統架構，讓系統清晰，不然沒人想當 Product Owner。',
         transcript: [
-            { speaker: '謎之聲', text: '內在是最重要的，但我們就是膚淺，所以還是包裝一下，對外統一用法。' },
+            { speaker: '尤達', text: '內在完成了，但為了提升整潔度與方便度，所以包一下，對外統一用法。' },
             { speaker: '你', text: '包起來，不燒腦，這是我最擅長的。' },
             { speaker: '你', text: '總於，這次的專案，雖然花了一點時間，但可讀性跟可測性都好多了。' },
-            { speaker: '謎之聲', text: '對啊，你這麼辛苦重整與設計，將來換個 Owner 就又爛了…' },
+            { speaker: '尤達', text: '對啊，你這麼辛苦重整與設計，將來換個 Owner 就又爛了…' },
 
         ],
         tasksTitle: '總管的背後，個個都是垃圾？',
@@ -201,6 +201,13 @@ interface RoadmapDialogProps {
 const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     const [selectedDay, setSelectedDay] = useState(scheduleData[0]);
     const [expandedCores, setExpandedCores] = useState<number[]>([]);
+    const detailsRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (detailsRef.current) {
+            detailsRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [selectedDay]);
 
     const toggleCore = (day: number, e: React.MouseEvent) => {
         // Stop propagation so we don't select the day when just expanding
@@ -238,7 +245,7 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                 <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
 
                     {/* ----------------- Left Side: Implementation Tasks (1/3) ----------------- */}
-                    <div className="w-full md:w-[400px] h-[40vh] md:h-full bg-white p-6 md:p-8 overflow-y-auto custom-scrollbar flex flex-col shrink-0 border-b md:border-b-0 md:border-r border-slate-200 order-1">
+                    <div ref={detailsRef} className="w-full md:w-[400px] h-[40vh] md:h-full bg-white p-6 md:p-8 overflow-y-auto custom-scrollbar flex flex-col shrink-0 border-b md:border-b-0 md:border-r border-slate-200 order-1">
                         <div className="mb-8">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${selectedDay.color} flex items-center justify-center text-white text-xl font-black shadow-lg`}>
