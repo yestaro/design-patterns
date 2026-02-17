@@ -439,19 +439,20 @@ const ReflectionTab: React.FC = () => {
             </div>
 
             <div className="mt-16 mb-8 border-t border-slate-200 pt-12 text-left">
-                <h4 className="text-2xl font-black text-slate-800 mb-8 border-l-4 border-blue-600 pl-4">AI 時代的開發新實踐：掌握「架構 Prompt」</h4>
+                <h4 className="text-2xl font-black text-slate-800 mb-8 border-l-4 border-blue-600 pl-4">AI 時代的開發新實踐</h4>
 
                 <blockquote className="text-lg italic text-slate-600 mb-6 leading-relaxed text-left">
-                    "AI 可以是一個「理論級的架構大師」能跟你聊 OOP/FP 聊得天花亂墜，卻也是一個「缺乏視野的實習生」飛快地動手寫出屎山代碼，改了東壞了西。它能講出 OOP/FP 的道理，是因為那些道理被寫成了書；它 Coding 只想解決當前問題、完成任務，是因為沒人給它邊界與規則。所以，你要能引導 AI，讓理論與實作能夠落地，連接兩者。"
+                    "AI 可以是一個「理論級的架構大師」能跟你聊 OOP/FP 聊得天花亂墜，卻也是一個「缺乏視野的程序員」飛快地動手寫出屎山代碼，改了東壞了西。它能講出 OOP/FP 的道理，是因為那些道理被寫成了書；它 Coding 只想解決當前問題、完成任務，是因為沒人給它邊界與規則。所以，你要能引導 AI，讓理論與實作能夠落地，連接兩者。"
                 </blockquote>
 
-                <h5 className="text-xl font-bold text-slate-800 mb-6">雙 AI 協作模式：架構師 vs. 實習生</h5>
+                <h5 className="text-xl font-bold text-slate-800 mb-6">Agentic Workflow：從「對話」進化到「指揮」</h5>
                 <p className="text-slate-600 mb-8">
-                    你可以開啟兩個不同的對話視窗（或者在支援 Agent 的工具如 LangGraph/AutoGPT 中設定），引導 AI 完成高品質的開發：
+                    在像 <strong>AntiGravity</strong> 這樣的高級 Agentic AI 環境下，系統內部其實已具備多 Agent 協作能力。
+                    現在，你不再只是提問者，而是<b>技術總監 (Director)</b>。你不需要切換視窗，而是透過 Prompt 引導 AI 在「架構師」與「工程師」思維間切換，完成高品質的開發：
                 </p>
 
                 <div className="space-y-12 mb-12">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <div className="flex flex-col space-y-4">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</span>
@@ -471,15 +472,29 @@ const ReflectionTab: React.FC = () => {
                         <div className="flex flex-col space-y-4 h-full">
                             <div className="flex items-center gap-3">
                                 <span className="bg-emerald-600 text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</span>
-                                <h6 className="text-lg font-bold text-emerald-900">第二步：請「實習生 AI」按圖索驥 (Vibe Coding)</h6>
+                                <h6 className="text-lg font-bold text-emerald-900">第二步：請「程序員 AI」按圖索驥 (Vibe Coding)</h6>
                             </div>
                             <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow flex-grow text-left">
                                 <p className="text-sm font-black text-emerald-500 uppercase tracking-wider mb-4">你的實作指令</p>
                                 <div className="bg-slate-50 p-4 rounded-xl text-sm italic text-slate-600 mb-6 border-l-4 border-emerald-200">
                                     「我是開發者。這是架構師剛給我的規劃書：[貼上第一步的內容]。請根據這個規劃，用 「某某程式語言」 實作具體的內容。記住，請確保符合 SOLID 原則與 DDD 精神。」
                                 </div>
+
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col space-y-4 h-full">
+                            <div className="flex items-center gap-3">
+                                <span className="bg-rose-600 text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</span>
+                                <h6 className="text-lg font-bold text-rose-900">第三步：請「審核員 AI」來找碴 (Code Review)</h6>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm hover:shadow-md transition-shadow flex-grow text-left">
+                                <p className="text-sm font-black text-rose-500 uppercase tracking-wider mb-4">你的審核指令</p>
+                                <div className="bg-slate-50 p-4 rounded-xl text-sm italic text-slate-600 mb-6 border-l-4 border-rose-200">
+                                    「我是資深工程師。這是剛寫好的 Code：[貼上程式碼]。請幫我 Review 這段程式碼是否符合 SOLID 原則？有沒有顯著的壞味道 (Code Smells)？請嚴格指出潛在 Bug。」
+                                </div>
                                 <p className="text-sm text-slate-500 leading-relaxed text-left">
-                                    我們學會使用「架構 Prompt」模版，才能成為真正的 AI 編程大師，角色從「打字員」轉變成<b>「審核員（Reviewer）」</b>與<b>「設計師」</b>。
+                                    最關鍵的一步。不要盲目相信 AI 生成的代碼，讓 AI 自己檢查自己的邏輯漏洞，通常能發現人類忽略的邊界條件。這才是真的變成<b>「審核員」</b>。
                                 </p>
                             </div>
                         </div>
