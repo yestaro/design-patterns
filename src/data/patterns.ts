@@ -1,7 +1,7 @@
 import {
   Layout, Code, Workflow, Zap, Play, Activity, Component, Share2,
   RotateCcw, ArrowRightLeft, Boxes, DatabaseZap, Box, AppWindow,
-  LayoutTemplate, LucideIcon
+  LayoutTemplate, LucideIcon, Command
 } from 'lucide-react';
 
 export interface DesignPattern {
@@ -629,7 +629,7 @@ function MonitorDashboard({ event }: { event: any }) {
     name: 'Command',
     chapter: '行為物件化',
     description: '將操作封裝成一致的物件，才能管理 (Undo/Redo 功能)，實現操作的歷史記錄追溯。',
-    icon: RotateCcw,
+    icon: Command,
     mermaid: `classDiagram
     class BaseCommand {
         <<abstract>>

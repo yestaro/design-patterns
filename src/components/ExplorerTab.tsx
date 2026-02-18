@@ -3,7 +3,9 @@ import {
     RotateCcw, RotateCw, LayoutList, SortAsc, SortDesc, Tag, Trash2,
     Folder, File, FileText, User, Calculator, FileJson, Search, X, Activity, Copy, ClipboardPaste, Image as ImageIcon,
     Calendar,
-    Play
+    Play,
+    Command,
+    Zap
 } from 'lucide-react';
 import { DirectoryComposite, EntryComponent, WordDocument, ImageFile, PlainText } from '../patterns/Composite';
 import { Clipboard } from '../patterns/Singleton';
@@ -314,6 +316,11 @@ const ExplorerTab: React.FC = () => {
                                 );
                             })}
                         </div>
+                        <div className="flex items-center gap-2 ml-auto pl-4 border-l border-slate-200" title="所有操作皆封裝為物件 (Command Pattern)">
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left">
+                                <Command size={18} className="text-purple-500" /> 命令模式 (Command)
+                            </h3>
+                        </div>
                     </div>
                 </div>
 
@@ -332,7 +339,7 @@ const ExplorerTab: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-stretch h-auto md:h-[520px]">
                 {/* 1. 檔案階層 (2/4) */}
                 <div className="col-span-1 md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left flex flex-col h-[400px] md:h-full overflow-hidden">
-                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-left"><Folder className="text-yellow-500" size={18} /> 檔案階層 (Composite)</h3>
+                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-left" title="使用 Composite 模式建構檔案與目錄的樹狀結構 (Composite Pattern)"><Folder className="text-yellow-500" size={18} /> 檔案階層 (Composite)</h3>
                     <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 flex-1 overflow-y-auto shadow-inner text-left custom-scrollbar">
                         <RenderTree
                             entry={compositeRoot}
@@ -350,7 +357,7 @@ const ExplorerTab: React.FC = () => {
                 <div className="col-span-1 md:col-span-1 flex flex-col gap-4 h-auto md:h-full overflow-hidden">
                     {/* Visitor 操作 */}
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4 flex-none">
-                        <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left"><User className="text-blue-600" size={18} /> 訪問者操作 (Visitor)</h3>
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left" title="使用 Visitor 模式在不修改結構的情況下增加新功能 (Visitor Pattern)"><Zap className="text-green-600" size={18} /> 訪問者操作 (Visitor)</h3>
                         <div className="flex flex-col gap-2">
                             <button
                                 onClick={() => handleAnalysis(async (obs) => {
@@ -409,7 +416,7 @@ const ExplorerTab: React.FC = () => {
 
                     {/* Observer 監控 */}
                     <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4 flex-1 flex flex-col justify-center space-y-4 overflow-hidden min-h-[200px]">
-                        <h3 className="font-bold text-slate-800 flex items-center justify-between text-left"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-blue-500" /> 監控 (Observer)</div><span className="text-[10px] px-2 py-0.5 bg-blue-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
+                        <h3 className="font-bold text-slate-800 flex items-center justify-between text-left" title="使用 Observer 模式即時更新監控數據 (Observer Pattern)"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-blue-500" /> 監控 (Observer)</div><span className="text-[10px] px-2 py-0.5 bg-blue-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
                         <div className="space-y-4 overflow-y-auto pr-1 dark-scrollbar">
                             <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
                                 <span className="text-sm text-slate-400 font-bold uppercase mb-1.5 text-left">目前節點</span>

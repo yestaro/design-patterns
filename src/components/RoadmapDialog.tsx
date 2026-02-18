@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, HelpCircle, Calendar, User, Code, Bot, Panda, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, HelpCircle, Calendar, User, Code, Bot, Panda, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 
 // ... (interfaces)
 interface RoadmapItem {
@@ -50,9 +50,9 @@ const scheduleData: RoadmapItem[] = [
         target: '在不改變物件結構的前提下，增加新功能。例如：輸出 XML、計算總和大小。',
         core: '將資料結構與操作邏輯解耦，透過 accept 機制實現行為的「插件化」擴展。',
         color: 'from-purple-600 to-pink-700',
-        context: '上次客戶說要分類管理，但具體是怎麼管理？應該就是新增、複製、刪除吧…',
+        context: '上次客戶說要分類管理，但具體是怎麼管理？應該就是複製、貼上、刪除、排序吧…',
         transcript: [
-            { speaker: '客戶', text: '對，新增、複製、刪除、排序，這些都是基本功能。' },
+            { speaker: '客戶', text: '對，複製、貼上、刪除、排序，這些都是基本功能。' },
             { speaker: '你', text: '那還有什麼沒提到的功能嗎？' },
             { speaker: '客戶', text: '檔案太多，所以一定要可以搜尋檔案。另外，要知道檔案的加總大小。' },
             { speaker: '客戶', text: '還有，由於有別的系統要整合，所以也需要可以匯出資料。' },
@@ -201,6 +201,7 @@ interface RoadmapDialogProps {
 const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     const [selectedDay, setSelectedDay] = useState(scheduleData[0]);
     const [expandedCores, setExpandedCores] = useState<number[]>([]);
+    const [copied, setCopied] = useState(false);
     const detailsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -215,6 +216,18 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
         setExpandedCores(prev =>
             prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
         );
+    };
+
+    const handleCopyTranscript = () => {
+        if (!selectedDay.transcript) return;
+        const transcriptText = selectedDay.transcript.map(t => `${t.speaker}: ${t.text}`).join('\n');
+        const textToCopy = selectedDay.context
+            ? `背景情境：${selectedDay.context}\n\n${transcriptText}`
+            : transcriptText;
+
+        navigator.clipboard.writeText(textToCopy);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     if (!isOpen) return null;
@@ -263,9 +276,18 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                         <p className="text-slate-800 text-base leading-relaxed mb-6">
                                             {selectedDay.context}
                                         </p>
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-4 mb-4">
                                             <div className="h-px bg-slate-200 flex-1"></div>
-                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Interview Start</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Interview Start</span>
+                                                <button
+                                                    onClick={handleCopyTranscript}
+                                                    className={`p-1.5 rounded-md transition-all hover:bg-slate-100 ${copied ? 'text-emerald-500' : 'text-slate-400 hover:text-blue-500'}`}
+                                                    title="複製對話內容"
+                                                >
+                                                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                                                </button>
+                                            </div>
                                             <div className="h-px bg-slate-200 flex-1"></div>
                                         </div>
                                     </div>
