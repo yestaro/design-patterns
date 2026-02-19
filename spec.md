@@ -15,6 +15,7 @@ graph TD
     User -->|操作檔案/目錄| FMS
     User -->|檢視統計資訊| FMS
     User -->|執行 Undo/Redo| FMS
+    User -->|查看知識地圖| FMS
     FMS -->|即時監控數據| User
     FMS -->|Console Log| User
 ```
@@ -166,6 +167,7 @@ erDiagram
     *   `CommandInvoker`: 管理 Undo/Redo 流程。
     *   Specific Commands (`CopyCommand`, `DeleteCommand`, `SortCommand`).
     *   Visitors (`StatisticsVisitor`, `FileSearchVisitor`).
+    *   `MindMapGenerator`: 產生系統知識地圖。
 4.  **Enterprise Business Rules (Entities)**:
     *   `EntryComponent`, `FileLeaf`, `DirectoryComposite`: 核心領域物件。
     *   `Clipboard` (Singleton).

@@ -145,9 +145,9 @@ const scheduleData: RoadmapItem[] = [
         ],
         tasksTitle: '表面是吹風機，其實是刮鬍刀',
         tasks: [
-            '完成 Command 命令介面達成一鍵復原',
-            '完成 CommandInvoker 紀錄操作歷史',
+            '完成 Command 複製、貼上、刪除、排序',
             '完成 Command 使用排序策略 Strategy',
+            '完成 CommandInvoker 紀錄操作, 可悔步',
             '完成 Clipboard 全域 Singleton 共享剪貼簿'
         ]
     },
@@ -166,8 +166,9 @@ const scheduleData: RoadmapItem[] = [
         ],
         tasksTitle: '現代設計，有標籤是很合理的',
         tasks: [
-            '完成 LabelFactory 共享標籤實體',
-            '完成 TagMediator 管理標籤與檔案的多對多'
+            '完成 LabelFactory 取得共享標籤實體',
+            '完成 TagMediator 管理標籤與檔案的多對多',
+            '完成 Command 方式，執行貼標籤的動作'
         ]
     },
     {
@@ -235,21 +236,41 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 text-left">
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
-            <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-7xl h-[90vh] overflow-hidden relative z-10 animate-in zoom-in-95 duration-300 flex flex-col border border-white/20 text-left">
+            <div className="bg-white w-full h-full md:w-11/12 md:max-w-7xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
 
-                {/* Modal Header - Restored Orange Theme */}
-                <div className="px-6 py-5 bg-gradient-to-r from-amber-500 to-orange-600 text-white flex justify-between items-center relative overflow-hidden shrink-0">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12">
-                        <HelpCircle size={120} />
+                {/* Header */}
+                <div className="relative flex items-center justify-center px-6 py-2 border-b border-slate-100 bg-white shrink-0">
+                    <div className="flex items-center gap-6">
+                        {/* Roadmap Visualization SVG */}
+                        <svg width="100" height="50" viewBox="0 0 130 60" className="flex-shrink-0 drop-shadow-sm">
+                            {/* Path */}
+                            <path d="M10 30 C 40 10, 80 50, 110 30" fill="none" stroke="#f97316" strokeWidth="4" strokeLinecap="round" strokeDasharray="4 4" />
+
+                            {/* Milestone Dots */}
+                            <circle cx="10" cy="30" r="6" fill="#f59e0b" />
+                            <circle cx="60" cy="30" r="8" fill="#ec4899" />
+                            <circle cx="110" cy="30" r="10" fill="#8b5cf6" />
+
+                            {/* Labels (Small) */}
+                            <text x="10" y="55" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#64748b">Start</text>
+                            <text x="60" y="55" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#64748b">Learn</text>
+                            <text x="110" y="55" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#64748b">Master</text>
+                        </svg>
+
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+                                Design Pattern in a Week
+                            </h2>
+                            <p className="text-sm text-slate-500 mt-1 font-medium">
+                                從 Structure 到 Behavioral 與 Creational - <span className="text-orange-500">難道我學過如來神掌也要告訴你嗎？</span>
+                            </p>
+                        </div>
                     </div>
-                    <div className="relative z-10">
-                        <h3 className="text-3xl font-black flex items-center gap-3 mb-1">
-                            <Calendar size={32} className="text-orange-200" />
-                            Design Pattern in a Week
-                        </h3>
-                        <p className="text-orange-50 font-medium tracking-wide">從 Structure 到 Behavioral 與 Creational - 難道我學過如來神掌也要告訴你嗎？</p>
-                    </div>
-                    <button onClick={onClose} className="relative z-10 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors">
+
+                    <button
+                        onClick={onClose}
+                        className="absolute right-6 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600"
+                    >
                         <X size={24} />
                     </button>
                 </div>

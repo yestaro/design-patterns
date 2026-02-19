@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Layers2, Share2, Play } from 'lucide-react';
+import { Layers2, Share2, Play, Map, Sparkles } from 'lucide-react';
 import mermaid from 'mermaid';
 import CodeBlock from './CodeBlock';
 import { patterns } from '../data/patterns';
+
+import { MindMapDialog } from './MindMapDialog';
 
 const CodeTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('composite');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMindMapOpen, setIsMindMapOpen] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -256,7 +259,6 @@ const CodeTab: React.FC = () => {
                                     `}
               </div>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left items-stretch">
               <div className="space-y-4 text-left flex flex-col h-full">
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Layers2 size={18} /> 1. 模式組合 (Composition)</h5>
@@ -505,18 +507,25 @@ const CodeTab: React.FC = () => {
 
               <div className="pt-6 relative">
                 <span className="text-8xl text-indigo-100 absolute -top-4 -left-4 select-none opacity-50">"</span>
-                <p className="font-serif italic text-2xl md:text-3xl text-indigo-800 font-bold relative z-10 px-8">
-                  即便在 AI 時代，好的架構依然是核心競爭力<br />
+                <div className="relative z-10 px-8">
                   <span className="text-base md:text-xl text-indigo-500 font-medium block mt-3 not-italic font-sans leading-relaxed">
-                    當 AI 成為團隊超級成員，你能擔任團隊方向與設計的角色嗎？<br />
-                    讓 AI 讀懂你，你也能讀懂 AI 程式碼，而不是一起舉手<b>「我完成了，但我看不懂」</b>。
+                    當 AI 成為團隊超級成員，你能擔任什麼角色？難道是一起舉手<b>「我完成了，但我看不懂」</b>。
                   </span>
-                </p>
+
+                  <button
+                    onClick={() => setIsMindMapOpen(true)}
+                    className="mt-8 px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl border-2 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 hover:scale-105 transition-all shadow-md flex items-center gap-3 mx-auto"
+                  >
+                    <Map size={20} />
+                    <span>AI 時代的開發抉擇</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </section>
       </div>
+      <MindMapDialog isOpen={isMindMapOpen} onClose={() => setIsMindMapOpen(false)} />
     </div>
   );
 };

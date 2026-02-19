@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Lightbulb, Sparkles, Brain, Scale, Globe, ChevronDown, HelpCircle, Zap, Users, X, FileText, Copy, Check
+    Lightbulb, Sparkles, Brain, Scale, Globe, ChevronDown, HelpCircle, Users, X, FileText, Copy, Check, Coffee
 } from 'lucide-react';
 import CodeBlock from './CodeBlock';
 
@@ -578,7 +578,7 @@ const ReflectionTab: React.FC = () => {
                 <h5 className="text-xl font-bold text-slate-800 mb-6">Agentic Workflow：從「對話」進化到「指揮」</h5>
                 <p className="text-slate-600 mb-8">
                     在像 <strong>AntiGravity</strong> 這樣的高級 Agentic AI 環境下，系統內部其實已具備多 Agent 協作能力。
-                    現在，你不再只是提問者，而是<b>技術總監 (Director)</b>。你不需要切換視窗，而是透過 Prompt 引導 AI 在「架構師」與「工程師」思維間切換，完成高品質的開發：
+                    現在，你不再只是提問者，而是<b>團隊的太陽 (The Sun of the Team)</b>。你不需要切換視窗，而是透過 Prompt 引導 AI 在「分析師」「架構師」與「工程師」思維間切換，完成高品質的開發：
                 </p>
 
                 <div className="space-y-12 mb-12">
@@ -586,28 +586,28 @@ const ReflectionTab: React.FC = () => {
                         <div className="flex flex-col space-y-4">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</span>
-                                <h6 className="text-lg font-bold text-indigo-900">第一步：請「架構師 AI」出規劃書</h6>
+                                <h6 className="text-lg font-bold text-indigo-900">第一步：PM 需求問答 (PRD)</h6>
                             </div>
                             <div className="bg-white p-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md transition-shadow flex-grow">
-                                <p className="text-sm font-black text-indigo-500 uppercase tracking-wider mb-4">你的規劃指令 (System Prompt)</p>
+                                <p className="text-sm font-black text-indigo-500 uppercase tracking-wider mb-4">你的引導指令 (Inception Prompt)</p>
                                 <div className="bg-slate-50 p-4 rounded-xl text-sm italic text-slate-600 mb-6 border-l-4 border-indigo-200">
-                                    「你是一名資深的軟體架構師。我要實作一個『檔案管理系統』的功能，包含『複製、貼上、刪除、排序、管理標籤、搜尋、輸出 XML 目錄結構、計算容量總和』，『其中操作的功能，可以Undo/Redo』。請不要寫具體代碼，先幫我定義出 Domain Entities、Interface 介面以及 Data Flow 流程圖。請確保符合 SOLID 原則與 DDD 精神。」
-                                    <br />
-                                    <br />
-                                    請先輸出設計文件的 Markdown 格式，包含介面定義，先不要寫具體 Function 的實作內容，等我確認設計後再進行下一步。
+                                    「你是一名資深的產品經理。我想開發一個『檔案管理系統』，但我還沒想清楚細節。請透過一問一答的方式，釐清我的使用場景、目標客群、以及核心功能。請幫我挖掘出潛在的需求，最後整理成一份需求規格書 (PRD)。」
                                 </div>
+                                <p className="text-sm text-slate-500 leading-relaxed text-left">
+                                    這是一切的起點。利用 AI 幫你補全沒想到的細節。不要急著寫 Code，先確認「做對的事 (Right Thing)」，再來考慮「把事做對 (Thing Right)」。
+                                </p>
                             </div>
                         </div>
 
                         <div className="flex flex-col space-y-4 h-full">
                             <div className="flex items-center gap-3">
                                 <span className="bg-emerald-600 text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</span>
-                                <h6 className="text-lg font-bold text-emerald-900">第二步：請「程序員 AI」按圖索驥 (Vibe Coding)</h6>
+                                <h6 className="text-lg font-bold text-emerald-900">第二步：架構師出規格 (Design)</h6>
                             </div>
                             <div className="bg-white p-6 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-shadow flex-grow text-left">
-                                <p className="text-sm font-black text-emerald-500 uppercase tracking-wider mb-4">你的實作指令</p>
+                                <p className="text-sm font-black text-emerald-500 uppercase tracking-wider mb-4">你的規劃指令</p>
                                 <div className="bg-slate-50 p-4 rounded-xl text-sm italic text-slate-600 mb-6 border-l-4 border-emerald-200">
-                                    「我是開發者。這是架構師剛給我的規劃書：[………]。請根據這個規劃，用實作具體的內容。記住，請確保符合 SOLID 原則與 DDD 精神。」
+                                    「這是我確認後的 PRD：[………]。請根據這份需求，定義出 Domain Entities、Interface 介面以及 Data Flow 流程圖。請確保符合 SOLID 原則與 DDD 精神。請先輸出設計文件的 Markdown 格式 (spec.md)，包含介面定義，先不要寫具體 Function 的實作內容。」
                                 </div>
                                 <p className="text-sm text-slate-500 leading-relaxed text-left">
                                     SOLID 原則、DDD 精神與 Clean Architecture 須明確定在
@@ -634,15 +634,15 @@ const ReflectionTab: React.FC = () => {
                         <div className="flex flex-col space-y-4 h-full">
                             <div className="flex items-center gap-3">
                                 <span className="bg-rose-600 text-white w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</span>
-                                <h6 className="text-lg font-bold text-rose-900">第三步：請「審核員 AI」來找碴 (Code Review)</h6>
+                                <h6 className="text-lg font-bold text-rose-900">第三步：程序員實作與測試 (Impl & Test)</h6>
                             </div>
                             <div className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm hover:shadow-md transition-shadow flex-grow text-left">
-                                <p className="text-sm font-black text-rose-500 uppercase tracking-wider mb-4">你的審核指令</p>
+                                <p className="text-sm font-black text-rose-500 uppercase tracking-wider mb-4">你的實作指令</p>
                                 <div className="bg-slate-50 p-4 rounded-xl text-sm italic text-slate-600 mb-6 border-l-4 border-rose-200">
-                                    「我是資深工程師。這是剛寫好的 Code：[………]。請幫我 Review 這段程式碼是否符合 SOLID 原則？有沒有顯著的壞味道 (Code Smells)？請嚴格指出潛在 Bug。」
+                                    「我是技術 Lead。這是架構與規格書：[………]。請根據這個規劃，『分批』實作具體的內容。每寫完一個功能模組，請務必同時產出單元測試 (Unit Test)，確保邏輯正確且符合介面規範。」
                                 </div>
                                 <p className="text-sm text-slate-500 leading-relaxed text-left">
-                                    最關鍵的一步。不要盲目相信 AI 生成的代碼，讓 AI 自己檢查自己的邏輯漏洞，通常能發現人類忽略的邊界條件。這才是真的變成<b>「審核員」</b>。
+                                    不要讓 AI 一次寫完所有 Code。要求「分批實作 (Vertical Slice)」與「測試先行」。所謂分批，是指<b>「每次只實作一個完整功能」</b>（如：先做搜尋，再做排序），而非一次寫完所有底層 (Layer)。這樣才能進行有效的 Review。
                                 </p>
                             </div>
                         </div>
@@ -650,39 +650,29 @@ const ReflectionTab: React.FC = () => {
 
                     <div className="bg-blue-600 rounded-3xl p-10 text-white shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-                            <Zap size={150} />
+                            <Coffee size={150} />
                         </div>
                         <h5 className="text-2xl font-black mb-6 flex items-center gap-3">
-                            <Zap size={24} className="text-blue-300" />
-                            Master Prompt Template
+                            <Coffee size={24} className="text-blue-300" />
+                            AI 時代的品味 - 什麼是美？什麼是好的產品？什麼才有長期的價值？
                         </h5>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="space-y-2">
-                                <div className="text-blue-200 font-bold uppercase tracking-tighter text-3xl opacity-50">01. THINK - DATA</div>
-                                <p className="text-sm leading-relaxed">分析功能的業務邏輯，這個系統的『動詞』與『名詞』是什麼？列出核心 Entity 與 Interface 邊界。建議畫出 ER Model 與 Domain Model。</p>
+                                <div className="text-blue-200 font-bold uppercase tracking-tighter text-3xl opacity-50">01. THINK</div>
+                                <div className="text-blue-100 font-bold text-lg">- Why(目標) & Who(角色)</div>
+                                <p className="text-sm leading-relaxed">別急著說「我要什麼」，先交代「為什麼做，為誰做」。明確意圖邊界與角色，以一問一答的方式釐清方向，讓 AI 發掘「背後 Context」的真正需求。</p>
                             </div>
                             <div className="space-y-2">
-                                <div className="text-blue-200 font-bold uppercase tracking-tighter text-3xl opacity-50">02. DESIGN - LOGIC</div>
-                                <p className="text-sm leading-relaxed">先定義所有必要的 Interface 與 Function，是否有經典的解決方案。將功能邏輯設計成獨立的 Pure Functions。</p>
+                                <div className="text-blue-200 font-bold uppercase tracking-tighter text-3xl opacity-50">02. DESIGN</div>
+                                <div className="text-blue-100 font-bold text-lg">- How(設計) & What(規格)</div>
+                                <p className="text-sm leading-relaxed">這是本文強調的價值，你必須能引導 AI 朝著你想要的方向去設計，並明確指出設計「規範 Constraints」與解決的「方法 Action」，讓 AI 產出最終方案規格書。</p>
                             </div>
                             <div className="space-y-2">
-                                <div className="text-blue-200 font-bold uppercase tracking-tighter text-3xl opacity-50">03. IMPLEMENT - SERVICE</div>
-                                <p className="text-sm leading-relaxed">根據上述設計寫出具體邏輯。請分開區塊輸出，且實作部分必須嚴格遵守設計階段的介面規範。</p>
+                                <div className="text-blue-200 font-bold uppercase tracking-tighter text-3xl opacity-50">03. IMPLEMENT</div>
+                                <div className="text-blue-100 font-bold text-lg">- Review(審核) & Test(測試)</div>
+                                <p className="text-sm leading-relaxed">要求 AI 「分批」實作並撰寫測試案例。而你轉為審核者 (Reviewer)，驗證「邏輯 Behavior」正確性與是否符合「架構 Structure」規範及最終測試結果。</p>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="bg-slate-50/50 rounded-3xl p-8 border border-slate-200/60 shadow-sm text-left">
-                        <h5 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-3">
-                            <Users size={24} className="text-indigo-500" />
-                            更完整的開發版圖
-                        </h5>
-                        <p className="text-slate-600 leading-relaxed text-left">
-                            雖然 AI 將開發手續轉化為「審核」與「設計」，但完美的軟體不僅僅是正確的代碼與架構。
-                            在 AI 輔助開發的體系中，本文強調了<b>架構師 (Architect) — 定義結構</b> 的角色，但請想想是否也需要 <b>需求分析師 (Requirement Analyst) — 定義範圍</b> 來釐清混亂且模糊的業務邏輯，
-                            以及 <b>UI/UX 設計師 — 定義體驗</b> 來定義產品的交互靈魂、視覺美感與使用者體驗。
-                            因為所有的技術實踐，最終目的都是為了更精準地解決「人」的問題。這些都等著你自己去嘗試，發掘屬於你的 AI 團隊。
-                        </p>
                     </div>
                 </div>
             </div>
