@@ -52,12 +52,12 @@ const CodeTab: React.FC = () => {
     `;
 
   return (
-    <div className="bg-white rounded-2xl p-8 border border-slate-200 min-h-[605px] text-left">
+    <div className="min-h-[605px] text-left animate-in fade-in duration-500">
       <style>{customStyles}</style>
-      <div className="w-full space-y-24 pb-24 text-base md:text-lg text-left">
+      <div className="w-full space-y-8 pb-24 text-base md:text-lg text-left">
 
         {/* 1. 封裝與可見性分析 */}
-        <section>
+        <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
           <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">1. 封裝與可見性分析 (Encapsulation)</h2>
           <div className="space-y-6 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
@@ -116,7 +116,7 @@ const CodeTab: React.FC = () => {
         </section>
 
         {/* 2. 抽象與介面概念 */}
-        <section>
+        <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
           <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">2. 抽象與共同屬性 (Abstraction)</h2>
           <div className="space-y-6 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
@@ -148,7 +148,7 @@ const CodeTab: React.FC = () => {
         </section>
 
         {/* 3. 擁有 vs 繼承 */}
-        <section>
+        <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
           <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">3. 擁有 vs 繼承 (Composition over Inheritance)</h2>
           <div className="space-y-6 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
@@ -178,7 +178,7 @@ const CodeTab: React.FC = () => {
         </section>
 
         {/* 4. 如何串連與使用 */}
-        <section>
+        <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
           <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">4. 模式的串連與使用 (Clean Architecture)</h2>
           <div className="space-y-8 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
@@ -364,7 +364,7 @@ const CodeTab: React.FC = () => {
         </section>
 
         {/* 5. 功能對照表 */}
-        <section>
+        <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
           <h2 className="text-xl font-black text-slate-800 mb-2 border-l-4 border-blue-600 pl-4 text-left">5. 類別設計 vs 傳統直覺</h2>
 
           {/* Tab Navigation: MacOS Dock Effect */}
@@ -466,7 +466,7 @@ const CodeTab: React.FC = () => {
 
         {/* 6. 結語 */}
         <section>
-          <div className="bg-gradient-to-br from-indigo-50 to-white p-10 rounded-3xl border border-indigo-100 shadow-lg text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-indigo-50 to-white p-10 rounded-2xl border border-indigo-100 shadow-lg text-center relative overflow-hidden">
             <h2 className="text-3xl font-black mb-8 text-slate-800 tracking-tight">
               為什麼軟體需要架構與學設計模式？
             </h2>

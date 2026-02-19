@@ -50,15 +50,13 @@ const DomainTab: React.FC = () => {
     const currentPattern = patterns.find(p => p.id === activeTab);
 
     return (
-        <div className="bg-white rounded-2xl p-8 border border-slate-200 text-left text-base">
-            <h2 className="text-xl font-black mb-6 flex items-center gap-2"><Layout className="text-blue-600" /> 設計模式：架構演進實戰地圖</h2>
-
+        <div className="text-left text-base animate-in fade-in duration-500">
             {/* Main Grid Layout: Mobile (1 col) -> Desktop (12 cols) */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
                 {/* Sidebar Navigation: Mobile (Full Width) -> Desktop (4 cols) */}
                 <div className="col-span-1 md:col-span-4">
-                    <div className="md:sticky md:top-6 overflow-hidden rounded-2xl border-2 border-slate-200">
+                    <div className="md:sticky md:top-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                         {patterns.map((pattern, index) => (
                             <div
                                 key={pattern.id}
@@ -85,7 +83,7 @@ const DomainTab: React.FC = () => {
 
                 {/* Content Area: Mobile (Full Width) -> Desktop (8 cols) */}
                 <div ref={contentRef} className="col-span-1 md:col-span-8">
-                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-full transition-all hover:shadow-md">
                         {currentPattern && (
                             <div>
                                 <h3 className="text-lg font-black text-slate-800 mb-4">{currentPattern.name} Pattern</h3>

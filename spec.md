@@ -3,6 +3,7 @@
 ## 1. 系統簡介與脈絡 (System Context)
 
 ### 1.1 系統目標
+
 本系統為一個基於 React 的檔案管理教學應用程式，主要目標是展示如何運用多種設計模式（Design Patterns）來解決複雜的軟體架構問題。系統模擬了真實檔案總管的核心行為，包括檔案/目錄的 CRUD、搜尋、排序、標籤管理、以及操作的復原與重做 (Undo/Redo)。
 
 ### 1.2 系統邊界 (System Context Diagram)
@@ -11,11 +12,9 @@
 graph TD
     User((使用者))
     FMS[檔案管理系統]
-    
     User -->|操作檔案/目錄| FMS
     User -->|檢視統計資訊| FMS
     User -->|執行 Undo/Redo| FMS
-    User -->|查看知識地圖| FMS
     FMS -->|即時監控數據| User
     FMS -->|Console Log| User
 ```
@@ -40,12 +39,12 @@ classDiagram
         +accept(visitor: BaseVisitor)
         +clone() EntryComponent
     }
-    
+  
     class FileLeaf {
         +accept(visitor: BaseVisitor)
         +clone() FileLeaf
     }
-    
+  
     class DirectoryComposite {
         -EntryComponent[] children
         -ISortStrategy activeStrategy
@@ -55,7 +54,7 @@ classDiagram
         +sort(strategy: ISortStrategy)
         +accept(visitor: BaseVisitor)
     }
-    
+  
     %% Concrete Files
     class WordDocument {
         +number pageCount
@@ -90,7 +89,7 @@ classDiagram
         +copyItem(id)
         +pasteItem(targetId) 
     }
-    
+  
     FileSystemFacade --> EntryComponent : manages
 ```
 
@@ -133,22 +132,22 @@ erDiagram
 
 ### 3.2 資料字典 (Data Dictionary)
 
-| Table Name | Column | Type | PK/FK | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| **Entries** | id | STRING | PK | 檔案或目錄的唯一識別碼 |
-| | parent_id | STRING | FK | 父目錄 ID (Root 為 null) |
-| | name | STRING | | 檔案名稱 |
-| | type | STRING | | 類型 (Directory, Word, Image, Text) |
-| | size | NUMBER | | 檔案大小 (KB) |
-| | created_at | DATETIME | | 建立時間 |
-| **EntryAttributes** | entry_id | STRING | PK, FK | 對應的 Entry ID (複合主鍵之一) |
-| | key | STRING | PK | 屬性名稱 (複合主鍵之二) |
-| | value | STRING | | 屬性值 |
-| **Tags** | id | STRING | PK | 標籤 ID |
-| | name | STRING | UK | 標籤名稱 (如 Urgent) |
-| | color | STRING | | 顯示顏色 |
-| **EntryTags** | entry_id | STRING | PK, FK | Entry ID (複合主鍵之一) |
-| | tag_id | STRING | PK, FK | Tag ID (複合主鍵之二) |
+| Table Name                | Column     | Type     | PK/FK  | Description                         |
+| :------------------------ | :--------- | :------- | :----- | :---------------------------------- |
+| **Entries**         | id         | STRING   | PK     | 檔案或目錄的唯一識別碼              |
+|                           | parent_id  | STRING   | FK     | 父目錄 ID (Root 為 null)            |
+|                           | name       | STRING   |        | 檔案名稱                            |
+|                           | type       | STRING   |        | 類型 (Directory, Word, Image, Text) |
+|                           | size       | NUMBER   |        | 檔案大小 (KB)                       |
+|                           | created_at | DATETIME |        | 建立時間                            |
+| **EntryAttributes** | entry_id   | STRING   | PK, FK | 對應的 Entry ID (複合主鍵之一)      |
+|                           | key        | STRING   | PK     | 屬性名稱 (複合主鍵之二)             |
+|                           | value      | STRING   |        | 屬性值                              |
+| **Tags**            | id         | STRING   | PK     | 標籤 ID                             |
+|                           | name       | STRING   | UK     | 標籤名稱 (如 Urgent)                |
+|                           | color      | STRING   |        | 顯示顏色                            |
+| **EntryTags**       | entry_id   | STRING   | PK, FK | Entry ID (複合主鍵之一)             |
+|                           | tag_id     | STRING   | PK, FK | Tag ID (複合主鍵之二)               |
 
 ## 4. 系統架構與設計 (Architecture & Design)
 
@@ -156,21 +155,20 @@ erDiagram
 
 遵循 Clean Architecture 原則，將系統分為四層：
 
-1.  **Frameworks & Drivers (External)**:
-    *   React Components (`ExplorerTab`, `App`)
-    *   Browser DOM / Console
-    *   Storage (Memory)
-2.  **Interface Adapters**:
-    *   `DashboardAdapter`: 將內部統計資料轉換為 UI 可用的格式。
-    *   `FileSystemFacade`: 提供簡易介面供 View 層呼叫。
-3.  **Application Business Rules (Use Cases)**:
-    *   `CommandInvoker`: 管理 Undo/Redo 流程。
-    *   Specific Commands (`CopyCommand`, `DeleteCommand`, `SortCommand`).
-    *   Visitors (`StatisticsVisitor`, `FileSearchVisitor`).
-    *   `MindMapGenerator`: 產生系統知識地圖。
-4.  **Enterprise Business Rules (Entities)**:
-    *   `EntryComponent`, `FileLeaf`, `DirectoryComposite`: 核心領域物件。
-    *   `Clipboard` (Singleton).
+1. **Frameworks & Drivers (External)**:
+   * React Components (`ExplorerTab`, `App`)
+   * Browser DOM / Console
+   * Storage (Memory)
+2. **Interface Adapters**:
+   * `DashboardAdapter`: 將內部統計資料轉換為 UI 可用的格式。
+   * `FileSystemFacade`: 提供簡易介面供 View 層呼叫。
+3. **Application Business Rules (Use Cases)**:
+   * `CommandInvoker`: 管理 Undo/Redo 流程。
+   * Specific Commands (`CopyCommand`, `DeleteCommand`, `SortCommand`).
+   * Visitors (`StatisticsVisitor`, `FileSearchVisitor`).
+4. **Enterprise Business Rules (Entities)**:
+   * `EntryComponent`, `FileLeaf`, `DirectoryComposite`: 核心領域物件。
+   * `Clipboard` (Singleton).
 
 ### 4.2 C4 Model - Container Diagram
 
@@ -178,25 +176,25 @@ erDiagram
 graph TB
     subgraph "Browser"
         UI[React UI Components]
-        
+      
         subgraph "Application Logic"
             Facade[FileSystem Facade]
             Commands[Command Pattern]
             Visitors[Visitor Pattern]
             Mediator[Tag Mediator]
         end
-        
+      
         subgraph "Domain Model"
             Composite[Composite Tree Structure]
             Entities[File/Directory Entities]
         end
     end
-    
+  
     UI -->|Calls| Facade
     Facade -->|Executes| Commands
     Facade -->|Uses| Visitors
     Facade -->|Delegates| Mediator
-    
+  
     Commands -->|Manipulates| Composite
     Visitors -->|Traverses| Composite
     Composite -->|Contains| Entities
@@ -224,7 +222,7 @@ sequenceDiagram
     Invoker->>Invoker: push(Cmd) to undoStack
     Invoker-->>Facade: (notify "executed")
     Facade-->>User: Update UI
-    
+  
     User->>Facade: undo()
     Facade->>Invoker: undo()
     Invoker->>Cmd: undo()
@@ -250,10 +248,10 @@ sequenceDiagram
     User->>Facade: searchFiles("keyword")
     Facade->>Visitor: result = new FileSearchVisitor("keyword")
     Facade->>Root: accept(visitor)
-    
+  
     Root->>Visitor: visitDirectory(this)
     Visitor->>Visitor: checkMatch(dir.name)
-    
+  
     loop For each child
         Root->>Child: accept(visitor)
         Child->>Visitor: visitFile(this)
@@ -263,7 +261,7 @@ sequenceDiagram
             Visitor-->>Facade: notify("progress")
         end
     end
-    
+  
     Facade->>User: cloudIds[]
 ```
 
@@ -274,23 +272,24 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Idle
-    
+  
     Idle --> HasHistory : Execute Command
     HasHistory --> HasHistory : Execute New Command (Clears Redo)
     HasHistory --> UndoAvailable : Undo Stack > 0
-    
+  
     state UndoAvailable {
         [*] --> CanUndo
         CanUndo --> CanRedo : Undo Action
         CanRedo --> CanUndo : Redo Action
     }
-    
+  
     UndoAvailable --> Idle : Undo Stack Empty
 ```
 
 ## 7. 程式規範與目錄結構
 
 ### 7.1 目錄結構
+
 依據 Clean Architecture 分層原則：
 
 - `src/components/`: **Interface Adapter / View**. UI 元件。
@@ -299,6 +298,7 @@ stateDiagram-v2
 - `src/assets/`: **Assets**. 靜態資源。
 
 ### 7.2 程式碼撰寫規範
+
 - **類別與變數命名**: 採用駝峰式命名 (camelCase/PascalCase)，類別名稱需明確表達其模式角色 (如 `DirectoryComposite`, `DeleteCommand`)。
 - **註解**: 所有公開介面 (Interface) 與類別 (Class) 必須包含 JSDoc 格式的中文註解。
 - **原則**: 嚴格遵守 SOLID 原則，特別是單一職責原則 (SRP) 與依賴反轉原則 (DIP)。

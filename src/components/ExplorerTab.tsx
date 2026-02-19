@@ -318,7 +318,7 @@ const ExplorerTab: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-2 ml-auto pl-4 border-l border-slate-200" title="所有操作皆封裝為物件 (Command Pattern)">
                             <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left">
-                                <Command size={18} className="text-purple-500" /> 命令模式 (Command)
+                                <Command size={18} className="text-purple-500" /> Command
                             </h3>
                         </div>
                     </div>
