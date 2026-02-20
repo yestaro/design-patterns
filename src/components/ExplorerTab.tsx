@@ -111,10 +111,12 @@ const ExplorerTab: React.FC = () => {
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [showRoadmap, setShowRoadmap] = useState(true);
 
-    // Console Auto-scroll
-    const consoleEndRef = useRef<HTMLDivElement>(null);
+    // Console Auto-scroll - Adjusted to scroll only the container, not the window
+    const consoleContainerRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (consoleContainerRef.current) {
+            consoleContainerRef.current.scrollTop = consoleContainerRef.current.scrollHeight;
+        }
     }, [visitorLogs, results]);
 
     const [history, setHistory] = useState({ canUndo: false, canRedo: false });
@@ -354,9 +356,9 @@ const ExplorerTab: React.FC = () => {
                 </div>
 
                 {/* 2. 操作與監控 (1/4) */}
-                <div className="col-span-1 md:col-span-1 flex flex-col gap-4 h-auto md:h-full overflow-hidden">
+                <div className="col-span-1 md:col-span-1 grid grid-cols-2 md:flex md:flex-col gap-4 h-auto md:h-full overflow-hidden">
                     {/* Visitor 操作 */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4 flex-none">
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-4 flex flex-col justify-start">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left" title="使用 Visitor 模式在不修改結構的情況下增加新功能 (Visitor Pattern)"><Zap className="text-green-600" size={18} /> 訪問者操作 (Visitor)</h3>
                         <div className="flex flex-col gap-2">
                             <button
@@ -415,7 +417,7 @@ const ExplorerTab: React.FC = () => {
                     </div>
 
                     {/* Observer 監控 */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4 flex-1 flex flex-col justify-center space-y-4 overflow-hidden min-h-[200px]">
+                    <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4 flex flex-col justify-center space-y-4 overflow-hidden min-h-[200px] h-full">
                         <h3 className="font-bold text-slate-800 flex items-center justify-between text-left" title="使用 Observer 模式即時更新監控數據 (Observer Pattern)"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-blue-500" /> 監控 (Observer)</div><span className="text-[10px] px-2 py-0.5 bg-blue-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
                         <div className="space-y-4 overflow-y-auto pr-1 dark-scrollbar">
                             <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
@@ -443,14 +445,16 @@ const ExplorerTab: React.FC = () => {
                     <div className="text-blue-400 mb-3 border-b border-slate-800 pb-2 text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-left">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse text-left"></div> Console
                     </div>
-                    <div className="flex-1 overflow-y-auto space-y-0.5 pr-2 dark-scrollbar text-left text-sm font-mono leading-tight">
+                    <div
+                        ref={consoleContainerRef}
+                        className="flex-1 overflow-y-auto space-y-0.5 pr-2 dark-scrollbar text-left text-sm font-mono leading-tight"
+                    >
                         {visitorLogs.map((log, i) => (
                             <div key={i} className="py-0.5 leading-snug border-b border-slate-800/40 text-slate-300">
                                 <span dangerouslySetInnerHTML={{ __html: log.message }} />
                             </div>
                         ))}
                         {results && <div className="mt-4 p-3 bg-blue-500/20 text-blue-200 rounded text-sm font-bold border border-blue-500/30 text-left">{results}</div>}
-                        <div ref={consoleEndRef} />
                     </div>
                 </div>
             </div>

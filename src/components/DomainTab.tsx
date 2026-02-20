@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Layout, Code } from 'lucide-react';
+import { Layout, Code, ArrowLeft } from 'lucide-react';
 import CodeBlock from './CodeBlock';
 import mermaid from 'mermaid';
 import { patterns } from '../data/patterns';
@@ -15,16 +15,56 @@ const DomainTab: React.FC = () => {
         });
     }, []);
 
-    const contentRef = useRef<HTMLDivElement>(null);
+    const [showMobileDetail, setShowMobileDetail] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        // RWD Scroll Logic
-        if (window.innerWidth < 768 && contentRef.current) {
-            // Mobile: Scroll to content
-            contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    const listScrollPos = useRef(0);
+    const hasEnteredDetail = useRef(false);
+
+    // Restore scroll position when returning to list view on mobile
+    useEffect(() => {
+        if (showMobileDetail) {
+            hasEnteredDetail.current = true;
+        } else if (hasEnteredDetail.current && isMobile) {
+            window.scrollTo({ top: listScrollPos.current, behavior: 'instant' });
+            hasEnteredDetail.current = false;
+        }
+    }, [showMobileDetail, isMobile]);
+
+    const isFirstRender = useRef(true);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
         } else {
-            // Desktop: Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Both Desktop and Mobile: Scroll to align with the top of the component
+            const yOffset = -100; // Offset for sticky header
+
+            if (isMobile) {
+                // Mobile: Only scroll if we are showing the detail view (slide-in)
+                if (showMobileDetail && contentRef.current) {
+                    const rect = contentRef.current.getBoundingClientRect();
+                    const targetY = Math.max(0, rect.top + window.scrollY + yOffset);
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                }
+            } else {
+                // Desktop: Scroll to the top of the entire DomainTab container
+                if (containerRef.current) {
+                    const rect = containerRef.current.getBoundingClientRect();
+                    const targetY = Math.max(0, rect.top + window.scrollY + yOffset);
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
+                }
+            }
         }
 
         requestAnimationFrame(async () => {
@@ -50,19 +90,25 @@ const DomainTab: React.FC = () => {
     const currentPattern = patterns.find(p => p.id === activeTab);
 
     return (
-        <div className="text-left text-base animate-in fade-in duration-500">
+        <div ref={containerRef} className="text-left text-base animate-in fade-in duration-500">
             {/* Main Grid Layout: Mobile (1 col) -> Desktop (12 cols) */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
                 {/* Sidebar Navigation: Mobile (Full Width) -> Desktop (4 cols) */}
-                <div className="col-span-1 md:col-span-4">
+                <div className={`col-span-1 md:col-span-4 ${isMobile && showMobileDetail ? 'hidden' : 'block'}`}>
                     <div className="md:sticky md:top-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                         {patterns.map((pattern, index) => (
                             <div
                                 key={pattern.id}
-                                onClick={() => setActiveTab(pattern.id)}
+                                onClick={() => {
+                                    if (isMobile) {
+                                        listScrollPos.current = window.scrollY;
+                                        setShowMobileDetail(true);
+                                    }
+                                    setActiveTab(pattern.id);
+                                }}
                                 className={`p-4 cursor-pointer transition-all ${activeTab === pattern.id
-                                    ? 'bg-blue-600 text-white border-l-4 border-l-blue-800'
+                                    ? 'bg-blue-600 text-white'
                                     : 'bg-white hover:bg-blue-50'
                                     } ${index !== patterns.length - 1 ? 'border-b border-slate-200' : ''}`}
                             >
@@ -81,9 +127,23 @@ const DomainTab: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Content Area: Mobile (Full Width) -> Desktop (8 cols) */}
-                <div ref={contentRef} className="col-span-1 md:col-span-8">
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-full transition-all hover:shadow-md">
+                {/* Content Area: Mobile (Slide-in) -> Desktop (8 cols) */}
+                <div ref={contentRef} className={`col-span-1 md:col-span-8 ${isMobile && !showMobileDetail ? 'hidden' : 'block'} ${isMobile ? 'animate-in slide-in-from-right duration-300' : ''}`}>
+
+                    {/* Mobile Back Button - Floating Bottom Right */}
+                    {isMobile && (
+                        <button
+                            onClick={() => {
+                                setShowMobileDetail(false);
+                            }}
+                            className="fixed bottom-6 right-6 z-50 p-3 bg-blue-600/90 text-white rounded-full shadow-lg backdrop-blur-sm active:scale-90 transition-all hover:bg-blue-700"
+                            title="返回列表"
+                        >
+                            <ArrowLeft size={24} />
+                        </button>
+                    )}
+
+                    <div className={`${isMobile ? '' : 'bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-full transition-all hover:shadow-md'}`}>
                         {currentPattern && (
                             <div>
                                 <h3 className="text-lg font-black text-slate-800 mb-4">{currentPattern.name} Pattern</h3>

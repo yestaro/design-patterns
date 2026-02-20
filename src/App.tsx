@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Network, Code, Layout, Database, Sparkles,
 } from 'lucide-react';
@@ -11,6 +11,51 @@ import ReflectionTab from './components/ReflectionTab';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('explorer');
+  const navAnchorRef = useRef<HTMLDivElement>(null);
+  const scrollIntentRef = useRef<'sticky' | 'top' | null>(null);
+
+  const handleTabClick = (tabId: string) => {
+    if (navAnchorRef.current) {
+      const rect = navAnchorRef.current.getBoundingClientRect();
+      const anchorY = rect.top + window.scrollY;
+      const yThreshold = anchorY - 16; // 16px is sticky offset
+
+      // Determine user's scroll position BEFORE activeTab state updates
+      // Add a small (-2px) tolerance because if it's already sticky, 
+      // window.scrollY will often exactly equal yThreshold or be off by a fraction of a pixel.
+      if (window.scrollY >= yThreshold - 2) {
+        scrollIntentRef.current = 'sticky';
+      } else {
+        scrollIntentRef.current = 'top';
+      }
+    }
+    setActiveTab(tabId);
+  };
+
+  // Scroll logic when active tab changes
+  useEffect(() => {
+    if (!navAnchorRef.current || !scrollIntentRef.current) return;
+
+    // Calculate dynamic threshold
+    const rect = navAnchorRef.current.getBoundingClientRect();
+    const anchorY = rect.top + window.scrollY;
+    const yThreshold = anchorY - 16;
+
+    const targetScroll = scrollIntentRef.current === 'sticky' ? yThreshold : 0;
+
+    // Immediately try to scroll
+    window.scrollTo({ top: targetScroll, behavior: 'instant' });
+
+    // Also apply it slightly after render to counter any height computations or mermaid renders
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: targetScroll, behavior: 'instant' });
+    }, 10);
+
+    // Reset intent
+    scrollIntentRef.current = null;
+
+    return () => clearTimeout(timer);
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-[#F5F5F7] text-[#1d1d1f] font-sans selection:bg-blue-100 selection:text-blue-900 transition-colors duration-500">
@@ -39,6 +84,9 @@ const App: React.FC = () => {
           </div>
         </header>
 
+        {/* Anchor for dynamic scroll threshold calculation */}
+        <div ref={navAnchorRef} aria-hidden="true" />
+
         {/* Floating Dock Navigation - Updated Style */}
         <div className="flex justify-center mb-8 sticky top-4 z-50">
           <div className="flex w-full justify-between p-2 bg-white/70 backdrop-blur-2xl rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 ring-1 ring-black/5">
@@ -51,7 +99,7 @@ const App: React.FC = () => {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabClick(tab.id)}
                 className={`
                   flex-1 justify-center relative px-4 py-3 rounded-full text-base font-bold transition-all duration-300 ease-out flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                   ${activeTab === tab.id
@@ -60,7 +108,7 @@ const App: React.FC = () => {
                 `}
               >
                 <tab.i size={20} className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 text-white' : 'group-hover:scale-110'}`} />
-                <span className={`${activeTab === tab.id ? 'opacity-100' : 'hidden sm:inline opacity-70'}`}>{tab.l}</span>
+                <span className={`hidden md:inline ${activeTab === tab.id ? 'opacity-100' : 'opacity-70'}`}>{tab.l}</span>
               </button>
             ))}
           </div>
@@ -68,7 +116,7 @@ const App: React.FC = () => {
 
         {/* Content Area - Bento Layout Container */}
         <main className="transition-all duration-500 ease-in-out transform">
-          <div className="min-h-[600px] animate-in slide-in-from-bottom-4 duration-700 fade-in fill-mode-backwards">
+          <div className="min-h-screen animate-in slide-in-from-bottom-4 duration-700 fade-in fill-mode-backwards">
             {activeTab === 'explorer' && <ExplorerTab />}
             {activeTab === 'domain' && <DomainTab />}
             {activeTab === 'er' && <ERTab />}

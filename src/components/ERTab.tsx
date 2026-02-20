@@ -154,7 +154,7 @@ const ERTab: React.FC = () => {
                     {/* Row 2: EntryTags & Tags */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><TableProperties size={14} /> 4. EntryTags (Mediator) 實例</p>
+                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><TableProperties size={14} /> 3. EntryTags (Mediator) 實例</p>
                             <div className="overflow-x-auto rounded-xl border border-rose-200 shadow-sm">
                                 <table className="w-full text-sm text-slate-700">
                                     <thead className="bg-rose-50 border-b border-rose-100 text-left">
@@ -169,7 +169,7 @@ const ERTab: React.FC = () => {
                         </div>
 
                         <div className="space-y-3">
-                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><Layers size={14} /> 3. Tags (Flyweight) 實例</p>
+                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><Layers size={14} /> 4. Tags (Flyweight) 實例</p>
                             <div className="overflow-x-auto rounded-xl border border-emerald-200 shadow-sm">
                                 <table className="w-full text-sm text-slate-700">
                                     <thead className="bg-emerald-50 border-b border-emerald-100 text-left">
