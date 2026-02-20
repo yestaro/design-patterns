@@ -137,7 +137,7 @@ const CodeTab: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <div className="bg-indigo-600 text-white p-8 rounded-3xl shadow-xl flex flex-col justify-center text-left">
+              <div className="bg-indigo-600 text-white p-8 rounded-2xl shadow-xl flex flex-col justify-center text-left">
                 <h4 className="font-black text-xl mb-4 flex items-center gap-2 text-left"><Layers2 size={24} /> 抽象的教學價值</h4>
                 <p className="italic leading-loose text-left">
                   「掌握了 EntryComponent 的 accept 介面，你就掌握了整棵樹。遞迴邏輯會自動處理對象，不需再寫判斷類型。往後的功能擴充，都只需要新增 Visitor，不需要修改既有的樹結構。」
@@ -263,7 +263,7 @@ const CodeTab: React.FC = () => {
               <div className="space-y-4 text-left flex flex-col h-full">
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Layers2 size={18} /> 1. 模式組合 (Composition)</h5>
                 <p className="text-base text-slate-500 text-left flex-grow">
-                  各個模式像積木一樣組合，內部都「持有」了其他模式來完成任務：
+                  各個模式像積木一樣組合，內部都「持有」其他的模式
                 </p>
                 <div className="bg-slate-900 p-5 rounded-xl text-xs lg:text-sm font-mono text-slate-300 border border-slate-700 text-left h-full overflow-hidden">
                   <span className="text-blue-400">class</span> FileSearchVisitor <span className="text-blue-400">implements</span> IVisitor &#123;<br />
@@ -284,7 +284,7 @@ const CodeTab: React.FC = () => {
               <div className="space-y-4 text-left flex flex-col h-full">
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Share2 size={18} /> 2. 注入與掛載 (Injection)</h5>
                 <p className="text-base text-slate-500 text-left flex-grow">
-                  透過掛載或注入 (Inject) 不同的策略物件，提供更靈活的行為：
+                  透過掛載或注入不同的策略物件，提供更靈活的行為
                 </p>
                 <div className="bg-slate-900 p-5 rounded-xl text-xs lg:text-sm font-mono text-slate-300 border border-slate-700 text-left h-full overflow-hidden">
                   <span className="text-gray-500">// 掛載觀察者 (Observer)</span><br />
@@ -299,7 +299,7 @@ const CodeTab: React.FC = () => {
 
               <div className="space-y-4 text-left flex flex-col h-full">
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Play size={18} /> 3. 觸發執行 (Execution)</h5>
-                <p className="text-base text-slate-500 text-left flex-grow">執行操作的入口點因不同的行為角色，而有所不同：</p>
+                <p className="text-base text-slate-500 text-left flex-grow">執行操作的入口點因不同的行為角色，而有所不同</p>
                 <div className="bg-slate-900 p-5 rounded-xl text-xs lg:text-sm font-mono text-slate-300 border border-slate-700 text-left h-full overflow-hidden">
                   <span className="text-gray-500">// Visitor (唯讀分析)</span><br />
                   root.<span className="text-pink-400">accept</span>(visitor);<br />

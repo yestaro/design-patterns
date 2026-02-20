@@ -443,12 +443,42 @@ const ExplorerTab: React.FC = () => {
                 {/* 3. Console (1/4) */}
                 <div className="col-span-1 md:col-span-1 bg-slate-900 rounded-2xl p-4 flex flex-col shadow-inner border border-slate-800 overflow-hidden h-[300px] md:h-full">
                     <div className="text-blue-400 mb-3 border-b border-slate-800 pb-2 text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-left">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse text-left"></div> Console
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse text-left"></div> Console
                     </div>
                     <div
                         ref={consoleContainerRef}
                         className="flex-1 overflow-y-auto space-y-0.5 pr-2 dark-scrollbar text-left text-sm font-mono leading-tight"
                     >
+                        {visitorLogs.length === 0 && !results && (
+                            <div className="space-y-3 py-2">
+                                {/* Deckard Cain 經典台詞 — 彩蛋 */}
+                                <p className="text-[#C7B377] font-bold text-base tracking-wide" style={{ textShadow: '0 0 8px rgba(199,179,119,0.4)' }}>
+                                    {'>'} Stay a while and listen..._
+                                </p>
+
+                                <p className="text-slate-500">
+                                    進入「檔案總管」多種設計模式的協作情境
+                                </p>
+
+                                <div className="space-y-2.5 text-sm">
+                                    <div className="space-y-1">
+                                        <p className="text-blue-300 font-bold">📂 檔案總管</p>
+                                        <p className="text-slate-500 pl-4">• 點擊節點選取檔案或目錄</p>
+                                        <p className="text-slate-500 pl-4">• 選取後可複製 / 貼上 / 刪除</p>
+                                        <p className="text-slate-500 pl-4">• 工具列可依名稱 / 大小 / 類型排序</p>
+                                        <p className="text-slate-500 pl-4">• 點擊標籤，為選取的檔案加上標籤</p>
+                                        <p className="text-slate-500 pl-4">• 支援 Undo / Redo 操作還原</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-green-500 font-bold">⚡ 操作與觀察</p>
+                                        <p className="text-slate-500 pl-4">• 計算大小 / 匯出 XML / 搜尋</p>
+                                        <p className="text-slate-500 pl-4">• 操作結果會即時顯示於此</p>
+                                    </div>
+                                </div>
+
+                                <p className="text-slate-600 text-sm pt-1">試試任意操作，Console 將記錄每步驟...</p>
+                            </div>
+                        )}
                         {visitorLogs.map((log, i) => (
                             <div key={i} className="py-0.5 leading-snug border-b border-slate-800/40 text-slate-300">
                                 <span dangerouslySetInnerHTML={{ __html: log.message }} />

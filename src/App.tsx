@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Network, Code, Layout, Database, Sparkles,
+  Network, Code, Layout, Database, Sparkles, ChessKnight,
 } from 'lucide-react';
 
 import ExplorerTab from './components/ExplorerTab';
@@ -78,9 +78,9 @@ const App: React.FC = () => {
 
             {/* Right: Version + Subtitle group */}
             <div className="flex flex-col items-center md:items-start gap-3">
-              <span className="text-sm uppercase tracking-widest font-bold text-blue-600">v3000 @2026 丙午．春</span>
+              <span className="text-sm uppercase tracking-widest font-bold text-blue-600 inline-flex items-center gap-1">@2026 <ChessKnight size={16} /> 丙午．春．v3000</span>
               <p className="text-sm md:text-base text-[#86868b] font-medium leading-relaxed text-center md:text-left whitespace-nowrap">
-                從 if - else 到抽象、封裝與介面，以架構思維實踐高品質程式碼
+                走出 if - else 的混亂，你需要的是設計思維
               </p>
             </div>
           </div>
@@ -117,8 +117,8 @@ const App: React.FC = () => {
         </div>
 
         {/* Content Area - Bento Layout Container */}
-        <main className="transition-all duration-500 ease-in-out transform">
-          <div className="min-h-screen animate-in slide-in-from-bottom-4 duration-700 fade-in fill-mode-backwards">
+        <main className="transition-all duration-500 ease-in-out">
+          <div className="min-h-[83vh] animate-in slide-in-from-bottom-4 duration-700 fade-in fill-mode-backwards">
             {activeTab === 'explorer' && <ExplorerTab />}
             {activeTab === 'domain' && <DomainTab />}
             {activeTab === 'er' && <ERTab />}

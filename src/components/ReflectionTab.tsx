@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    Lightbulb, Sparkles, Brain, Scale, Globe, ChevronDown, HelpCircle, Users, X, FileText, Copy, Check, Coffee
+    Lightbulb, Sparkles, Brain, Scale, Globe, ChevronDown, HelpCircle, X, FileText, Code, Copy, Check, Coffee, ArrowRightLeft
 } from 'lucide-react';
 import CodeBlock from './CodeBlock';
 
@@ -202,16 +202,16 @@ const ReflectionTab: React.FC = () => {
                 </div>
                 <div className="relative z-10 text-left">
                     <h2 className="text-3xl font-black text-slate-800 mb-4 flex items-center gap-3">
-                        <span className="bg-amber-500 text-white p-2 rounded-lg"><Sparkles size={24} /></span>
+                        <span className="bg-amber-500 text-white p-2 rounded-lg"><ArrowRightLeft size={24} /></span>
                         從 Class 到 雲端架構：抽象思維的可攜性
                     </h2>
                     <p className="text-lg text-slate-600 leading-relaxed">
                         設計的核心，始終圍繞著<b>「邊界 (Boundaries)、合約 (Contracts) 與 職責 (Responsibilities)」</b>。
                         無論是程式設計、服務提供或系統整合（Class &rarr; Service &rarr; System），<b>「高內聚、低偶合」、「依賴抽象不依賴實作」</b> 的原則永遠不變。
-                        學會這些通則，等於掌握了本質設計思路，不再卡在技術棧的細節上<i>if, else, CRUD...</i>。
+                        學會這些通則，等於掌握了思路本質，不再卡在技術細節<i>if, else, CRUD...</i>上。
                     </p>
 
-                    <ul className="mt-8 space-y-6 text-slate-700 p-6 rounded-xl border border-amber-100/50">
+                    <ul className="mt-4 space-y-6 text-slate-700 p-6 rounded-xl border border-amber-100/50">
                         <li className="flex gap-4">
                             <div className="mt-1 min-w-[6px] h-[6px] rounded-full relative top-2" />
                             <div>
@@ -252,7 +252,7 @@ const ReflectionTab: React.FC = () => {
                 {/* 1. 微觀層次：Class 設計 */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-left group">
                     <div className="mb-4 bg-blue-100 w-12 h-12 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                        <Brain size={24} />
+                        <Code size={24} />
                     </div>
                     <h3 className="text-xl font-bold text-slate-800 mb-3">1. 微觀層次：Class 內部的職責與解耦</h3>
                     <p className="text-slate-600 leading-relaxed text-sm">
@@ -294,6 +294,7 @@ const ReflectionTab: React.FC = () => {
             <div className="mt-16 mb-8 border-t border-slate-200 pt-12 text-left">
                 <div className="space-y-4">
                     <h2 className="text-2xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 flex items-center gap-3">
+                        <Brain size={24} />
                         動動腦反思，我真的懂了嗎
                     </h2>
 
@@ -313,6 +314,75 @@ const ReflectionTab: React.FC = () => {
                             <li>移除 <code>add/remove</code> &rarr; 「目錄」這個概念就崩塌了 &rarr; 這就是<strong>本質 (Keep in Class)</strong>。</li>
                             <li>移除 <code>exportXml</code> &rarr; 「目錄」還是「目錄」，只不過不能匯出而已 &rarr; 這是<strong>插件 (Use Visitor)</strong>。</li>
                         </ul>
+
+                        <div className="mt-6 bg-gradient-to-r from-violet-50 to-blue-50 p-6 rounded-xl border border-violet-200">
+                            <h4 className="text-lg font-bold text-violet-800 mb-4 flex items-center gap-2">
+                                現代語言，還需要 Visitor 介面嗎？
+                            </h4>
+                            <p className="text-slate-600 mb-4">
+                                Visitor 模式要解的問題（<b>在不修改結構的前提下新增操作</b>）沒有消失，但現代語言的表達力讓你<b>不再需要 <code>accept / visit</code> 的雙分派儀式</b>。
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+                                <div>
+                                    <strong className="block text-blue-700 mb-2">TypeScript — 需要套件輔助</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        TypeScript 原生支援 <b>Discriminated Union</b>（<code>type.kind</code> 區分）與 <code>switch</code> 型別收窄，但<b>不提供 exhaustive check</b>（遺漏分支時不會編譯錯誤）。
+                                    </p>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        社群套件 <code className="bg-blue-100 px-1 rounded">ts-pattern</code> 補足了這點：提供 <code>.exhaustive()</code> 確保所有 case 都被處理。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="typescript" code={`// Discriminated Union
+type Entry =
+  | { kind: 'file'; name: string; size: number }
+  | { kind: 'dir';  name: string; children: Entry[] };
+
+// ts-pattern：exhaustive matching
+import { match } from 'ts-pattern';
+
+const calcSize = (e: Entry): number =>
+  match(e)
+    .with({ kind: 'file' }, f => f.size)
+    .with({ kind: 'dir' },  d =>
+      d.children.reduce((s, c) => s + calcSize(c), 0))
+    .exhaustive(); // 少寫一個 case 就編譯失敗`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ⚠️ TC39 的 <code>match</code> 提案仍在 Stage 1，原生 Pattern Matching 尚未進入 ECMAScript 標準。
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <strong className="block text-purple-700 mb-2">C# — 原生完整支援</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        C# 從 7.0 開始引入 Pattern Matching，到 C# 12/13 已非常成熟。搭配 <code>abstract record</code> + <code>sealed</code> 階層，編譯器會在 <code>switch expression</code> 中<b>自動檢查是否遺漏分支</b>。
+                                    </p>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        <b>不需要任何第三方套件</b>，語言原生即可完全取代 Visitor 的雙分派。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="csharp" code={`// sealed 階層 + record
+public abstract record Entry(string Name);
+public sealed record File(string Name, int Size)
+  : Entry(Name);
+public sealed record Dir(string Name, Entry[] Children)
+  : Entry(Name);
+
+// Switch Expression — 原生 exhaustive
+public static int CalcSize(Entry e) => e switch
+{
+    File f => f.Size,
+    Dir  d => d.Children.Sum(c => CalcSize(c)),
+    // 少寫一個 case → CS8509 編譯警告
+};`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ✅ C# 8+ switch expression + sealed hierarchy = 編譯器保證 exhaustive。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </ReflectionItem>
 
                     <ReflectionItem
@@ -323,33 +393,244 @@ const ReflectionTab: React.FC = () => {
                         <ul className="list-disc pl-5 space-y-2">
                             <li>
                                 淺拷貝 (Shallow Copy)：
-                                只複製第一層屬性。如果有巢狀物件 (如 Directory 下的 children 陣列)，複製出來的新目錄，裡面的 children 還是指向舊的那群檔案。（相互影響）
+                                只複製第一層屬性。如果有巢狀物件 (如 Directory 下的 children 陣列)，複製的新目錄，其裡面 children 還是指向舊的。（相互影響）
                             </li>
                             <li>
                                 深拷貝 (Deep Copy)：
-                                遞迴複製所有層級。我們的 <code>DirectoryComposite</code> 必須實作深拷貝，這樣「複製貼上」出來的檔案樹，才是完全獨立的副本，互不影響。
-                            </li>
-                            <li>
-                                <span className="text-blue-600">實務上</span>，我們很少自己寫 clone，因屬性一多就容易漏改。為避免維護地獄，通常依賴套件來代勞
-                                <div className="bg-slate-100/50 p-4 rounded-xl border border-slate-200">
-                                    <strong className="text-slate-800 block mb-2 text-sm">🧰 語言實作大補帖 (Deep Copy in Practice)</strong>
-                                    <dl className="list-none space-y-3 text-sm">
-                                        <dt className="font-bold text-indigo-600 block">C# 的世界</dt>
-                                        <dd>
-                                            原生標準做法是實作 <code>ICloneable</code> 介面，但實務上常使用 <code>BinaryFormatter</code> 來暴力達成。✨ 推薦套件：AutoMapper, DeepCloner
-                                        </dd>
-                                        <dt className="font-bold text-blue-600 block">TypeScript 的世界：</dt>
-                                        <dd>
-                                            以往常用 <code>JSON.parse(JSON.stringify(obj))</code> 偷吃步，但會遺失方法與型別。現代瀏覽器已支援 <code>structuredClone()</code>。✨ 推薦套件：Lodash (.cloneDeep), class-transformer, Immer
-                                        </dd>
-                                    </dl>
-                                </div>
+                                遞迴複製所有層級。<code>DirectoryComposite</code> 必須實作深拷貝，這樣「複製貼上」出來的結果，才是完全獨立的副本，互不影響。
                             </li>
                         </ul>
+
+                        <div className="mt-6 bg-gradient-to-r from-violet-50 to-blue-50 p-6 rounded-xl border border-violet-200">
+                            <h4 className="text-lg font-bold text-violet-800 mb-4 flex items-center gap-2">
+                                現代語言，還需要自己實作 clone 嗎？
+                            </h4>
+                            <p className="text-slate-600 mb-4">
+                                Prototype 要解的問題（<b>基於現有物件快速複製出獨立副本</b>）沒有消失，但現代語言已提供<b>原生機制</b>來處理深拷貝與不可變性。
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+                                <div>
+                                    <strong className="block text-blue-700 mb-2">TypeScript — 原生 + 套件互補</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        瀏覽器與 Node.js 已原生支援 <code className="bg-blue-100 px-1 rounded">structuredClone()</code>，可對純資料物件進行深拷貝。但它<b>無法複製 class instance 的方法與原型鏈</b>。
+                                    </p>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        若需要不可變性管理，<code className="bg-blue-100 px-1 rounded">Immer</code> 是主流方案：用 mutable 語法產出副本。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="typescript" code={`// 1. structuredClone — 原生深拷貝（純資料）
+const original = { name: 'docs', children: [{ name: 'a.txt' }] };
+const copy = structuredClone(original);
+copy.children[0].name = 'b.txt'; // 不影響 original ✅
+
+// 2. Immer — 不可變更新（適合前端 state 管理）
+import { produce } from 'immer';
+
+const nextState = produce(currentState, draft => {
+  draft.files.push({ name: 'new.txt' }); // 用 mutable 語法
+}); // 自動產出全新的 immutable 物件`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ⚠️ <code>structuredClone</code> 不支援 Function、DOM、class prototype。有 class 繼承的場景仍需手寫或用 <code>class-transformer</code>。
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <strong className="block text-purple-700 mb-2">C# — 原生完整支援</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        C# 9+ 的 <code>record</code> 型別天生 immutable，搭配 <code className="bg-purple-100 px-1 rounded">with</code> 表達式即可產生「修改部分屬性的全新副本」，完全不需手寫 clone。
+                                    </p>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        <b>不需要任何第三方套件</b>，編譯器自動生成值比較 (Value Equality) 與複製邏輯。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="csharp" code={`// record：天生 immutable + 自動 clone
+public record FileEntry(string Name, int Size, string Date);
+
+var original = new FileEntry("報告.docx", 500, "2026-01-01");
+// with 表達式 — 修改部分屬性，產出全新副本
+var copy = original with { Name = "報告_副本.docx" };
+// original.Name 仍是 "報告.docx" ✅ copy 是完全獨立的新物件 ✅
+// 巢狀結構：搭配 record + ImmutableArray
+public record Directory(
+    string Name,
+    ImmutableArray<FileEntry> Children);`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ✅ <code>record</code> + <code>with</code> = 語言原生的 Prototype 模式，零樣板代碼。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </ReflectionItem>
+
+
+                    <ReflectionItem
+                        title="3. 關於 Decorator (裝飾者模式)"
+                        question="範列的 Decorator 只是將 if 判斷關鍵字，然後輸出 style 包裝起來，值得為了這個多設計 class 嗎？"
+                    >
+                        這取決於「複雜度」與「組合性」。
+                        <ul className="list-disc pl-5 mt-1 space-y-1">
+                            <li><strong>簡單場景：</strong>如果只有一種變化（例如：錯誤變紅色），if-else 絕對是首選 (KISS 原則)。寫 Class 是過度設計。</li>
+                            <li><strong>組合爆炸 (Combinatorial Explosion)：</strong>當需求變成「N 種圖標」×「M 種顏色」×「K 種樣式」時，if-else 會變成恐怖的巢狀地獄。Decorator 讓你像積木一樣<span className="text-blue-600 font-bold">動態組合</span>這些維度，且完全符合 OCP (新增樣式不需修改舊程式碼)。</li>
+                        </ul>
+
+                        <div className="mt-6 bg-gradient-to-r from-violet-50 to-blue-50 p-6 rounded-xl border border-violet-200">
+                            <h4 className="text-lg font-bold text-violet-800 mb-4 flex items-center gap-2">
+                                現代語言中，Decorator 就是 AOP
+                            </h4>
+                            <p className="text-slate-600 mb-4">
+                                Decorator 模式的本質是<b>「在不改原始邏輯的情況下，橫切插入額外行為」</b>。這跟 <b>AOP (Aspect-Oriented Programming)</b> 的理念完全一致：Log、認證、快取、重試⋯⋯都是「橫切關注點 (Cross-cutting Concerns)」。
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+                                <div>
+                                    <strong className="block text-blue-700 mb-2">TypeScript — 原生 Decorator（Stage 3）</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        TC39 Decorator 提案已進入 Stage 3，TypeScript 5.0+ 原生支援。不需要額外套件，直接用 <code>@decorator</code> 語法修飾 class / method。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="typescript" code={`// 原生 @decorator — 自動加上 Log
+function Log(target: any, context: ClassMethodDecoratorContext) {
+  return function (...args: any[]) {
+    console.log(\`[\${String(context.name)}] called\`);
+    return target.apply(this, args);
+  };
+}
+
+class FileService {
+  @Log  // AOP: 橫切插入，不改原始邏輯
+  search(keyword: string) { /* ... */ }
+  @Log
+  export(format: string) { /* ... */ }
+}`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ✅ TS 5.0+ 原生支援。NestJS 的 <code>@Guard</code>、<code>@Interceptor</code>、Angular 的 <code>@Component</code> 都是 Decorator + AOP。
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <strong className="block text-purple-700 mb-2">C# — Middleware + Attribute（原生）</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        C# / .NET 用 <b>Middleware Pipeline</b> 實現 AOP：每個 Middleware 就是一層 Decorator，依序包裹 Request，形成「洋蔥模型」。另可用 <code>[Attribute]</code> 標注。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="csharp" code={`// ASP.NET Middleware — Decorator 的洋蔥模型
+app.Use(async (context, next) =>
+{
+    // Before: 計時開始
+    var sw = Stopwatch.StartNew();
+    await next();  // 呼叫下一層（核心邏輯）
+    // After: 記錄耗時
+    Log(\$"{context.Request.Path} took {sw.ElapsedMilliseconds}ms");
+});
+
+// 或用 Attribute 標注 AOP
+[Authorize]   // 認證 Decorator
+[Cache(60)]   // 快取 Decorator
+public IActionResult GetData() => Ok(data);`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ✅ .NET 原生。Spring 的 <code>@Transactional</code>、Python 的 <code>@app.route</code> 也都是同一思路。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="3. 關於 Facade (外觀模式)"
+                        title="4. 關於 Strategy (策略模式)"
+                        question="為什麼我不傳 string/enum 進去用 if/else 就好，要大費周章寫 Strategy Class 再傳進去？"
+                    >
+                        核心差異在於「誰來承擔演算法的負擔」
+                        <ul className="list-disc pl-5 mt-2 space-y-3">
+                            <li>
+                                <strong>傳參數 (由 DirectoryComposite 自己實作)：</strong>
+                                核心類別必須「學會」每一種排序法。如果按標籤排序需要 <code>TagMediator</code>，那 <code>Directory</code> 就得被迫依賴它。規則愈多，<code>Directory</code> 愈臃腫。
+                            </li>
+                            <li>
+                                <strong>傳策略 (由 Strategy Class 實作)：</strong>
+                                <code>Directory</code> 只需要知道 <code>strategy.sort()</code>。演算法與它所需的外部依賴（如 Mediator）都被封裝在策略物件裡。核心類別保持乾淨，像外包可隨時抽換。
+                            </li>
+                        </ul>
+
+                        <div className="mt-6 bg-gradient-to-r from-violet-50 to-blue-50 p-6 rounded-xl border border-violet-200">
+                            <h4 className="text-lg font-bold text-violet-800 mb-4 flex items-center gap-2">
+                                現代語言中，Strategy 就是 Delegate / Lambda
+                            </h4>
+                            <p className="text-slate-600 mb-4">
+                                傳統 Strategy 用 <b>interface + class</b> 來封裝演算法，但現代語言支援<b>一級函式 (First-class Functions)</b>後，一個 lambda / delegate 就能取代整個 Strategy class。本質沒變：<b>「把演算法當參數傳入」</b>。
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+                                <div>
+                                    <strong className="block text-blue-700 mb-2">TypeScript — 高階函式（原生）</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        TypeScript 的 function 本身就是一級公民，直接傳入 <code>(a, b) =&gt; ...</code> 即可，不需要定義 interface 或 class。<code>Array.sort()</code> 本身就是 Strategy 模式的典型應用。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="typescript" code={`// Strategy = 一個 function type
+type SortStrategy<T> = (a: T, b: T) => number;
+
+// 不需要 interface + class，直接傳 lambda
+function sortEntries(entries: Entry[], strategy: SortStrategy<Entry>) {
+  return [...entries].sort(strategy);
+}
+
+// 使用時：策略就是一行 lambda
+sortEntries(files, (a, b) => a.name.localeCompare(b.name));
+sortEntries(files, (a, b) => a.size - b.size);
+
+// 複雜策略需要外部依賴？用閉包封裝
+const byLabel = (mediator: TagMediator): SortStrategy<Entry> =>
+  (a, b) => mediator.getTag(a.id).localeCompare(mediator.getTag(b.id));`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ✅ 原生支援。Angular 的 <code>pipe()</code> operator、RxJS 的 <code>switchMap</code> 都是 Strategy。
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <strong className="block text-purple-700 mb-2">C# — Func / Action / Delegate（原生）</strong>
+                                    <p className="text-sm text-slate-600 mb-3">
+                                        C# 用 <code className="bg-purple-100 px-1 rounded">Func&lt;T, TResult&gt;</code> 或 <code className="bg-purple-100 px-1 rounded">delegate</code> 取代 Strategy interface。LINQ 的每個方法（<code>.Where()</code>、<code>.OrderBy()</code>）都是接收 delegate 的 Strategy。
+                                    </p>
+                                    <div className="bg-slate-900 rounded-lg p-3 text-sm font-mono text-slate-300 overflow-x-auto">
+                                        <CodeBlock language="csharp" code={`// Strategy = Func<T, T, int> delegate
+public void Sort(List<Entry> entries, Comparison<Entry> strategy)
+{
+    entries.Sort(strategy);  // 傳入的 delegate 就是策略
+}
+
+// 使用時：lambda 就是策略
+Sort(files, (a, b) => a.Name.CompareTo(b.Name));
+Sort(files, (a, b) => a.Size - b.Size);
+
+// LINQ 本身就是 Strategy 的極致應用
+var result = files
+    .Where(f => f.Size > 100)           // 過濾策略
+    .OrderBy(f => f.Name)               // 排序策略
+    .Select(f => f.Name.ToUpper());     // 轉換策略`} />
+                                    </div>
+                                    <p className="text-sm mt-2">
+                                        ✅ C# 原生。<code>Func&lt;&gt;</code> / <code>Action&lt;&gt;</code> / <code>delegate</code> 讓你完全不需寫 Strategy class。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </ReflectionItem>
+
+                    <ReflectionItem
+                        title="5. 關於 Flyweight (享元模式)"
+                        question="我們說 LabelFactory 是為了享元 (Flyweight) 控制記憶體，但如果新來的同事直接 new Label('Urgent')，是不是你的 Flyweight 就失效了？"
+                    >
+                        你有想過，要把 Label 的 Constructor 變成私有的嗎 (private or internal)？禁止直接 new？架構不能只靠口頭約束，要有機制強制執行。
+                    </ReflectionItem>
+
+                    <ReflectionItem
+                        title="6. 關於 Facade (外觀模式)"
                         question="我在 UI 上，有事件的 function (例如：按鈕事件 onSearch, onCopy, onXmlExport) 對應 Visitor, Command 的使用，為什麼還需要獨立的 Facade Class？"
                     >
                         <ul className="list-disc pl-5 space-y-2">
@@ -369,42 +650,38 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="4. 關於 Decorator (裝飾者模式)"
-                        question="範列的 Decorator 只是將 if 判斷關鍵字，然後輸出 style 包裝起來，值得為了這個多設計 class 嗎？"
+                        title="7. 現代語言特性與設計模式"
+                        question="除了前面提到的 Pattern Matching、Lambda、@Decorator，還有哪些語言特性正在「吃掉」設計模式？"
                     >
-                        這取決於「複雜度」與「組合性」。
-                        <ul className="list-disc pl-5 mt-1 space-y-1">
-                            <li><strong>簡單場景：</strong>如果只有一種變化（例如：錯誤變紅色），if-else 絕對是首選 (KISS 原則)。寫 Class 是過度設計。</li>
-                            <li><strong>組合爆炸 (Combinatorial Explosion)：</strong>當需求變成「N 種圖標」×「M 種顏色」×「K 種樣式」時，if-else 會變成恐怖的巢狀地獄。Decorator 讓你像積木一樣<span className="text-blue-600 font-bold">動態組合</span>這些維度，且完全符合 OCP (新增樣式不需修改舊程式碼)。</li>
-                        </ul>
-                    </ReflectionItem>
-
-                    <ReflectionItem
-                        title="5. 關於 Strategy (策略模式)"
-                        question="為什麼我不傳 string/enum 進去用 if/else 就好，要大費周章寫 Strategy Class 再傳進去？"
-                    >
-                        核心差異在於「誰來承擔演算法的負擔」
-                        <ul className="list-disc pl-5 mt-2 space-y-3">
+                        <ul className="list-disc pl-5 space-y-3">
                             <li>
-                                <strong>傳參數 (由 DirectoryComposite 自己實作)：</strong>
-                                核心類別必須「學會」每一種排序法。如果按標籤排序需要 <code>TagMediator</code>，那 <code>Directory</code> 就得被迫依賴它。規則愈多，<code>Directory</code> 愈臃腫。
+                                <strong>C# Extension Method：</strong>
+                                不修改、不繼承 class 就能「掛上」新方法。LINQ 的 <code>.Where()</code>、<code>.Select()</code> 全是 Extension Method，同時解決了 Visitor（加操作）與 Decorator（加行為）的問題。TypeScript 沒有對應機制。
                             </li>
                             <li>
-                                <strong>傳策略 (由 Strategy Class 實作)：</strong>
-                                <code>Directory</code> 只需要知道 <code>strategy.sort()</code>。演算法與它所需的外部依賴（如 Mediator）都被封裝在策略物件裡。核心類別保持乾淨，像外包可隨時抽換。
+                                <strong>Java 17+ sealed + record + switch：</strong>
+                                Java 終於追上 C# 的 Pattern Matching。<code>sealed interface</code> + <code>record</code> + <code>switch expression</code> 完整取代 Visitor 雙分派，編譯器同樣能檢查 exhaustive。
+                            </li>
+                            <li>
+                                <strong>async / await（全語言）：</strong>
+                                傳統 Observer 模式處理非同步時，往往需要 callback 或事件訂閱，容易造成 callback hell。現代語言的 <code>async/await</code> 讓非同步流程可以用同步語法寫，大幅降低了 Observer 的使用場景。
+                            </li>
+                            <li>
+                                <strong>Kotlin sealed class + when：</strong>
+                                Kotlin 的 <code>sealed class</code> + <code>when</code> 表達式，是目前 JVM 上最優雅的 Pattern Matching 實現，編譯器強制 exhaustive。Android 開發者對此應該不陌生。
+                            </li>
+                            <li>
+                                <strong>Python 3.10+ match / case：</strong>
+                                Python 也加入了 Structural Pattern Matching。搭配 <code>@dataclass</code>，可以對物件結構做解構匹配，語法簡潔直覺，取代傳統的 if-elif 鏈。Python 的 <code>@decorator</code> 更是早在語言層級就內建了裝飾者模式。
                             </li>
                         </ul>
+                        <p className="mt-4 text-slate-600">
+                            <b>思考：</b>這些語言特性讓我們不再需要「為了模式而寫 class」，但每個特性背後解決的問題，仍然是那些設計模式當年要解決的同一個問題。理解模式的「為什麼」，才能真正懂得語言特性的「為何存在」。
+                        </p>
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="6. 關於 Flyweight (享元模式)"
-                        question="我們說 LabelFactory 是為了享元 (Flyweight) 控制記憶體，但如果新來的同事直接 new Label('Urgent')，是不是你的 Flyweight 就失效了？"
-                    >
-                        你有想過，要把 Label 的 Constructor 變成私有的嗎 (private or internal)？禁止直接 new？架構不能只靠口頭約束，要有機制強制執行。
-                    </ReflectionItem>
-
-                    <ReflectionItem
-                        title="7. 關於 現代 Framework 與 Libraries"
+                        title="8. 現代 Framework 與 Libraries"
                         question="現代流行的 Framework (Angular, Spring) 或 Library (AutoMapper, Akka) 中，是否其實也有這些觀念的延伸？"
                     >
                         完全正確。技術會變，但「管理複雜度」的本質不變：
@@ -412,11 +689,11 @@ const ReflectionTab: React.FC = () => {
                         <div className="mt-4 mb-2 font-bold text-blue-700">1. 應用框架 (Frameworks)</div>
                         <ul className="list-disc pl-5 space-y-2">
                             <li><strong>Angular / Android / DOM / WinForms / WPF (Composite)</strong>：所有 UI 框架的 Component Tree (元件樹) 都是 Composite 的應用，將複雜的 UI 視為樹狀結構，讓容器與控制項一視同仁。</li>
-                            <li><strong>Angular (DI = Strategy + IoC)</strong>：Angular 核心的 Dependency Injection，讓你注入不同的 Service，這其實就是策略模式的應用，將依賴反轉，達成鬆散耦合。</li>
-                            <li><strong>Spring / .NET (AOP = Decorator / Proxy)</strong>：Spring AOP 的攔截器 (Interceptor) 或 .NET 的 Middleware，用來處理 Log 或權限，這就是裝飾者或代理模式的經典實踐。</li>
+                            <li><strong>Angular (DI = Strategy + IoC)</strong>：Dependency Injection，讓你注入不同的 Service，這其實就是策略模式的應用，將依賴反轉，達成鬆散耦合。</li>
+                            <li><strong>Spring / .NET (AOP = Decorator / Proxy)</strong>：AOP 的攔截器 (Interceptor) 或 .NET 的 Middleware，處理 Log 或權限，就是裝飾者或代理模式的應用。</li>
                             <li><strong>Python (@Decorator)</strong>：Python 語言直接將裝飾者模式內建為語法糖 (<code>@wrapper</code>)，讓你不需要寫 Class 也能輕鬆擴充函式功能。</li>
                         </ul>
-                        <div className="mt-6 mb-2 font-bold text-emerald-700">2. 通用函式庫 (Libraries)</div>
+                        <div className="mt-6 mb-2 font-bold text-blue-700">2. 通用函式庫 (Libraries)</div>
                         <ul className="list-disc pl-5 space-y-2">
                             <li><strong>Akka / Orleans (Observer + Command)</strong>：Actor 模型將狀態與行為封裝，透過異步訊息溝通，解決高併發鎖 (Lock) 的問題。</li>
                             <li><strong>Autofac (Factory + Strategy)</strong>：IoC Container 本質上就是「超級工廠」，負責物件生產與生命週期，並讓你輕鬆替換實作。</li>
@@ -428,7 +705,7 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="8. 關於 Life (生活中的抽象)"
+                        title="9. 生活中的抽象應用實例"
                         question="你每天用的「USB 插孔」跟「插座」。如果你買了一個國外的電器，插頭形狀不合怎麼辦？有對應的 Design Pattern 嗎？"
                     >
                         <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -438,24 +715,25 @@ const ReflectionTab: React.FC = () => {
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="9. 關於 未來 (AI 與架構)"
+                        title="10. 未來 AI 與設計"
                         question="AI 也懂所有的設計模式與軟體架構，為什麼 AI Coding 的時代依然需要懂設計模式的人？"
                     >
                         AI 擅長「解題」與「生成」，但軟體架構的本質是「在權衡 (Trade-offs) 中做出決策」：
                         <ul className="list-disc pl-5 mt-2 space-y-2">
                             <li><strong>預測下一個字的侷限：</strong> AI 的本質是 Next-token Prediction (下一個詞預測)，它追求的是區域性的正確性（Local Correctness），也就是讓這一段代碼能編譯成功。</li>
                             <li><strong>缺乏全局狀態的痛點：</strong> AI「什麼是公共衛生」？他可以寫出優美的申論；但你叫他去掃廁所，他會為了趕快掃完，把垃圾全塞進馬桶裡——因為對 AI 來說，那是完成任務「路徑最短」的方法。</li>
-                            <li><strong>計劃未來變動的能力：</strong> AI 根據現有代碼推理，但人類根據「產品藍圖」推理。你選擇某種模式，是為了幫兩週後可能發生的需求預留<b>「正確的擴充點」</b>。</li>
-                            <li><strong>最終責任審美的決策：</strong> AI 提供選項，但人類決定品味。架構就像城市的都市計畫，AI 能蓋出漂亮的房子，但人類才懂得如何配置街道與公園，讓系統在五年後依然能優雅地運作。</li>
+                            <li><strong>應付未來變動的能力：</strong> AI 根據現有代碼推理，但你的腦海有「產品藍圖」。你選擇某種模式，是為了幫兩週後可能發生的需求預留<b>「正確的擴充點」</b>。</li>
+                            <li><strong>最終責任審美的決策：</strong> AI 提供選項，但你決定品味。架構就像城市的都市計畫，AI 能蓋出漂亮的房子，但人類才懂得如何配置街道與公園，讓系統在五年後依然能優雅地運作。</li>
                         </ul>
                     </ReflectionItem>
                 </div>
             </div>
             <div className="mt-16 mb-8 border-t border-slate-200 pt-12 text-left">
 
-                <h3 className="text-2xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 flex items-center gap-3">
+                <h2 className="text-2xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 flex items-center gap-3">
+                    <Lightbulb size={24} />
                     現代架構思維，OOP 的「形」與 FP 的「魂」
-                </h3>
+                </h2>
 
                 <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-left">
                     <h4 className="text-xl font-bold text-slate-800 mt-8 mb-4">1. OOAD 在當代的定位</h4>
@@ -489,7 +767,7 @@ const ReflectionTab: React.FC = () => {
                         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
                             <strong className="block text-blue-700 mb-2">TypeScript</strong>
                             <p className="text-slate-600">
-                                天生多範式。你可以用 <code>class</code> 寫嚴謹的 OOP；也可以用 <code>type/interface</code> 定義結構，配合純函式 (Pure Functions) 進行資料轉換，在 React 開發中尤為常見。
+                                天生多範式。你可以用 <code>class</code> 寫嚴謹的 OOP；也可以用 <code>type/interface</code> 定義結構，配合純函式 (Pure Functions) 進行資料轉換，在 Angular 開發中也大量使用。
                             </p>
                         </div>
                     </div>
@@ -569,7 +847,10 @@ const ReflectionTab: React.FC = () => {
             </div>
 
             <div className="mt-16 mb-8 border-t border-slate-200 pt-12 text-left">
-                <h4 className="text-2xl font-black text-slate-800 mb-8 border-l-4 border-blue-600 pl-4">AI 時代的開發新實踐</h4>
+                <h2 className="text-2xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 flex items-center gap-3">
+                    <Sparkles size={24} />
+                    AI 時代的開發新實踐
+                </h2>
 
                 <blockquote className="text-lg italic text-slate-600 mb-6 leading-relaxed text-left">
                     "AI 可以是一個「理論級的架構大師」能跟你聊 OOP/FP 聊得天花亂墜，卻也是一個「缺乏視野的程序員」飛快地動手寫出屎山代碼，改了東壞了西。它能講出 OOP/FP 的道理，是因為那些道理被寫成了書；它 Coding 只想解決當前問題、完成任務，是因為沒人給它邊界與規則。所以，你要能引導 AI，讓理論與實作能夠落地，連接兩者。"
