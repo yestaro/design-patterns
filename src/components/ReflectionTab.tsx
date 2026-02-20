@@ -577,8 +577,14 @@ const ReflectionTab: React.FC = () => {
 
                 <h5 className="text-xl font-bold text-slate-800 mb-6">Agentic Workflow：從「對話」進化到「指揮」</h5>
                 <p className="text-slate-600 mb-8">
-                    在像 <strong>AntiGravity</strong> 這樣的高級 Agentic AI 環境下，系統內部其實已具備多 Agent 協作能力。
-                    現在，你不再只是提問者，而是<b>團隊的太陽 (The Sun of the Team)</b>。你不需要切換視窗，而是透過 Prompt 引導 AI 在「分析師」「架構師」與「工程師」思維間切換，完成高品質的開發：
+                    在 Agentic AI 環境下，系統內部其實已具備多 Agent 協作能力。例如 Claude Code、Cursor、Antigravity 等等，都具備多 Agent 協作能力。
+                    可參考 <a href="https://code.claude.com/docs/zh-TW/agent-teams" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1 mx-1 bg-[#F2EDE5] text-[#2C2B29] border border-[#E5DEC3] hover:bg-[#EAE4D9] hover:border-[#D6CCC3] hover:shadow-sm rounded-lg font-bold font-serif transition-all align-middle group">
+                        <svg className="w-4 h-4 text-[#D77956] group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 4v16M4 12h16M7 7l10 10M7 17L17 7" />
+                        </svg>
+                        Claude Agent-Teams
+                    </a> 。
+                    現在，你不再只是提問者，而是<b>團隊的太陽 (The Sun of the Team)</b>。你不需要切換視窗，而是引導 AI 在「分析師」「架構師」與「多位工程師」思維間切換，完成高品質的開發：
                 </p>
 
                 <div className="space-y-12 mb-12">

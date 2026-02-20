@@ -368,7 +368,7 @@ const CodeTab: React.FC = () => {
           <h2 className="text-xl font-black text-slate-800 mb-2 border-l-4 border-blue-600 pl-4 text-left">5. 類別設計 vs 傳統直覺</h2>
 
           {/* Tab Navigation: MacOS Dock Effect */}
-          <div className="relative mb-16">
+          <div className="relative mb-20">
             <div
               className={`${isMobile ? 'grid grid-cols-4 gap-y-14 gap-x-2 px-2 py-6 h-auto' : 'flex justify-center items-end gap-3 h-32 px-6'} relative z-10`}
               onMouseLeave={() => setHoveredIndex(null)}
@@ -412,19 +412,19 @@ const CodeTab: React.FC = () => {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     onMouseEnter={() => !isMobile && setHoveredIndex(index)}
-                    className={`group relative flex flex-col items-center justify-end transition-all duration-200 ease-out p-2 mx-1 shrink-0`}
+                    className={`group relative flex flex-col items-center justify-end transition-all duration-200 ease-out p-1 md:mx-2 shrink-0`}
                     style={{
                       transform: `scale(${scale}) translateY(${translateY}px)`,
                       zIndex
                     }}
                     title={tab.chapter}
                   >
-                    <div className={`p-4 rounded-3xl shadow-xl border flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-400 shadow-blue-500/50 w-20 h-20' : 'bg-white border-slate-200 w-20 h-20 hover:border-blue-200'}`}>
+                    <div className={`rounded-[1.2rem] shadow-xl border flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-400 shadow-blue-500/50 w-[60px] h-[60px] md:w-[68px] md:h-[68px]' : 'bg-white border-slate-200 w-[60px] h-[60px] md:w-[68px] md:h-[68px] hover:border-blue-200'}`}>
                       <tab.icon size={36} className={`transition-all duration-300 ${isActive ? 'text-white' : subtleColor}`} />
                     </div>
 
                     {/* Tooltip Label */}
-                    <span className={`absolute -bottom-12 whitespace-nowrap px-3 py-1 text-slate-500 text-xs font-bold transition-all duration-200 pointer-events-none ${hoveredIndex === index || isActive ? 'opacity-100 text-slate-800 scale-110 -translate-y-1' : 'opacity-60 scale-90'}`}>
+                    <span className={`absolute -bottom-10 md:-bottom-12 whitespace-nowrap px-3 py-1 text-slate-500 text-[10px] md:text-xs font-bold transition-all duration-200 pointer-events-none ${hoveredIndex === index || isActive ? 'opacity-100 text-slate-800 scale-110 -translate-y-1' : 'opacity-60 scale-90'}`}>
                       {tab.name}
                     </span>
 

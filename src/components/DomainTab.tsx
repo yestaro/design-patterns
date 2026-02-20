@@ -47,23 +47,12 @@ const DomainTab: React.FC = () => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
         } else {
-            // Both Desktop and Mobile: Scroll to align with the top of the component
-            const yOffset = -100; // Offset for sticky header
-
-            if (isMobile) {
+            if (isMobile && showMobileDetail && contentRef.current) {
                 // Mobile: Only scroll if we are showing the detail view (slide-in)
-                if (showMobileDetail && contentRef.current) {
-                    const rect = contentRef.current.getBoundingClientRect();
-                    const targetY = Math.max(0, rect.top + window.scrollY + yOffset);
-                    window.scrollTo({ top: targetY, behavior: 'smooth' });
-                }
-            } else {
-                // Desktop: Scroll to the top of the entire DomainTab container
-                if (containerRef.current) {
-                    const rect = containerRef.current.getBoundingClientRect();
-                    const targetY = Math.max(0, rect.top + window.scrollY + yOffset);
-                    window.scrollTo({ top: targetY, behavior: 'smooth' });
-                }
+                const yOffset = -100; // Offset for sticky header
+                const rect = contentRef.current.getBoundingClientRect();
+                const targetY = Math.max(0, rect.top + window.scrollY + yOffset);
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
             }
         }
 
@@ -104,6 +93,14 @@ const DomainTab: React.FC = () => {
                                     if (isMobile) {
                                         listScrollPos.current = window.scrollY;
                                         setShowMobileDetail(true);
+                                    } else {
+                                        // Explicitly scroll Desktop content to top ONLY when sidebar is clicked here
+                                        if (containerRef.current) {
+                                            const yOffset = -100;
+                                            const rect = containerRef.current.getBoundingClientRect();
+                                            const targetY = Math.max(0, rect.top + window.scrollY + yOffset);
+                                            window.scrollTo({ top: targetY, behavior: 'smooth' });
+                                        }
                                     }
                                     setActiveTab(pattern.id);
                                 }}

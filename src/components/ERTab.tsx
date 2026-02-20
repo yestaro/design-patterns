@@ -19,7 +19,7 @@ const ERTab: React.FC = () => {
                             <div className="border border-slate-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-slate-50 text-slate-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left">COLUMN</th><th className="p-4 text-left">ROLE</th></tr>
+                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 text-slate-700">
                                         <tr><td className="p-4 font-bold">EntryID</td><td className="p-4 text-blue-600 font-bold">PK</td></tr>
@@ -46,7 +46,7 @@ const ERTab: React.FC = () => {
                             <div className="border border-indigo-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-indigo-50 text-indigo-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left">COLUMN</th><th className="p-4 text-left">ROLE</th></tr>
+                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
                                     </thead>
                                     <tbody className="divide-y divide-indigo-50 text-slate-700">
                                         <tr><td className="p-4 font-bold">AttrID</td><td className="p-4 text-blue-600 font-bold">PK</td></tr>
@@ -70,7 +70,7 @@ const ERTab: React.FC = () => {
                             <div className="border border-rose-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-rose-50 text-rose-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left">COLUMN</th><th className="p-4 text-left">ROLE</th></tr>
+                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
                                     </thead>
                                     <tbody className="divide-y divide-rose-50 text-slate-700">
                                         <tr><td className="p-4 font-bold">EntryID</td><td className="p-4 text-blue-600 font-bold text-xs">PK, FK(Entries)</td></tr>
@@ -89,7 +89,7 @@ const ERTab: React.FC = () => {
                             <div className="border border-emerald-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-emerald-50 text-emerald-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left">COLUMN</th><th className="p-4 text-left">ROLE</th></tr>
+                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
                                     </thead>
                                     <tbody className="divide-y divide-emerald-50 text-slate-700">
                                         <tr><td className="p-4 font-bold">TagID</td><td className="p-4 text-blue-600 font-bold">PK</td></tr>

@@ -21,13 +21,13 @@
   .bento-card {
     @apply bg-white rounded-[24px] shadow-sm border border-white/50 transition-all duration-300;
   }
-  
+
   .bento-card:hover {
     @apply shadow-md scale-[1.002];
   }
 
   .nav-segment {
-    @apply bg-[rgba(118,118,128,0.12)] p-1 rounded-full backdrop-blur-md;
+    @apply bg-[rgba(118, 118, 128, 0.12)] p-1 rounded-full backdrop-blur-md;
   }
 
   .nav-item {
@@ -35,7 +35,7 @@
   }
 
   .nav-item-active {
-    @apply bg-white text-black shadow-[0_3px_8px_rgba(0,0,0,0.12),0_3px_1px_rgba(0,0,0,0.04)] font-semibold;
+    @apply bg-white text-black shadow-[0_3px_8px_rgba(0, 0, 0, 0.12), 0_3px_1px_rgba(0, 0, 0, 0.04)] font-semibold;
   }
 
   .nav-item-inactive {

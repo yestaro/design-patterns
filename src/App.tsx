@@ -63,6 +63,9 @@ const App: React.FC = () => {
       {/* Background decoration - optional subtle gradient */}
       <div className="fixed inset-0 bg-gradient-to-tr from-blue-50/30 via-transparent to-purple-50/30 pointer-events-none" />
 
+      {/* Technology Grid Background */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
       <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         <header className="mb-6 text-center md:text-left space-y-4">
           <div className="flex flex-col md:flex-row items-center justify-center gap-6">
@@ -71,12 +74,11 @@ const App: React.FC = () => {
               Design Patterns <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Mastery</span>
             </h1>
 
-            {/* Vertical Divider (visible on desktop) */}
-            <div className="hidden md:block w-[1px] h-16 bg-slate-300/50"></div>
+            {/* Divider removed */}
 
             {/* Right: Version + Subtitle group */}
             <div className="flex flex-col items-center md:items-start gap-3">
-              <span className="text-sm uppercase tracking-widest font-bold text-blue-600">v3000</span>
+              <span className="text-sm uppercase tracking-widest font-bold text-blue-600">v3000 @2026 丙午．春</span>
               <p className="text-sm md:text-base text-[#86868b] font-medium leading-relaxed text-center md:text-left whitespace-nowrap">
                 從 if - else 到抽象、封裝與介面，以架構思維實踐高品質程式碼
               </p>
@@ -107,7 +109,7 @@ const App: React.FC = () => {
                     : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 active:scale-95'}
                 `}
               >
-                <tab.i size={20} className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 text-white' : 'group-hover:scale-110'}`} />
+                <tab.i size={20} className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 text-blue-300' : 'group-hover:scale-110'}`} />
                 <span className={`hidden md:inline ${activeTab === tab.id ? 'opacity-100' : 'opacity-70'}`}>{tab.l}</span>
               </button>
             ))}
