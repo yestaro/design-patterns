@@ -1,48 +1,5 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-app: #F5F5F7;
-    --text-primary: #1D1D1F;
-    --text-secondary: #86868B;
-    --accent-blue: #0071E3;
-  }
-
-  body {
-    background-color: var(--bg-app);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscaled;
-  }
-}
-
-@layer utilities {
-  .bento-card {
-    @apply bg-white rounded-[24px] shadow-sm border border-white/50 transition-all duration-300;
-  }
-
-  .bento-card:hover {
-    @apply shadow-md scale-[1.002];
-  }
-
-  .nav-segment {
-    @apply bg-[rgba(118, 118, 128, 0.12)] p-1 rounded-full backdrop-blur-md;
-  }
-
-  .nav-item {
-    @apply rounded-full text-sm font-medium transition-all duration-200 ease-out;
-  }
-
-  .nav-item-active {
-    @apply bg-white text-black shadow-[0_3px_8px_rgba(0, 0, 0, 0.12), 0_3px_1px_rgba(0, 0, 0, 0.04)] font-semibold;
-  }
-
-  .nav-item-inactive {
-    @apply text-gray-500 hover:text-gray-900 hover:bg-black/5;
-  }
-}
-
 /* Custom Scrollbar for Bento Style */
 ::-webkit-scrollbar {
   width: 8px;
