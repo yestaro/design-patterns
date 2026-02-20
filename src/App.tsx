@@ -118,7 +118,7 @@ const App: React.FC = () => {
 
         {/* Content Area - Bento Layout Container */}
         <main className="transition-all duration-500 ease-in-out">
-          <div className="min-h-[83vh] animate-in slide-in-from-bottom-4 duration-700 fade-in fill-mode-backwards">
+          <div className="min-h-[83vh] animate-in fade-in duration-700 fill-mode-backwards">
             {activeTab === 'explorer' && <ExplorerTab />}
             {activeTab === 'domain' && <DomainTab />}
             {activeTab === 'er' && <ERTab />}

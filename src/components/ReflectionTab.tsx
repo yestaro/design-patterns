@@ -732,7 +732,7 @@ var result = files
 
                 <h2 className="text-2xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 flex items-center gap-3">
                     <Lightbulb size={24} />
-                    現代架構思維，OOP 的「形」與 FP 的「魂」
+                    現代思維，OOP 的「形」與 FP 的「魂」
                 </h2>
 
                 <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-left">
