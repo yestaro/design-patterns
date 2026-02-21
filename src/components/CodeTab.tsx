@@ -120,7 +120,7 @@ const CodeTab: React.FC = () => {
           <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">2. 抽象與共同屬性 (Abstraction)</h2>
           <div className="space-y-6 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
-              抽象並非只是為了寫更少的程式碼，而是為了<b>定義系統的通訊契約</b>。
+              抽象並非只是為了寫更少的程式碼，而是為了<b>定義系統的通訊契約</b>。「Interface/Protocol/Trait」
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
               <div className="space-y-4 text-left">
@@ -152,7 +152,7 @@ const CodeTab: React.FC = () => {
           <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">3. 擁有 vs 繼承 (Composition over Inheritance)</h2>
           <div className="space-y-6 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
-              在處理觀察者模式時，我們面臨語意與彈性的權衡：<b>Visitor 是否應該繼承 Subject</b>？
+              在處理觀察者模式時，我們面臨語意與彈性的權衡：<b>Visitor 是否應該繼承 Subject</b>？「繼承是代碼重用最爛的方式」。
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
               <div className="p-6 bg-green-50 rounded-2xl border border-green-100 ring-2 ring-green-200 text-left">
@@ -179,10 +179,10 @@ const CodeTab: React.FC = () => {
 
         {/* 4. 如何串連與使用 */}
         <section className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
-          <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">4. 模式的串連與使用 (Clean Architecture)</h2>
+          <h2 className="text-xl font-black text-slate-800 mb-6 border-l-4 border-blue-600 pl-4 text-left">4. 整潔的架構 (Clean Architecture)</h2>
           <div className="space-y-8 text-left">
             <p className="text-slate-600 leading-relaxed font-medium text-left">
-              理解模式如何定義後，最重要的就是看它們如何「組合在一起」完成功能。清楚的架構層次：<b>分層、相依性、跨層</b>，是設計的三個原則。
+              架構層次的原則：<b>分層、相依性、跨層</b>。深入瞭解「依賴反轉 (Dependency Inversion)」與「解耦 (Decoupling)」的意涵。
             </p>
 
             <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 overflow-hidden">

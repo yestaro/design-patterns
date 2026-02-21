@@ -630,7 +630,27 @@ var result = files
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="6. 關於 Facade (外觀模式)"
+                        title="6. 關於 Adapter (轉接器模式)"
+                        question="什麼時候需要轉換？我有一個函式只接受 A Class，所以要設計一個轉成 A 的 Adapter 類別嗎？"
+                    >
+
+                        不要為了「型別不同」就寫 Adapter。先問自己：<b>我能不能直接改介面？</b>
+
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li>
+                                <strong>不需要 Adapter 的情況：</strong>
+                                如果 A 和 B 都是你寫的，直接統一介面就好。寫 Adapter 是過度設計。若只是單純的數據或格式轉換，可以考慮使用 <code>map</code>、<code>reduce</code>、<code>filter</code> 等高階函式。
+                                真正的 Adapter 不是在做「數據拷貝」，而是在做「行為轉發」。只是數據轉換，那它不叫 Adapter，那叫 Mapper。
+                            </li>
+                            <li>
+                                <strong>需要 Adapter 的情況：</strong>
+                                當你<b>無法修改</b>其中一邊時，例如：第三方 SDK、Legacy 舊系統、外部 API 回傳的格式跟你的設計不同。這時候 Adapter 就是「翻譯官」，讓兩個不相容的世界能溝通。就像我們設計了一個 Logger Adapter，提供多種輸出方式，但背後可能轉接到 NLog 或 log4net。
+                            </li>
+                        </ul>
+                    </ReflectionItem>
+
+                    <ReflectionItem
+                        title="7. 關於 Facade (外觀模式)"
                         question="我在 UI 上，有事件的 function (例如：按鈕事件 onSearch, onCopy, onXmlExport) 對應 Visitor, Command 的使用，為什麼還需要獨立的 Facade Class？"
                     >
                         <ul className="list-disc pl-5 space-y-2">
@@ -650,7 +670,7 @@ var result = files
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="7. 現代語言特性與設計模式"
+                        title="8. 現代語言特性與設計模式"
                         question="除了前面提到的 Pattern Matching、Lambda、@Decorator，還有哪些語言特性正在「吃掉」設計模式？"
                     >
                         <ul className="list-disc pl-5 space-y-3">
@@ -681,7 +701,7 @@ var result = files
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="8. 現代 Framework 與 Libraries"
+                        title="9. 現代 Framework 與 Libraries"
                         question="現代流行的 Framework (Angular, Spring) 或 Library (AutoMapper, Akka) 中，是否其實也有這些觀念的延伸？"
                     >
                         完全正確。技術會變，但「管理複雜度」的本質不變：
@@ -705,7 +725,7 @@ var result = files
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="9. 生活中的抽象應用實例"
+                        title="10. 生活中的抽象應用實例"
                         question="你每天用的「USB 插孔」跟「插座」。如果你買了一個國外的電器，插頭形狀不合怎麼辦？有對應的 Design Pattern 嗎？"
                     >
                         <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -715,7 +735,7 @@ var result = files
                     </ReflectionItem>
 
                     <ReflectionItem
-                        title="10. 未來 AI 與設計"
+                        title="11. 未來 AI 與設計"
                         question="AI 也懂所有的設計模式與軟體架構，為什麼 AI Coding 的時代依然需要懂設計模式的人？"
                     >
                         AI 擅長「解題」與「生成」，但軟體架構的本質是「在權衡 (Trade-offs) 中做出決策」：
@@ -738,7 +758,7 @@ var result = files
                 <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed text-left">
                     <h4 className="text-xl font-bold text-slate-800 mt-8 mb-4">1. OOAD 在當代的定位</h4>
                     <p className="mb-6">
-                        在 2000 年代初期，Java 與 C# 推向巔峰的 OOAD（物件導向分析與設計）幾乎是軟體工程的唯一真理。當時流行的設計模式（Design Patterns）、過度設計的類別繼承鏈，在現代開發節奏下顯得太重了。
+                        在 2000 年代初期，Java 與 C# 推向巔峰的 OOAD（物件導向分析與設計）幾乎是軟體工程的唯一真理。當時流行的設計模式（Design Patterns）、<b>過度設計的類別繼承鏈</b>，在現代開發節奏下顯得太重了。
                     </p>
                     <ul className="list-disc pl-5 mb-6 space-y-2">
                         <li><strong>併發挑戰：</strong> OOP 的核心是「狀態（State）」，在多核心、高併發的時代，管理共享狀態（Shared Mutable State）簡直是噩夢，這正是 FP 的強項。</li>
