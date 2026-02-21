@@ -59,7 +59,7 @@ const scheduleData: RoadmapItem[] = [
             { speaker: '你', text: '那交換的格式，走 XML 可以嗎？' },
             { speaker: '客戶', text: '我不了解，但你們先訂一版看看吧。' }
         ],
-        tasksTitle: '想要就說，我有 Accept 搞定',
+        tasksTitle: '看到沒，這個就叫做專業！',
         tasks: [
             '完成 計算檔案大小 的功能',
             '完成 搜尋特定關鍵字檔案 的功能',
@@ -186,7 +186,7 @@ const scheduleData: RoadmapItem[] = [
             { speaker: '尤達', text: '對啊，你這麼辛苦重整與設計，將來換個 Owner 就又爛了…' },
 
         ],
-        tasksTitle: '總管的背後，個個都是垃圾？',
+        tasksTitle: '這就是傳說中的要你命3000',
         tasks: [
             '完成 FileSystemFacade 統整所有命令介面',
             '降低 Explorer UI 對模式實體類別的直接依賴'

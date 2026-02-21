@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layers2, Share2, Play, Map, Sparkles } from 'lucide-react';
+import { Layers2, Share2, Play, Map, Sparkles, Landmark } from 'lucide-react';
 import mermaid from 'mermaid';
 import CodeBlock from './CodeBlock';
 import { patterns } from '../data/patterns';
@@ -174,6 +174,58 @@ const CodeTab: React.FC = () => {
                 </ul>
               </div>
             </div>
+
+            {/* VR 快打 2 風格：組合優於繼承 */}
+            {/* <div className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 relative overflow-hidden group shadow-sm">
+              <div className="absolute top-2 right-4 text-7xl font-black text-indigo-200/40 select-none italic tracking-tighter">VF 2</div>
+
+              <div className="relative z-10 flex gap-5 items-start">
+                <div className="flex flex-col gap-2 shrink-0">
+                  <div className="w-12 h-12 bg-white rounded-full border-4 border-slate-300 shadow-inner flex items-center justify-center font-black text-slate-400 text-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">P</div>
+                  <div className="w-12 h-12 bg-white rounded-full border-4 border-slate-300 shadow-inner flex items-center justify-center font-black text-slate-400 text-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">K</div>
+                  <div className="w-12 h-12 bg-white rounded-full border-4 border-slate-300 shadow-inner flex items-center justify-center font-black text-slate-400 text-xl shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">G</div>
+                </div>
+
+                <div className="flex-1">
+                  <h4 className="font-black text-xl mb-4 text-indigo-900 italic tracking-tight flex items-center gap-3">
+                    <Landmark className="text-indigo-600" size={20} /> 組合的奧義 - Punch, Kick, Guard
+                  </h4>
+                  <div className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-white shadow-sm space-y-3">
+                    <p className="text-slate-800 leading-relaxed font-bold">
+                      為什麼說「組合（Composition）」勝過繼承？
+                    </p>
+                    <p className="text-slate-600 leading-relaxed">
+                      這就像結城晶的<b className="text-indigo-700">「崩擊雲身雙虎掌」</b>。
+                      它不是一個單一招式類別，而是透過<b>崩拳、鷂子穿林、雙掌</b>三個獨立動作（Has-a）組合成的強大技。
+                    </p>
+                    <div className="flex flex-wrap items-center gap-4 mt-4 text-sm font-black text-indigo-600">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200">崩拳</span>
+                        <span className="text-xs font-mono text-slate-400">P + K + G</span>
+                      </div>
+                      <span className="text-slate-300 pb-4">+</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200">鷂子穿林</span>
+                        <span className="text-xs font-mono text-slate-400">← ↘ P + K</span>
+                      </div>
+                      <span className="text-slate-300 pb-4">+</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200">雙掌</span>
+                        <span className="text-xs font-mono text-slate-400">← P</span>
+                      </div>
+                      <span className="text-slate-300 pb-4">=</span>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200">崩擊雲身雙虎掌</span>
+                        <span className="text-xs font-mono text-slate-400">高手</span>
+                      </div>
+                    </div>
+                    <p className="text-slate-500 text-sm mt-4 italic border-t border-indigo-100 pt-3">
+                      繼承強迫你「是」什麼，讓你定型；而組合讓你「有」什麼，能隨戰況靈活連段，這才是簡單卻強大。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div> */}
           </div>
         </section>
 
@@ -501,6 +553,7 @@ const CodeTab: React.FC = () => {
                   <div>
                     <span>其實，沒有人一開始就能寫出完美的架構。</span>
                     <span className="font-medium text-slate-600 text-base block mt-2">設計模式通常是在<b>「重構」</b>階段引入的——當你發現代碼開始變得難以維護時，這些模式就是你的解藥。</span>
+                    <span className="font-medium text-slate-600 text-base block mt-2">那什麼時候該重構呢？<b className="text-indigo-700">「事不過三」</b>——當同一個讓你煩躁的現象出現第三次，就是重構的信號。</span>
                   </div>
                 </div>
               </div>

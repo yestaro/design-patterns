@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, UserRound, Route, Sparkles, ArrowRight, ChessKnight } from 'lucide-react';
+import { LoaderPinwheel, UserRound, Route, Sparkles, ArrowRight, ChessKnight } from 'lucide-react';
 import RoadmapDialog from './RoadmapDialog';
 
 /** Landing Page 的四張價值卡片資料 */
@@ -10,9 +10,9 @@ const valueCards = [
         iconBg: 'bg-emerald-500/20',
         iconColor: 'text-emerald-400',
         glowColor: 'bg-emerald-500/40',
-        Icon: Flame,
+        Icon: LoaderPinwheel,
         title: '為什麼需要設計思維？',
-        body: 'God Function 越長越不敢碰？AI 寫了 code 但你看不懂？問題不在技術不夠，是缺乏架構意識。',
+        body: '麵條式的程式，越長越不敢碰？AI 寫了 code 但你看不懂？問題不在技術不夠，是缺乏架構意識。',
     },
     {
         label: 'WHO',
@@ -22,7 +22,7 @@ const valueCards = [
         glowColor: 'bg-blue-500/40',
         Icon: UserRound,
         title: '適合誰？',
-        body: '只寫 CRUD，只在 Debug。沒思考過設計，似懂非懂而想升級的你。AI 時代，想搞清楚自己價值在哪。',
+        body: '只寫 CRUD，只在 Debug。沒思考過設計，什麼才是有價值的開發經驗。AI 時代，想想你的定位在哪。',
     },
     {
         label: 'HOW',

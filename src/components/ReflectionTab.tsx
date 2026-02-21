@@ -206,7 +206,7 @@ const ReflectionTab: React.FC = () => {
                         從 Class 到 雲端架構：抽象思維的可攜性
                     </h2>
                     <p className="text-lg text-slate-600 leading-relaxed">
-                        設計的核心，始終圍繞著<b>「邊界 (Boundaries)、合約 (Contracts) 與 職責 (Responsibilities)」</b>。
+                        設計的核心，始終圍繞著<b>「邊界 (Boundaries)、合約 (Contracts) 與 依賴 (Dependencies)」</b>。
                         無論是程式設計、服務提供或系統整合（Class &rarr; Service &rarr; System），<b>「高內聚、低偶合」、「依賴抽象不依賴實作」</b> 的原則永遠不變。
                         學會這些通則，等於掌握了思路本質，不再卡在技術細節<i>if, else, CRUD...</i>上。
                     </p>
@@ -228,17 +228,17 @@ const ReflectionTab: React.FC = () => {
                                 <strong className="text-slate-900 text-lg block mb-2">合約 (Contracts)</strong>
                                 <ul className="space-y-2 text-base pl-1 text-slate-600">
                                     <li>合約觀念，能定義與外部透過 <b>介面 (Interface)</b> 溝通，而非直接依賴具體程式碼，進而實現 <b>鬆散耦合 (Loose Coupling)</b>。</li>
-                                    <li>建立了穩定的 <b>API 規範 (Specification)</b> 與承諾 (Promise)，讓不同的開發者或模組可以並行工作，因為大家依賴的是不變的合約。讓替換實作變得容易「依賴反轉 (DIP)」</li>
+                                    <li>建立了穩定的 <b>API 規範 (Specification)</b> 與<b>承諾 (Promise)</b>，讓不同的開發者或模組可以並行工作，因為大家依賴的是不變的合約。讓替換實作變得容易。</li>
                                 </ul>
                             </div>
                         </li>
                         <li className="flex gap-4">
                             <div className="mt-1 min-w-[6px] h-[6px] rounded-full relative top-2" />
                             <div>
-                                <strong className="text-slate-900 text-lg block mb-2">職責 (Responsibilities)</strong>
+                                <strong className="text-slate-900 text-lg block mb-2">依賴 (Dependencies)</strong>
                                 <ul className="space-y-2 text-base pl-1 text-slate-600">
-                                    <li>有了職責意識，才能實踐 <b>單一職責 (SRP)</b> 與 <b>高內聚 (High Cohesion)</b>，確保相關的邏輯緊密集中。更容易進行 單元測試 (Unit Testing) 與除錯 (Debugging)。</li>
-                                    <li>幫助開發者在設計當下判斷「這段程式碼該放在哪裡」，避免創造出包山包海、修改困難的「上帝類別 (God Class)」。</li>
+                                    <li>依賴方向決定了穩定與彈性，<b>高層模組不依賴低層模組，兩者都應依賴抽象 (DIP)</b>。當方向正確，替換實作、單元測試與除錯都變得輕而易舉。</li>
+                                    <li>明確的依賴方向幫助你判斷「誰該知道誰」，外層認識內層，內層不認識外層。在更高的層次上，這就是系統穩定性的根基：<b>變動被隔離在外層，核心邏輯不受波及</b>。</li>
                                 </ul>
                             </div>
                         </li>
@@ -281,10 +281,10 @@ const ReflectionTab: React.FC = () => {
                     <div className="mb-4 bg-green-100 w-12 h-12 rounded-xl flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
                         <Globe size={24} />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800 mb-3">3. 巨觀層次：異質系統整合</h3>
+                    <h3 className="text-xl font-bold text-slate-800 mb-3">3. 巨觀層次：異質系統整合依賴方向</h3>
                     <p className="text-slate-600 leading-relaxed text-sm">
-                        再放大到系統與系統之間，也遵循 <strong>SRP (單一職責)</strong>：
-                        每個服務專注做好一件事，而「整合」本身就是一個獨立的職責。
+                        再放大到系統與系統之間，也遵循 <strong>依賴方向</strong>：
+                        每個服務專注做好一件事，而「整合」本身就是一個依賴的方向。
                         <strong>Mediator 模式</strong> 演化為 <strong>API Gateway / Service Mesh</strong>，負責協調通訊，相互串聯，讓系統既獨立又協作。
                     </p>
                 </div>
@@ -918,21 +918,21 @@ var result = files
                                 </div>
                                 <p className="text-sm text-slate-500 leading-relaxed text-left">
                                     SOLID 原則、DDD 精神與 Clean Architecture 須明確定在
-                                    <span
+                                    <a
                                         className="text-blue-600 font-bold hover:underline cursor-pointer px-1 hover:bg-blue-50 rounded"
                                         onClick={() => setActiveRule('global')}
                                     >
                                         <FileText size={14} className="inline mr-1" />
                                         AntiGravity 的 Rule
-                                    </span>
+                                    </a>
                                     裏，或是 VS Code 的
-                                    <span
+                                    <a
                                         className="text-blue-600 font-bold hover:underline cursor-pointer px-1 hover:bg-blue-50 rounded"
                                         onClick={() => setActiveRule('vscode')}
                                     >
                                         <FileText size={14} className="inline mr-1" />
                                         .github/instructions.md
-                                    </span>
+                                    </a>
                                     裏。
                                 </p>
                             </div>

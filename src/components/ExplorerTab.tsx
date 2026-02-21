@@ -206,6 +206,7 @@ const ExplorerTab: React.FC = () => {
         const clipboard = Clipboard.getInstance();
         clipboard.notifier.subscribe(clipboardObs);
 
+
         return () => {
             commandInvokerInstance.notifier.unsubscribe(cmdObs);
             clipboard.notifier.unsubscribe(clipboardObs);
@@ -450,33 +451,34 @@ const ExplorerTab: React.FC = () => {
                         className="flex-1 overflow-y-auto space-y-0.5 pr-2 dark-scrollbar text-left text-sm font-mono leading-tight"
                     >
                         {visitorLogs.length === 0 && !results && (
-                            <div className="space-y-3 py-2">
+                            <div className="space-y-3 py-2 text-slate-400">
                                 {/* Deckard Cain 經典台詞 — 彩蛋 */}
                                 <p className="text-[#C7B377] font-bold text-base tracking-wide" style={{ textShadow: '0 0 8px rgba(199,179,119,0.4)' }}>
                                     {'>'} Stay a while and listen..._
                                 </p>
 
-                                <p className="text-slate-500">
-                                    進入「檔案總管」多種設計模式的協作情境
+                                <p>
+                                    完成「檔案總管」實戰多種設計模式的運用
                                 </p>
 
                                 <div className="space-y-2.5 text-sm">
                                     <div className="space-y-1">
                                         <p className="text-blue-300 font-bold">📂 檔案總管</p>
-                                        <p className="text-slate-500 pl-4">• 點擊節點選取檔案或目錄</p>
-                                        <p className="text-slate-500 pl-4">• 選取後可複製 / 貼上 / 刪除</p>
-                                        <p className="text-slate-500 pl-4">• 工具列可依名稱 / 大小 / 類型排序</p>
-                                        <p className="text-slate-500 pl-4">• 點擊標籤，為選取的檔案加上標籤</p>
-                                        <p className="text-slate-500 pl-4">• 支援 Undo / Redo 操作還原</p>
+                                        <p className="pl-4">• 點擊節點選取檔案或目錄</p>
+                                        <p className="pl-4">• 選取後可複製 / 貼上 / 刪除</p>
+                                        <p className="pl-4">• 工具列可依名稱 / 大小 / 類型排序</p>
+                                        <p className="pl-4">• 點擊標籤，為選取的檔案加上標籤</p>
+                                        <p className="pl-4">• 支援 Undo / Redo 操作還原</p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-green-500 font-bold">⚡ 操作與觀察</p>
-                                        <p className="text-slate-500 pl-4">• 計算大小 / 匯出 XML / 搜尋</p>
-                                        <p className="text-slate-500 pl-4">• 操作結果會即時顯示於此</p>
+                                        <p className="pl-4">• 計算大小 / 匯出 XML / 搜尋</p>
+                                        <p className="pl-4">• 操作進度與結果會即時顯示</p>
                                     </div>
                                 </div>
 
-                                <p className="text-slate-600 text-sm pt-1">試試任意操作，Console 將記錄每步驟...</p>
+                                <p className="text-sm pt-1">試試任意操作，Console 將記錄每步驟...</p>
+                                <p className="text-amber-500/80 text-sm pt-2 font-medium">💡 如果是你，會如何實作這些功能？</p>
                             </div>
                         )}
                         {visitorLogs.map((log, i) => (

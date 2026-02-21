@@ -9,7 +9,7 @@ const ERTab: React.FC = () => {
 
                 <div className="space-y-8 mt-6">
                     {/* Row 1: Entries & EntryAttributes */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                         {/* Entries 主表 */}
                         <div>
                             <div className="bg-slate-800 text-white p-4 rounded-t-2xl font-mono text-base flex justify-between items-center shadow-lg text-left">
@@ -60,7 +60,7 @@ const ERTab: React.FC = () => {
                     </div>
 
                     {/* Row 2: EntryTags & Tags */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                         {/* EntryTags 關聯表 (Mediator) */}
                         <div>
                             <div className="bg-rose-900 text-white p-4 rounded-t-2xl font-mono text-base flex justify-between items-center shadow-lg text-rose-100">

@@ -85,7 +85,7 @@ const App: React.FC = () => {
                   onClick={() => setShowLanding(true)}
                   className="text-4xl md:text-6xl font-black tracking-tight text-[#1d1d1f] drop-shadow-sm cursor-pointer hover:opacity-80 transition-opacity duration-200"
                 >
-                  Design Patterns <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Mastery</span>
+                  Design Patterns <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Beyond</span>
                 </h1>
 
                 {/* Divider removed */}
@@ -119,8 +119,8 @@ const App: React.FC = () => {
                     className={`
                   flex-1 justify-center relative px-4 py-3 rounded-full text-base font-bold transition-all duration-300 ease-out flex items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                   ${activeTab === tab.id
-                        ? 'bg-slate-900 text-white shadow-lg scale-100'
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 active:scale-95'}
+                        ? 'bg-slate-900 text-white shadow-lg scale-100 cursor-default'
+                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 active:scale-95 cursor-pointer'}
                 `}
                   >
                     <tab.i size={20} className={`transition-transform duration-300 ${activeTab === tab.id ? 'scale-110 text-blue-300' : 'group-hover:scale-110'}`} />
