@@ -71,7 +71,7 @@ export abstract class BaseExporterTemplate extends BaseVisitor {
     /**
      * [關鍵防禦] _write 現在會檢查型別
      */
-    private _write(safeFragment: SafeFragment | string | undefined | null, node: EntryComponent, logMsg: string): void {
+    private _write(safeFragment: SafeFragment | string | undefined | null, node: EntryComponent): void {
         if (!safeFragment || (safeFragment instanceof SafeFragment && !safeFragment.content)) {
             return;
         }
@@ -82,22 +82,22 @@ export abstract class BaseExporterTemplate extends BaseVisitor {
             console.error(errorMsg);
             throw new Error(errorMsg);
         }
-
         const indent = " ".repeat(this.depth * this.indentSize);
         this.output += `${indent}${safeFragment.content}\n`;
-        this.changeState(logMsg, node);
     }
 
     override visitDirectory(dir: DirectoryComposite): void {
-        this._write(this.renderDirectoryStart(dir), dir, `開始目錄: ${dir.name}`);
+        this._write(this.renderDirectoryStart(dir), dir);
+        this.changeState(`開始目錄: ${dir.name}`, dir);
         this.depth++;
         dir.getChildren().forEach(child => child.accept(this));
         this.depth--;
-        this._write(this.renderDirectoryEnd(dir), dir, `結束目錄: ${dir.name}`);
+        this._write(this.renderDirectoryEnd(dir), dir);
     }
 
     override visitFile(file: FileLeaf): void {
-        this._write(this.renderFile(file), file, `處理檔案: ${file.name}`);
+        this._write(this.renderFile(file), file);
+        this.changeState(`處理檔案: ${file.name}`, file);
     }
 
     escape(text: string): string {
