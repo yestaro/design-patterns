@@ -83,9 +83,10 @@ const App: React.FC = () => {
                 {/* Left: Title */}
                 <h1
                   onClick={() => setShowLanding(true)}
-                  className="text-4xl md:text-6xl font-black tracking-tight text-[#1d1d1f] drop-shadow-sm cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                  className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-sm cursor-pointer hover:opacity-80 transition-opacity duration-200"
                 >
-                  Design Patterns <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Beyond</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Beyond</span>
+                  <span className="whitespace-nowrap ml-1 text-slate-500/30" style={{ WebkitTextStroke: '1px #64748b' }}> Design Patterns</span>
                 </h1>
 
                 {/* Divider removed */}

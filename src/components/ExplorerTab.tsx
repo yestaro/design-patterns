@@ -340,7 +340,7 @@ const ExplorerTab: React.FC = () => {
             <div className="flex flex-col md:flex-row md:h-[520px] md:overflow-hidden h-auto">
                 {/* 1. 側邊欄：檔案階層 (w-[440px]) */}
                 <div className="w-full md:w-[440px] bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 p-5 text-left h-[400px] md:h-auto overflow-hidden">
-                    <h3 className="font-bold text-slate-800 mb-5 flex items-center gap-2 text-left" title="使用 Composite 模式建構檔案與目錄的樹狀結構 (Composite Pattern)"><Workflow className="text-amber-500" size={18} /> 檔案階層 (Composite)</h3>
+                    <h3 className="font-bold text-slate-800 mb-5 flex items-center gap-2 text-left" title="使用 Composite 模式建構檔案與目錄的樹狀結構 (Composite Pattern)"><Workflow className="text-amber-500" size={18} />Composite</h3>
                     <div className="flex-1 overflow-y-auto custom-scrollbar text-left">
                         <RenderTree
                             entry={compositeRoot}
@@ -359,7 +359,7 @@ const ExplorerTab: React.FC = () => {
                     <div className="flex-1 flex flex-col md:flex-row min-h-0 border-b border-slate-200 bg-white">
                         {/* Visitor 操作 */}
                         <div className="flex-1 p-4 flex flex-col justify-start space-y-4 border-r border-slate-100 overflow-y-auto custom-scrollbar">
-                            <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left" title="使用 Visitor 模式在不修改結構的情況下增加新功能 (Visitor Pattern)"><Zap className="text-emerald-600" size={18} /> 訪問者操作 (Visitor)</h3>
+                            <h3 className="font-bold text-slate-800 flex items-center gap-2 text-left" title="使用 Visitor 模式在不修改結構的情況下增加新功能 (Visitor Pattern)"><Zap className="text-emerald-600" size={18} />Visitor</h3>
                             <div className="flex flex-col gap-2">
                                 <button
                                     onClick={() => handleAnalysis(async (obs) => {
@@ -418,7 +418,7 @@ const ExplorerTab: React.FC = () => {
 
                         {/* Observer 監控 */}
                         <div className="w-full md:w-80 p-4 flex flex-col justify-start space-y-4 bg-white overflow-y-auto custom-scrollbar">
-                            <h3 className="font-bold text-slate-800 flex items-center justify-between text-left" title="使用 Observer 模式即時更新監控數據 (Observer Pattern)"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-pink-500" /> 監控 (Observer)</div><span className="text-[10px] px-2 py-0.5 bg-pink-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
+                            <h3 className="font-bold text-slate-800 flex items-center justify-between text-left" title="使用 Observer 模式即時更新監控數據 (Observer Pattern)"><div className="flex items-center gap-2 text-left"><Activity size={16} className="text-pink-500" />Observer</div><span className="text-[10px] px-2 py-0.5 bg-pink-500 text-white rounded-full font-bold uppercase tracking-tighter text-left">Live</span></h3>
                             <div className="space-y-4">
                                 <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
                                     <span className="text-sm text-slate-400 font-bold uppercase mb-1.5 text-left">目前節點</span>
