@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, HelpCircle, Calendar, User, Code, Bot, Panda, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
+import { X, HelpCircle, Calendar, User, Code, Bot, Panda, ChevronDown, ChevronUp, Copy, Check, ArrowLeft, Loader2, Lock, Unlock } from 'lucide-react';
+import { CodeFetcher } from '../data/CodeFetcher';
+import CodeBlock from './CodeBlock';
 
 // ... (interfaces)
 interface RoadmapItem {
@@ -13,6 +15,13 @@ interface RoadmapItem {
     transcript?: { speaker: string; text: string }[];
     tasks: string[];
     tasksTitle: string;
+    codeUrls?: string[];
+    quiz?: {
+        question: string;
+        options: string[];
+        answer: any; // Can be string or mapping
+        type: 'match' | 'choice';
+    };
 }
 
 const scheduleData: RoadmapItem[] = [
@@ -41,7 +50,14 @@ const scheduleData: RoadmapItem[] = [
             '推導出系統的 Domain Model（領域模型），並使用 UML 類別圖呈現。',
             '規劃出系統的 ER Model，將來資料庫會有那些表格與欄位或關聯。',
             '不限語言，先實作出「名詞」可看到樹狀的檔案呈現即可，不用實現「動詞」的功能。'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Composite.ts'],
+        quiz: {
+            question: '天地會的總舵主是誰？',
+            options: ['陳近南', '韋小寶', '吳三桂'],
+            answer: '陳近南',
+            type: 'choice'
+        }
     },
     {
         day: 2,
@@ -64,7 +80,14 @@ const scheduleData: RoadmapItem[] = [
             '完成 計算檔案大小 的功能',
             '完成 搜尋特定關鍵字檔案 的功能',
             '完成 輸出 XML 格式的功能'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Visitor.ts'],
+        quiz: {
+            question: '這就叫做專業。出自哪部電影？',
+            options: ['食神', '功夫', '鹿鼎記'],
+            answer: '功夫',
+            type: 'choice'
+        }
     },
     {
         day: 3,
@@ -80,11 +103,18 @@ const scheduleData: RoadmapItem[] = [
             { speaker: '客戶', text: '聽 AI 部門說，他們另要 Markdown。' },
             { speaker: '你', text: '(心想…輸出要考慮"字元脫逸"、"縮排"問題。只要輸出，就要處理這些)' },
         ],
-        tasksTitle: '身為子類別，要有一套規矩',
+        tasksTitle: '我們子類別，是有一套規矩的',
         tasks: [
             '定義 BaseExporterTemplate 基類，在 visit (骨架方法) 中處理「字元脫逸」與「縮排」。',
             '完成 JSONExporter 與 MarkdownExporter 子類別，只處理格式輸出（細節不拘）。'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Template.ts'],
+        quiz: {
+            question: '什麼是江湖規矩？',
+            options: ['單挑', '群架', '吃瓜'],
+            answer: '單挑',
+            type: 'choice'
+        }
     },
     {
         day: 4,
@@ -104,7 +134,14 @@ const scheduleData: RoadmapItem[] = [
             '完成發佈端 Subject 介面實作，發佈訊息',
             '完成接收端 ConsoleObserver 顯示日誌',
             '完成接收端 DashboardObserver 即時狀態'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Observer.ts'],
+        quiz: {
+            question: '打雷啦！下雨囉，收衣服呀。請配對',
+            options: ['打雷啦', '下雨囉', '收衣服呀'],
+            answer: { Notify: '打雷啦', Adapter: '下雨囉', Reaction: '收衣服呀' },
+            type: 'match'
+        }
     },
     {
         day: 5,
@@ -124,7 +161,14 @@ const scheduleData: RoadmapItem[] = [
         tasks: [
             '完成 各種 Decorator 偵測關鍵字變樣式',
             '完成 Adapter 介面轉換，讓儀表板顯示進度'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Decorator.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Adapter.ts'],
+        quiz: {
+            question: '降龍十八掌是那個宗派絕學？',
+            options: ['少林', '武當', '丐幫'],
+            answer: '丐幫',
+            type: 'choice'
+        }
     },
     {
         day: 6,
@@ -149,7 +193,14 @@ const scheduleData: RoadmapItem[] = [
             '完成 Command 使用排序策略 Strategy',
             '完成 CommandInvoker 紀錄操作, 可悔步',
             '完成 Clipboard 全域 Singleton 共享剪貼簿'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Command.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Strategy.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Singleton.ts'],
+        quiz: {
+            question: '凌凌漆自彈自唱哪首歌？',
+            options: ['夜來香', '李香蘭', '上海灘'],
+            answer: '李香蘭',
+            type: 'choice'
+        }
     },
     {
         day: 7,
@@ -169,7 +220,14 @@ const scheduleData: RoadmapItem[] = [
             '完成 LabelFactory 取得共享標籤實體',
             '完成 TagMediator 管理標籤與檔案的多對多',
             '完成 Command 方式，執行貼標籤的動作'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Flyweight.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Mediator.ts'],
+        quiz: {
+            question: '汽車維修員，身上有什麼也是合理的？',
+            options: ['扳手', '鎚子', '都合理'],
+            answer: '都合理',
+            type: 'choice'
+        }
     },
     {
         day: 8,
@@ -190,7 +248,14 @@ const scheduleData: RoadmapItem[] = [
         tasks: [
             '完成 FileSystemFacade 統整所有命令介面',
             '降低 Explorer UI 對模式實體類別的直接依賴'
-        ]
+        ],
+        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Facade.ts'],
+        quiz: {
+            question: '要你命3000，是誰發明的？',
+            options: ['達文西', '聞西', '唐僧'],
+            answer: '聞西',
+            type: 'choice'
+        }
     }
 ];
 
@@ -203,13 +268,43 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     const [selectedDay, setSelectedDay] = useState(scheduleData[0]);
     const [expandedCores, setExpandedCores] = useState<number[]>([]);
     const [copied, setCopied] = useState(false);
+    const [viewMode, setViewMode] = useState<'roadmap' | 'code'>('roadmap');
+    const [fetchedCodes, setFetchedCodes] = useState<Record<number, string[]>>({});
+    const [isLoadingCode, setIsLoadingCode] = useState(false);
+    const [unlockedDays, setUnlockedDays] = useState<number[]>([]);
+    const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
+    const [selectedChoice, setSelectedChoice] = useState<string>('');
+    const [copiedCodeIdx, setCopiedCodeIdx] = useState<number | null>(null);
     const detailsRef = useRef<HTMLDivElement>(null);
+
+    const isCurrentDayUnlocked = unlockedDays.includes(selectedDay.day) || !selectedDay.quiz;
 
     useEffect(() => {
         if (detailsRef.current) {
             detailsRef.current.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        // Reset quiz state when switching days
+        setQuizAnswers({});
+        setSelectedChoice('');
     }, [selectedDay]);
+
+    useEffect(() => {
+        // 如果進入程式碼模式且尚未抓取過
+        if (viewMode === 'code' && selectedDay.codeUrls && selectedDay.codeUrls.length > 0 && !fetchedCodes[selectedDay.day]) {
+            loadCode();
+        }
+    }, [viewMode, selectedDay.day]);
+
+    const loadCode = async () => {
+        if (!selectedDay.codeUrls) return;
+        setIsLoadingCode(true);
+        try {
+            const result = await CodeFetcher.fetchMany(selectedDay.codeUrls);
+            setFetchedCodes(prev => ({ ...prev, [selectedDay.day]: result }));
+        } finally {
+            setIsLoadingCode(false);
+        }
+    };
 
     const toggleCore = (day: number, e: React.MouseEvent) => {
         // Stop propagation so we don't select the day when just expanding
@@ -229,6 +324,12 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCopyCode = (code: string, idx: number) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCodeIdx(idx);
+        setTimeout(() => setCopiedCodeIdx(null), 2000);
     };
 
     if (!isOpen) return null;
@@ -301,13 +402,15 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                             <div className="h-px bg-slate-200 flex-1"></div>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Interview Start</span>
-                                                <button
-                                                    onClick={handleCopyTranscript}
-                                                    className={`p-1.5 rounded-md transition-all hover:bg-slate-100 ${copied ? 'text-emerald-500' : 'text-slate-400 hover:text-blue-500'}`}
-                                                    title="複製對話內容"
-                                                >
-                                                    {copied ? <Check size={14} /> : <Copy size={14} />}
-                                                </button>
+                                                <div className="flex gap-1.5 items-center">
+                                                    <button
+                                                        onClick={handleCopyTranscript}
+                                                        className={`p-1.5 rounded-md transition-all hover:bg-slate-100 ${copied ? 'text-emerald-500' : 'text-slate-400 hover:text-blue-500'}`}
+                                                        title="複製對話內容"
+                                                    >
+                                                        {copied ? <Check size={14} /> : <Copy size={14} />}
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div className="h-px bg-slate-200 flex-1"></div>
                                         </div>
@@ -345,10 +448,23 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                 )}
 
                                 <div>
-                                    <h5 className="text-sm font-black text-slate-900 flex items-center gap-2 mb-4">
-                                        <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
-                                        今日任務：
-                                    </h5>
+                                    <div className="flex items-center mb-4">
+                                        <h5 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                                            <span className="w-1.5 h-4 bg-blue-500 rounded-full"></span>
+                                            今日任務：
+                                        </h5>
+                                        <button
+                                            onClick={() => setViewMode('code')}
+                                            className={`py-1 px-3 rounded-xl transition-all border flex items-center gap-2 text-sm ${viewMode === 'code'
+                                                ? 'bg-blue-600 border-blue-500 text-white shadow-lg'
+                                                : 'bg-white border-slate-200 text-slate-400 hover:border-blue-500 hover:text-blue-600 shadow-sm'
+                                                }`}
+                                            title="查看範例程式碼"
+                                        >
+                                            <Lock size={14} />
+                                            <span>解鎖源碼</span>
+                                        </button>
+                                    </div>
                                     <div className="grid grid-cols-1 gap-2">
                                         {selectedDay.tasks.map((task, idx) => (
                                             <div key={idx} className="flex gap-3 p-2 rounded-xl hover:bg-slate-50 transition-all group items-start">
@@ -364,56 +480,228 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                         </div>
                     </div>
 
-                    {/* ----------------- Right Side: Original Roadmap Cards (2/3) ----------------- */}
-                    <div className="flex-1 md:h-full p-6 md:p-8 overflow-y-auto bg-slate-200 custom-scrollbar order-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {scheduleData.map((item) => (
-                                <div
-                                    key={item.day}
-                                    onClick={() => setSelectedDay(item)}
-                                    className={`bg-white rounded-2xl border-2 transition-all overflow-hidden group cursor-pointer ${selectedDay.day === item.day ? 'border-blue-500 shadow-xl scale-[1.02]' : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'}`}
-                                >
-                                    <div className={`p-1 bg-gradient-to-r ${item.color}`} />
-                                    <div className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-700 block mb-1">Day {item.day}</span>
-                                                <h4 className="text-xl font-bold text-slate-800">{item.title}</h4>
-                                            </div>
-                                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform`}>
-                                                {item.day}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                <p className="text-xs font-black text-slate-400 uppercase mb-1">核心模式</p>
-                                                <p className="font-bold text-blue-600 text-sm">{item.pattern}</p>
-                                            </div>
-                                            <p className="text-slate-600 text-sm leading-relaxed">{item.target}</p>
-                                            {/* Key Mechanism (Collapsible) */}
-                                            <div
-                                                className="pt-3 border-t border-dashed border-slate-200 cursor-pointer hover:bg-slate-50 -mx-6 px-6 pb-2 transition-colors group/core"
-                                                onClick={(e) => toggleCore(item.day, e)}
-                                            >
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <p className="text-xs font-black text-slate-400 uppercase group-hover/core:text-blue-500 transition-colors">關鍵機制</p>
-                                                    {expandedCores.includes(item.day) ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                    {/* ----------------- Right Side: Roadmap Cards OR Code View ----------------- */}
+                    {viewMode === 'roadmap' ? (
+                        <div className="flex-1 md:h-full p-6 md:p-8 overflow-y-auto bg-slate-200 custom-scrollbar order-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {scheduleData.map((item) => (
+                                    <div
+                                        key={item.day}
+                                        onClick={() => setSelectedDay(item)}
+                                        className={`bg-white rounded-2xl border-2 transition-all overflow-hidden group cursor-pointer ${selectedDay.day === item.day ? 'border-blue-500 shadow-xl scale-[1.02]' : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'}`}
+                                    >
+                                        <div className={`p-1 bg-gradient-to-r ${item.color}`} />
+                                        <div className="p-6">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-700 block mb-1">Day {item.day}</span>
+                                                    <h4 className="text-xl font-bold text-slate-800">{item.title}</h4>
                                                 </div>
+                                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform`}>
+                                                    {item.day}
+                                                </div>
+                                            </div>
 
-                                                {/* Content: Expand/Collapse */}
-                                                {expandedCores.includes(item.day) && (
-                                                    <p className="text-slate-600 text-sm italic leading-relaxed font-medium animate-in slide-in-from-top-2 duration-200 mt-2">
-                                                        "{item.core}"
-                                                    </p>
-                                                )}
+                                            <div className="space-y-4">
+                                                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                                    <p className="text-xs font-black text-slate-400 uppercase mb-1">核心模式</p>
+                                                    <p className="font-bold text-blue-600 text-sm">{item.pattern}</p>
+                                                </div>
+                                                <p className="text-slate-600 text-sm leading-relaxed">{item.target}</p>
+                                                {/* Key Mechanism (Collapsible) */}
+                                                <div
+                                                    className="pt-3 border-t border-dashed border-slate-200 cursor-pointer hover:bg-slate-50 -mx-6 px-6 pb-2 transition-colors group/core"
+                                                    onClick={(e) => toggleCore(item.day, e)}
+                                                >
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <p className="text-xs font-black text-slate-400 uppercase group-hover/core:text-blue-500 transition-colors">關鍵機制</p>
+                                                        {expandedCores.includes(item.day) ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                                                    </div>
+
+                                                    {/* Content: Expand/Collapse */}
+                                                    {expandedCores.includes(item.day) && (
+                                                        <p className="text-slate-600 text-sm italic leading-relaxed font-medium animate-in slide-in-from-top-2 duration-200 mt-2">
+                                                            "{item.core}"
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="flex-1 md:h-full bg-slate-900 overflow-hidden flex flex-col order-2">
+                            {/* Code View Header */}
+                            <div className="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700 shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${selectedDay.color} flex items-center justify-center text-white text-lg font-black shadow-lg`}>
+                                        {selectedDay.day}
+                                    </div>
+                                    <div>
+                                        <h4 className="text-slate-200 font-bold flex items-center gap-2">
+                                            Code Reference
+                                        </h4>
+                                        <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">{selectedDay.pattern}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setViewMode('roadmap')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 text-sm font-bold rounded-xl transition-all shadow-lg border border-slate-600"
+                                >
+                                    <ArrowLeft size={16} /> 返回路線圖
+                                </button>
+                            </div>
+
+                            {/* Challenge Screen or Code Content */}
+                            {!isCurrentDayUnlocked ? (
+                                <div className="flex-1 flex items-center justify-center p-8 bg-slate-950 relative overflow-hidden">
+                                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#f97316_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+
+                                    <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl relative z-10 space-y-8 text-center animate-in zoom-in-95 duration-500 text-left">
+                                        <div className="space-y-3">
+                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-500 text-[10px] font-black uppercase tracking-widest">
+                                                Knowledge Challenge - 解鎖程式碼實作
+                                            </div>
+                                            <h3 className="text-2xl font-black text-white italic tracking-tighter">
+                                                {selectedDay.quiz?.question}
+                                            </h3>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {selectedDay.quiz?.type === 'match' ? (
+                                                Object.keys(selectedDay.quiz.answer).map((btn) => (
+                                                    <div key={btn} className="flex items-center gap-4 text-left">
+                                                        <div className="w-16 h-12 rounded-2xl border-2 border-slate-700 flex items-center justify-center text-[10px] font-black text-white bg-slate-800 shadow-[0_0_15px_rgba(0,0,0,0.5)] shrink-0 px-2 overflow-hidden text-center leading-tight">
+                                                            {btn}
+                                                        </div>
+                                                        <div className="flex-1 grid grid-cols-3 gap-2">
+                                                            {selectedDay.quiz?.options.map((meaning) => (
+                                                                <button
+                                                                    key={meaning}
+                                                                    onClick={() => setQuizAnswers(prev => ({ ...prev, [btn]: meaning }))}
+                                                                    className={`px-2 py-2 rounded-lg text-[10px] font-bold transition-all border ${quizAnswers[btn] === meaning
+                                                                        ? 'bg-orange-500 border-orange-400 text-white shadow-[0_0_10px_rgba(249,115,22,0.4)]'
+                                                                        : 'bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-500'
+                                                                        }`}
+                                                                >
+                                                                    {meaning}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {selectedDay.quiz?.options.map((opt) => (
+                                                        <button
+                                                            key={opt}
+                                                            onClick={() => setSelectedChoice(opt)}
+                                                            className={`w-full p-4 rounded-xl text-left text-sm font-bold transition-all border flex items-center justify-between group ${selectedChoice === opt
+                                                                ? 'bg-orange-500 border-orange-400 text-white shadow-lg'
+                                                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                                                                }`}
+                                                        >
+                                                            {opt}
+                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedChoice === opt ? 'border-white bg-white/20' : 'border-slate-600 group-hover:border-slate-400'}`}>
+                                                                {selectedChoice === opt && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            disabled={
+                                                (selectedDay.quiz?.type === 'match' &&
+                                                    Object.keys(selectedDay.quiz.answer).some(key => !quizAnswers[key])) ||
+                                                (selectedDay.quiz?.type === 'choice' && !selectedChoice)
+                                            }
+                                            onClick={() => {
+                                                let isCorrect = false;
+                                                if (selectedDay.quiz?.type === 'match') {
+                                                    isCorrect = JSON.stringify(quizAnswers) === JSON.stringify(selectedDay.quiz?.answer);
+                                                } else {
+                                                    isCorrect = selectedChoice === selectedDay.quiz?.answer;
+                                                }
+
+                                                if (isCorrect) {
+                                                    setUnlockedDays(prev => [...prev, selectedDay.day]);
+                                                } else {
+                                                    alert('唔，觀念有些偏差，回頭翻翻筆記？');
+                                                }
+                                            }}
+                                            className="w-full py-4 bg-orange-600 hover:bg-orange-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group"
+                                        >
+                                            <Unlock size={20} className="group-hover:animate-bounce" />
+                                            解鎖章節
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-slate-950 font-mono text-sm leading-relaxed">
+                                    <div className="max-w-4xl mx-auto space-y-8">
+                                        <div className="flex items-center gap-3 text-emerald-500 mb-8">
+                                            <Code size={20} />
+                                            <span className="text-lg font-bold">範例程式碼實作：{selectedDay.pattern}</span>
+                                        </div>
+
+                                        {isLoadingCode ? (
+                                            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                                                <Loader2 size={40} className="text-blue-500 animate-spin" />
+                                                <p className="text-slate-400 font-bold animate-pulse">正在從 GitHub 傳輸原始碼...</p>
+                                            </div>
+                                        ) : fetchedCodes[selectedDay.day] ? (
+                                            <div className="space-y-12">
+                                                {fetchedCodes[selectedDay.day].map((code, idx) => (
+                                                    <div key={idx} className="relative group">
+                                                        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                            <button
+                                                                onClick={() => handleCopyCode(code, idx)}
+                                                                className={`p-2 rounded-xl transition-all border backdrop-blur-md shadow-2xl ${copiedCodeIdx === idx
+                                                                    ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                                                                    : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
+                                                                    }`}
+                                                                title="複製此段程式碼"
+                                                            >
+                                                                {copiedCodeIdx === idx ? <Check size={16} /> : <Copy size={16} />}
+                                                            </button>
+                                                        </div>
+                                                        <div className="bg-slate-950/80 p-8 rounded-3xl border border-slate-800 text-slate-300 shadow-inner overflow-hidden">
+                                                            <CodeBlock
+                                                                code={code}
+                                                                language="typescript"
+                                                                showLineNumbers={true}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="p-10 border-2 border-dashed border-slate-800 rounded-3xl text-center space-y-4">
+                                                <Bot size={40} className="mx-auto text-slate-700" />
+                                                <p className="text-slate-500 font-bold">
+                                                    {selectedDay.codeUrls && selectedDay.codeUrls.length > 0
+                                                        ? '尚未載入內容，請點擊按鈕重試'
+                                                        : '此章節尚未設定遠端存放路徑'}
+                                                </p>
+                                                {selectedDay.codeUrls && (
+                                                    <button
+                                                        onClick={loadCode}
+                                                        className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-sm font-bold transition-all"
+                                                    >
+                                                        手動抓取
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
