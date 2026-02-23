@@ -64,7 +64,10 @@ const App: React.FC = () => {
 
       {/* Landing Page */}
       {showLanding && (
-        <LandingPage onEnter={() => setShowLanding(false)} />
+        <LandingPage onEnter={() => {
+          setShowLanding(false);
+          window.scrollTo(0, 0);
+        }} />
       )}
 
       {/* App 主體 */}

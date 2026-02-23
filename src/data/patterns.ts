@@ -1,6 +1,6 @@
 import {
-  Layout, Code, Workflow, Zap, Play, Activity, Component, Share2,
-  RotateCcw, ArrowRightLeft, Boxes, DatabaseZap, Box, AppWindow,
+  Workflow, Zap, Activity, Component, Share2,
+  RefreshCcwDot, Boxes, Box, AppWindow, Plug2,
   LayoutTemplate, LucideIcon, Command
 } from 'lucide-react';
 
@@ -543,7 +543,7 @@ function notify(msg: string, action: number, level: string, withIcon: boolean) {
     name: 'Adapter',
     chapter: '介面轉換',
     description: '將不相容的事件資料 (NotificationEvent) 轉換為 UI 期待的格式 (Dashboard)，解決介面不對接問題。',
-    icon: Share2,
+    icon: Plug2,
     mermaid: `classDiagram
     class NotificationEvent {
         <<Adaptee>>
@@ -737,7 +737,7 @@ function onPasteClick(targetId: string) {
     name: 'Strategy',
     chapter: '策略注入',
     description: '定義排序演算法家族，讓排序規則 (名稱、大小、標籤) 可在需要時選擇切換，彈性應用。',
-    icon: ArrowRightLeft,
+    icon: RefreshCcwDot,
     mermaid: `classDiagram
     class ISortStrategy {
         <<interface>>
@@ -970,7 +970,7 @@ fileX.tags.push(new Label('Personal', 'bg-green-500'));
     name: 'Mediator',
     chapter: '關係管理',
     description: '集中管理檔案與標籤的多對多關聯，避免物件間的網狀依賴,實現 O(1) 雙向查詢。',
-    icon: DatabaseZap,
+    icon: Share2,
     mermaid: `classDiagram
     class TagMediator {
         -fileToLabels : Map~ID, Set~
