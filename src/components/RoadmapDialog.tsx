@@ -269,6 +269,7 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     const [expandedCores, setExpandedCores] = useState<number[]>([]);
     const [copied, setCopied] = useState(false);
     const [viewMode, setViewMode] = useState<'roadmap' | 'code'>('roadmap');
+    const [mobileStep, setMobileStep] = useState<'grid' | 'details' | 'action'>('grid');
     const [fetchedCodes, setFetchedCodes] = useState<Record<number, string[]>>({});
     const [isLoadingCode, setIsLoadingCode] = useState(false);
     const [unlockedDays, setUnlockedDays] = useState<number[]>([]);
@@ -278,6 +279,14 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     const detailsRef = useRef<HTMLDivElement>(null);
 
     const isCurrentDayUnlocked = unlockedDays.includes(selectedDay.day) || !selectedDay.quiz;
+
+    useEffect(() => {
+        if (isOpen) {
+            setViewMode('roadmap');
+            setMobileStep('grid');
+            setSelectedDay(scheduleData[0]);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (detailsRef.current) {
@@ -377,11 +386,24 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Two-Column Body: Left (Detailed Tasks) | Right (Roadmap Grid) */}
-                <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+                <div className="flex flex-col md:flex-row flex-1 overflow-hidden relative">
+                    {/* Circular Mobile Back FAB - Bottom Right */}
+                    {mobileStep === 'details' && (
+                        <button
+                            onClick={() => {
+                                setMobileStep('grid');
+                                setViewMode('roadmap');
+                            }}
+                            className="md:hidden fixed bottom-8 right-8 z-[60] flex items-center justify-center w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] active:scale-90 transition-all border-4 border-white"
+                            title="返回路線列表"
+                        >
+                            <ArrowLeft size={28} />
+                        </button>
+                    )}
 
                     {/* ----------------- Left Side: Implementation Tasks (1/3) ----------------- */}
-                    <div ref={detailsRef} className="w-full md:w-[400px] h-[40vh] md:h-full bg-white p-6 md:p-8 overflow-y-auto custom-scrollbar flex flex-col shrink-0 border-b md:border-b-0 md:border-r border-slate-200 order-1">
-                        <div className="mb-8">
+                    <div ref={detailsRef} className={`w-full md:w-[400px] h-full bg-white p-6 md:p-8 overflow-y-auto custom-scrollbar flex-col shrink-0 border-b md:border-b-0 md:border-r border-slate-200 order-1 relative ${mobileStep === 'details' ? 'flex animate-in slide-in-from-left duration-300' : 'hidden md:flex'}`}>
+                        <div className="mb-8 pe-12 md:pe-0">
                             <div className="flex items-center gap-3 mb-6">
                                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${selectedDay.color} flex items-center justify-center text-white text-xl font-black shadow-lg`}>
                                     {selectedDay.day}
@@ -454,7 +476,10 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                             今日任務：
                                         </h5>
                                         <button
-                                            onClick={() => setViewMode('code')}
+                                            onClick={() => {
+                                                setViewMode('code');
+                                                setMobileStep('action');
+                                            }}
                                             className={`py-1 px-3 rounded-xl transition-all border flex items-center gap-2 text-sm ${viewMode === 'code'
                                                 ? 'bg-blue-600 border-blue-500 text-white shadow-lg'
                                                 : 'bg-white border-slate-200 text-slate-400 hover:border-blue-500 hover:text-blue-600 shadow-sm'
@@ -481,227 +506,240 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* ----------------- Right Side: Roadmap Cards OR Code View ----------------- */}
-                    {viewMode === 'roadmap' ? (
-                        <div className="flex-1 md:h-full p-6 md:p-8 overflow-y-auto bg-slate-200 custom-scrollbar order-2">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {scheduleData.map((item) => (
-                                    <div
-                                        key={item.day}
-                                        onClick={() => setSelectedDay(item)}
-                                        className={`bg-white rounded-2xl border-2 transition-all overflow-hidden group cursor-pointer ${selectedDay.day === item.day ? 'border-blue-500 shadow-xl scale-[1.02]' : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'}`}
-                                    >
-                                        <div className={`p-1 bg-gradient-to-r ${item.color}`} />
-                                        <div className="p-6">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-700 block mb-1">Day {item.day}</span>
-                                                    <h4 className="text-xl font-bold text-slate-800">{item.title}</h4>
-                                                </div>
-                                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform`}>
-                                                    {item.day}
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                                    <p className="text-xs font-black text-slate-400 uppercase mb-1">核心模式</p>
-                                                    <p className="font-bold text-blue-600 text-sm">{item.pattern}</p>
-                                                </div>
-                                                <p className="text-slate-600 text-sm leading-relaxed">{item.target}</p>
-                                                {/* Key Mechanism (Collapsible) */}
-                                                <div
-                                                    className="pt-3 border-t border-dashed border-slate-200 cursor-pointer hover:bg-slate-50 -mx-6 px-6 pb-2 transition-colors group/core"
-                                                    onClick={(e) => toggleCore(item.day, e)}
-                                                >
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <p className="text-xs font-black text-slate-400 uppercase group-hover/core:text-blue-500 transition-colors">關鍵機制</p>
-                                                        {expandedCores.includes(item.day) ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                    <div className={`flex-1 h-full min-w-0 overflow-hidden order-2 ${mobileStep === 'details' ? 'hidden md:flex' : 'flex'}`}>
+                        {viewMode === 'roadmap' ? (
+                            <div className={`w-full h-full p-6 md:p-8 overflow-y-auto bg-slate-200 custom-scrollbar ${mobileStep === 'grid' ? 'block' : 'hidden md:block'}`}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {scheduleData.map((item) => (
+                                        <div
+                                            key={item.day}
+                                            onClick={() => {
+                                                setSelectedDay(item);
+                                                setMobileStep('details');
+                                            }}
+                                            className={`bg-white rounded-2xl border-2 transition-all overflow-hidden group cursor-pointer ${selectedDay.day === item.day ? 'border-blue-500 shadow-xl scale-[1.02]' : 'border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300'}`}
+                                        >
+                                            <div className={`p-1 bg-gradient-to-r ${item.color}`} />
+                                            <div className="p-6">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-700 block mb-1">Day {item.day}</span>
+                                                        <h4 className="text-xl font-bold text-slate-800">{item.title}</h4>
                                                     </div>
+                                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform`}>
+                                                        {item.day}
+                                                    </div>
+                                                </div>
 
-                                                    {/* Content: Expand/Collapse */}
-                                                    {expandedCores.includes(item.day) && (
-                                                        <p className="text-slate-600 text-sm italic leading-relaxed font-medium animate-in slide-in-from-top-2 duration-200 mt-2">
-                                                            "{item.core}"
-                                                        </p>
-                                                    )}
+                                                <div className="space-y-4">
+                                                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                                        <p className="text-xs font-black text-slate-400 uppercase mb-1">核心模式</p>
+                                                        <p className="font-bold text-blue-600 text-sm">{item.pattern}</p>
+                                                    </div>
+                                                    <p className="text-slate-600 text-sm leading-relaxed">{item.target}</p>
+                                                    {/* Key Mechanism (Collapsible) */}
+                                                    <div
+                                                        className="pt-3 border-t border-dashed border-slate-200 cursor-pointer hover:bg-slate-50 -mx-6 px-6 pb-2 transition-colors group/core"
+                                                        onClick={(e) => toggleCore(item.day, e)}
+                                                    >
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <p className="text-xs font-black text-slate-400 uppercase group-hover/core:text-blue-500 transition-colors">關鍵機制</p>
+                                                            {expandedCores.includes(item.day) ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
+                                                        </div>
+
+                                                        {/* Content: Expand/Collapse */}
+                                                        {expandedCores.includes(item.day) && (
+                                                            <p className="text-slate-600 text-sm italic leading-relaxed font-medium animate-in slide-in-from-top-2 duration-200 mt-2">
+                                                                "{item.core}"
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex-1 md:h-full bg-slate-900 overflow-hidden flex flex-col order-2">
-                            {/* Code View Header */}
-                            <div className="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700 shrink-0">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${selectedDay.color} flex items-center justify-center text-white text-lg font-black shadow-lg`}>
-                                        {selectedDay.day}
-                                    </div>
-                                    <div>
-                                        <h4 className="text-slate-200 font-bold flex items-center gap-2">
-                                            Code Reference
-                                        </h4>
-                                        <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">{selectedDay.pattern}</p>
-                                    </div>
+                                    ))}
                                 </div>
-                                <button
-                                    onClick={() => setViewMode('roadmap')}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 text-sm font-bold rounded-xl transition-all shadow-lg border border-slate-600"
-                                >
-                                    <ArrowLeft size={16} /> 返回路線圖
-                                </button>
                             </div>
-
-                            {/* Challenge Screen or Code Content */}
-                            {!isCurrentDayUnlocked ? (
-                                <div className="flex-1 flex items-center justify-center p-8 bg-slate-950 relative overflow-hidden">
-                                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#f97316_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-
-                                    <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl relative z-10 space-y-8 text-center animate-in zoom-in-95 duration-500 text-left">
-                                        <div className="space-y-3">
-                                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-500 text-[10px] font-black uppercase tracking-widest">
-                                                Knowledge Challenge - 解鎖程式碼實作
-                                            </div>
-                                            <h3 className="text-2xl font-black text-white italic tracking-tighter">
-                                                {selectedDay.quiz?.question}
-                                            </h3>
+                        ) : (
+                            <div className={`w-full h-full bg-slate-900 overflow-hidden flex flex-col ${mobileStep === 'action' ? 'flex animate-in slide-in-from-right duration-300' : 'hidden md:flex'}`}>
+                                {/* Code View Header */}
+                                <div className="flex items-center justify-between px-6 py-4 bg-slate-800 border-b border-slate-700 shrink-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${selectedDay.color} flex items-center justify-center text-white text-lg font-black shadow-lg`}>
+                                            {selectedDay.day}
                                         </div>
+                                        <div>
+                                            <h4 className="text-slate-200 font-bold flex items-center gap-2">
+                                                Code Reference
+                                            </h4>
+                                            <p className="text-xs text-slate-400 font-mono uppercase tracking-widest">{selectedDay.pattern}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            if (window.innerWidth < 768) {
+                                                setMobileStep('details');
+                                            } else {
+                                                setViewMode('roadmap');
+                                            }
+                                        }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 text-sm font-bold rounded-xl transition-all shadow-lg border border-slate-600"
+                                    >
+                                        <ArrowLeft size={16} /> 返回
+                                    </button>
+                                </div>
 
-                                        <div className="space-y-4">
-                                            {selectedDay.quiz?.type === 'match' ? (
-                                                Object.keys(selectedDay.quiz.answer).map((btn) => (
-                                                    <div key={btn} className="flex items-center gap-4 text-left">
-                                                        <div className="w-16 h-12 rounded-2xl border-2 border-slate-700 flex items-center justify-center text-[10px] font-black text-white bg-slate-800 shadow-[0_0_15px_rgba(0,0,0,0.5)] shrink-0 px-2 overflow-hidden text-center leading-tight">
-                                                            {btn}
-                                                        </div>
-                                                        <div className="flex-1 grid grid-cols-3 gap-2">
-                                                            {selectedDay.quiz?.options.map((meaning) => (
+                                {/* Challenge Screen or Code Content */}
+                                {!isCurrentDayUnlocked ? (
+                                    <div className="flex-1 bg-slate-950 relative overflow-y-auto custom-scrollbar">
+                                        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#f97316_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+
+                                        <div className="min-h-full flex items-center justify-center p-6 md:p-8">
+                                            <div className="max-w-md w-full bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl relative z-10 space-y-8 animate-in zoom-in-95 duration-500">
+                                                <div className="space-y-3">
+                                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-500 text-xs font-black uppercase tracking-widest">
+                                                        Knowledge Challenge - 解鎖程式碼實作
+                                                    </div>
+                                                    <h3 className="text-2xl font-black text-white italic tracking-tighter">
+                                                        {selectedDay.quiz?.question}
+                                                    </h3>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    {selectedDay.quiz?.type === 'match' ? (
+                                                        Object.keys(selectedDay.quiz.answer).map((btn) => (
+                                                            <div key={btn} className="flex items-center gap-4 text-left">
+                                                                <div className="w-16 h-12 rounded-2xl border-2 border-slate-700 flex items-center justify-center text-xs font-black text-white bg-slate-800 shadow-[0_0_15px_rgba(0,0,0,0.5)] shrink-0 px-2 overflow-hidden text-center leading-tight">
+                                                                    {btn}
+                                                                </div>
+                                                                <div className="flex-1 grid grid-cols-3 gap-2">
+                                                                    {selectedDay.quiz?.options.map((meaning) => (
+                                                                        <button
+                                                                            key={meaning}
+                                                                            onClick={() => setQuizAnswers(prev => ({ ...prev, [btn]: meaning }))}
+                                                                            className={`px-2 py-2 rounded-lg text-xs font-bold transition-all border ${quizAnswers[btn] === meaning
+                                                                                ? 'bg-orange-500 border-orange-400 text-white shadow-[0_0_10px_rgba(249,115,22,0.4)]'
+                                                                                : 'bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-500'
+                                                                                }`}
+                                                                        >
+                                                                            {meaning}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            {selectedDay.quiz?.options.map((opt) => (
                                                                 <button
-                                                                    key={meaning}
-                                                                    onClick={() => setQuizAnswers(prev => ({ ...prev, [btn]: meaning }))}
-                                                                    className={`px-2 py-2 rounded-lg text-[10px] font-bold transition-all border ${quizAnswers[btn] === meaning
-                                                                        ? 'bg-orange-500 border-orange-400 text-white shadow-[0_0_10px_rgba(249,115,22,0.4)]'
-                                                                        : 'bg-slate-800 border-slate-700 text-slate-500 hover:border-slate-500'
+                                                                    key={opt}
+                                                                    onClick={() => setSelectedChoice(opt)}
+                                                                    className={`w-full p-4 rounded-xl text-left text-sm font-bold transition-all border flex items-center justify-between group ${selectedChoice === opt
+                                                                        ? 'bg-orange-500 border-orange-400 text-white shadow-lg'
+                                                                        : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
                                                                         }`}
                                                                 >
-                                                                    {meaning}
+                                                                    {opt}
+                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedChoice === opt ? 'border-white bg-white/20' : 'border-slate-600 group-hover:border-slate-400'}`}>
+                                                                        {selectedChoice === opt && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                                                    </div>
                                                                 </button>
                                                             ))}
                                                         </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="space-y-2">
-                                                    {selectedDay.quiz?.options.map((opt) => (
-                                                        <button
-                                                            key={opt}
-                                                            onClick={() => setSelectedChoice(opt)}
-                                                            className={`w-full p-4 rounded-xl text-left text-sm font-bold transition-all border flex items-center justify-between group ${selectedChoice === opt
-                                                                ? 'bg-orange-500 border-orange-400 text-white shadow-lg'
-                                                                : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
-                                                                }`}
-                                                        >
-                                                            {opt}
-                                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedChoice === opt ? 'border-white bg-white/20' : 'border-slate-600 group-hover:border-slate-400'}`}>
-                                                                {selectedChoice === opt && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                                    )}
+                                                </div>
+
+                                                <button
+                                                    disabled={
+                                                        (selectedDay.quiz?.type === 'match' &&
+                                                            Object.keys(selectedDay.quiz.answer).some(key => !quizAnswers[key])) ||
+                                                        (selectedDay.quiz?.type === 'choice' && !selectedChoice)
+                                                    }
+                                                    onClick={() => {
+                                                        let isCorrect = false;
+                                                        if (selectedDay.quiz?.type === 'match') {
+                                                            isCorrect = JSON.stringify(quizAnswers) === JSON.stringify(selectedDay.quiz?.answer);
+                                                        } else {
+                                                            isCorrect = selectedChoice === selectedDay.quiz?.answer;
+                                                        }
+
+                                                        if (isCorrect) {
+                                                            setUnlockedDays(prev => [...prev, selectedDay.day]);
+                                                        } else {
+                                                            alert('唔，觀念有些偏差，回頭翻翻筆記？');
+                                                        }
+                                                    }}
+                                                    className="w-full py-4 bg-orange-600 hover:bg-orange-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group"
+                                                >
+                                                    <Unlock size={20} className="group-hover:animate-bounce" />
+                                                    解鎖章節
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-slate-950 font-mono text-sm leading-relaxed">
+                                        <div className="max-w-4xl mx-auto space-y-8">
+                                            <div className="flex items-center gap-3 text-emerald-500 mb-8">
+                                                <Code size={20} />
+                                                <span className="text-lg font-bold">範例程式碼實作：{selectedDay.pattern}</span>
+                                            </div>
+
+                                            {isLoadingCode ? (
+                                                <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                                                    <Loader2 size={40} className="text-blue-500 animate-spin" />
+                                                    <p className="text-slate-400 font-bold animate-pulse">正在從 GitHub 傳輸原始碼...</p>
+                                                </div>
+                                            ) : fetchedCodes[selectedDay.day] ? (
+                                                <div className="space-y-12">
+                                                    {fetchedCodes[selectedDay.day].map((code, idx) => (
+                                                        <div key={idx} className="relative group">
+                                                            <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                                <button
+                                                                    onClick={() => handleCopyCode(code, idx)}
+                                                                    className={`p-2 rounded-xl transition-all border backdrop-blur-md shadow-2xl ${copiedCodeIdx === idx
+                                                                        ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
+                                                                        : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
+                                                                        }`}
+                                                                    title="複製此段程式碼"
+                                                                >
+                                                                    {copiedCodeIdx === idx ? <Check size={16} /> : <Copy size={16} />}
+                                                                </button>
                                                             </div>
-                                                        </button>
+                                                            <div className="bg-slate-950/80 p-8 rounded-3xl border border-slate-800 text-slate-300 shadow-inner overflow-hidden">
+                                                                <CodeBlock
+                                                                    code={code}
+                                                                    language="typescript"
+                                                                    showLineNumbers={true}
+                                                                />
+                                                            </div>
+                                                        </div>
                                                     ))}
+                                                </div>
+                                            ) : (
+                                                <div className="p-10 border-2 border-dashed border-slate-800 rounded-3xl text-center space-y-4">
+                                                    <Bot size={40} className="mx-auto text-slate-700" />
+                                                    <p className="text-slate-500 font-bold">
+                                                        {selectedDay.codeUrls && selectedDay.codeUrls.length > 0
+                                                            ? '尚未載入內容，請點擊按鈕重試'
+                                                            : '此章節尚未設定遠端存放路徑'}
+                                                    </p>
+                                                    {selectedDay.codeUrls && (
+                                                        <button
+                                                            onClick={loadCode}
+                                                            className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-sm font-bold transition-all"
+                                                        >
+                                                            手動抓取
+                                                        </button>
+                                                    )}
                                                 </div>
                                             )}
                                         </div>
-
-                                        <button
-                                            disabled={
-                                                (selectedDay.quiz?.type === 'match' &&
-                                                    Object.keys(selectedDay.quiz.answer).some(key => !quizAnswers[key])) ||
-                                                (selectedDay.quiz?.type === 'choice' && !selectedChoice)
-                                            }
-                                            onClick={() => {
-                                                let isCorrect = false;
-                                                if (selectedDay.quiz?.type === 'match') {
-                                                    isCorrect = JSON.stringify(quizAnswers) === JSON.stringify(selectedDay.quiz?.answer);
-                                                } else {
-                                                    isCorrect = selectedChoice === selectedDay.quiz?.answer;
-                                                }
-
-                                                if (isCorrect) {
-                                                    setUnlockedDays(prev => [...prev, selectedDay.day]);
-                                                } else {
-                                                    alert('唔，觀念有些偏差，回頭翻翻筆記？');
-                                                }
-                                            }}
-                                            className="w-full py-4 bg-orange-600 hover:bg-orange-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 group"
-                                        >
-                                            <Unlock size={20} className="group-hover:animate-bounce" />
-                                            解鎖章節
-                                        </button>
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="flex-1 p-8 overflow-y-auto custom-scrollbar bg-slate-950 font-mono text-sm leading-relaxed">
-                                    <div className="max-w-4xl mx-auto space-y-8">
-                                        <div className="flex items-center gap-3 text-emerald-500 mb-8">
-                                            <Code size={20} />
-                                            <span className="text-lg font-bold">範例程式碼實作：{selectedDay.pattern}</span>
-                                        </div>
-
-                                        {isLoadingCode ? (
-                                            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                                                <Loader2 size={40} className="text-blue-500 animate-spin" />
-                                                <p className="text-slate-400 font-bold animate-pulse">正在從 GitHub 傳輸原始碼...</p>
-                                            </div>
-                                        ) : fetchedCodes[selectedDay.day] ? (
-                                            <div className="space-y-12">
-                                                {fetchedCodes[selectedDay.day].map((code, idx) => (
-                                                    <div key={idx} className="relative group">
-                                                        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                            <button
-                                                                onClick={() => handleCopyCode(code, idx)}
-                                                                className={`p-2 rounded-xl transition-all border backdrop-blur-md shadow-2xl ${copiedCodeIdx === idx
-                                                                    ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
-                                                                    : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white hover:border-slate-500'
-                                                                    }`}
-                                                                title="複製此段程式碼"
-                                                            >
-                                                                {copiedCodeIdx === idx ? <Check size={16} /> : <Copy size={16} />}
-                                                            </button>
-                                                        </div>
-                                                        <div className="bg-slate-950/80 p-8 rounded-3xl border border-slate-800 text-slate-300 shadow-inner overflow-hidden">
-                                                            <CodeBlock
-                                                                code={code}
-                                                                language="typescript"
-                                                                showLineNumbers={true}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="p-10 border-2 border-dashed border-slate-800 rounded-3xl text-center space-y-4">
-                                                <Bot size={40} className="mx-auto text-slate-700" />
-                                                <p className="text-slate-500 font-bold">
-                                                    {selectedDay.codeUrls && selectedDay.codeUrls.length > 0
-                                                        ? '尚未載入內容，請點擊按鈕重試'
-                                                        : '此章節尚未設定遠端存放路徑'}
-                                                </p>
-                                                {selectedDay.codeUrls && (
-                                                    <button
-                                                        onClick={loadCode}
-                                                        className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-sm font-bold transition-all"
-                                                    >
-                                                        手動抓取
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
