@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LoaderPinwheel, UserRound, Route, Sparkles, ArrowRight, ChessKnight } from 'lucide-react';
+import { LoaderPinwheel, UserRound, Route, Sparkles, ArrowRight } from 'lucide-react';
 import RoadmapDialog from './RoadmapDialog';
 
 /** Landing Page 的四張價值卡片資料 */
@@ -11,8 +11,8 @@ const valueCards = [
         iconColor: 'text-emerald-400',
         glowColor: 'bg-emerald-500/40',
         Icon: LoaderPinwheel,
-        title: '為什麼需要設計思維？',
-        body: '麵條式的程式，越長越不敢碰？AI 寫了 code 但你看不懂？問題不在技術不夠，是缺乏架構意識。',
+        title: '為什麼需要設計思維',
+        body: '麵條式的代碼混亂…AI 的 Code 像天書？批評別人的代碼很容易，但你有能力規劃的更好嗎？',
     },
     {
         label: 'WHO',
@@ -21,8 +21,8 @@ const valueCards = [
         iconColor: 'text-blue-400',
         glowColor: 'bg-blue-500/40',
         Icon: UserRound,
-        title: '適合誰？',
-        body: '只寫 CRUD，只在 Debug。沒思考過設計，什麼才是有價值的開發經驗。AI 時代，想想你的定位在哪。',
+        title: '你不只是代碼搬運工',
+        body: '只寫 CRUD，複製貼上，數年如一日。什麼才是有價值的開發經驗？AI 時代，想想你的定位在哪。',
     },
     {
         label: 'HOW',
@@ -32,7 +32,7 @@ const valueCards = [
         glowColor: 'bg-amber-500/40',
         Icon: Route,
         id: 'how',
-        title: '怎麼學？',
+        title: '漸進式架構思維教學',
         body: '',
     },
     {
@@ -42,8 +42,8 @@ const valueCards = [
         iconColor: 'text-purple-400',
         glowColor: 'bg-purple-500/40',
         Icon: Sparkles,
-        title: '互動式架構思維教學',
-        body: '從探索 → 實作 → 反思。理解模式的「為什麼」，最終留下「符合現代價值」的心法而不是守舊套路。',
+        title: '讓品味成為你的資產',
+        body: '理解模式的「設計」，留下符合現代的心法而不是守舊套路。從物件到微服務架構都能一眼看穿。',
     },
 ];
 

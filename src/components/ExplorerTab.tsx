@@ -339,7 +339,7 @@ const ExplorerTab: React.FC = () => {
             {/* 主工作區佈局 */}
             <div className="flex flex-col md:flex-row md:h-[520px] md:overflow-hidden h-auto">
                 {/* 1. 側邊欄：檔案階層 (w-[440px]) */}
-                <div className="w-full md:w-[440px] bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 p-5 text-left h-[400px] md:h-auto overflow-hidden">
+                <div className="w-full md:w-[440px] bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 p-4 text-left h-[400px] md:h-auto overflow-hidden">
                     <h3 className="font-bold text-slate-800 mb-5 flex items-center gap-2 text-left" title="使用 Composite 模式建構檔案與目錄的樹狀結構 (Composite Pattern)"><Workflow className="text-amber-500" size={18} />Composite</h3>
                     <div className="flex-1 overflow-y-auto custom-scrollbar text-left">
                         <RenderTree
