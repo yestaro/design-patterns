@@ -11,7 +11,7 @@ const valueCards = [
         iconColor: 'text-emerald-400',
         glowColor: 'bg-emerald-500/40',
         Icon: LoaderPinwheel,
-        title: '為什麼需要設計思維',
+        title: '為什麼要懂設計',
         body: '麵條式的代碼混亂…AI 的 Code 像天書？批評別人的代碼很容易，但你有能力規劃的更好嗎？',
     },
     {
@@ -21,8 +21,8 @@ const valueCards = [
         iconColor: 'text-blue-400',
         glowColor: 'bg-blue-500/40',
         Icon: UserRound,
-        title: '你不只是代碼搬運工',
-        body: '只寫 CRUD，複製貼上，數年如一日。什麼才是有價值的開發經驗？AI 時代，想想你的定位在哪。',
+        title: '你不只是碼農',
+        body: '忙於 CRUD，複製貼上，數年如一日。什麼才是有價值的開發經驗？AI 時代，想想你的定位在哪。',
     },
     {
         label: 'HOW',
@@ -32,7 +32,7 @@ const valueCards = [
         glowColor: 'bg-amber-500/40',
         Icon: Route,
         id: 'how',
-        title: '漸進式架構思維教學',
+        title: '貫穿思維原則',
         body: '',
     },
     {
@@ -42,8 +42,8 @@ const valueCards = [
         iconColor: 'text-purple-400',
         glowColor: 'bg-purple-500/40',
         Icon: Sparkles,
-        title: '讓品味成為你的資產',
-        body: '理解模式的「設計」，留下符合現代的心法而不是守舊套路。從物件到微服務架構都能一眼看穿。',
+        title: '讓品味跟隨你',
+        body: '理解模式的「設計」，留下符合現代的心法而不是守舊套路。從物件到微服務架構都能受用。',
     },
 ];
 
@@ -232,7 +232,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
                             {/* Body */}
                             <p className="text-sm text-slate-400 leading-relaxed">
                                 {card.id === 'how' ? (
-                                    <>用一個「<button onClick={() => setIsRoadmapOpen(true)} className="text-amber-300 underline underline-offset-2 decoration-amber-500/40 hover:text-amber-200 hover:decoration-amber-400 transition-colors cursor-pointer">檔案管理系統</button>」貫穿 12 個設計模式的實戰應用，理解每個設計決策背後的為什麼。</>
+                                    <>用一個「<button onClick={() => setIsRoadmapOpen(true)} className="text-amber-300 underline underline-offset-2 decoration-amber-500/40 hover:text-amber-200 hover:decoration-amber-400 transition-colors cursor-pointer">檔案管理系統</button>」實戰 12 個設計模式的應用場景，理解每個設計決策背後的為什麼。</>
                                 ) : card.body}
                             </p>
                         </div>
