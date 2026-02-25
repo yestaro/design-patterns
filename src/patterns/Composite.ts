@@ -12,7 +12,6 @@ export interface ISortStrategy {
 }
 
 export interface EntryAttributes {
-    iconType: string;
     [key: string]: any;
 }
 
@@ -29,7 +28,7 @@ export abstract class EntryComponent {
         public size: number,
         public created: string
     ) {
-        this.attributes = { iconType: 'File' };
+        this.attributes = {};
     }
 
     /**
@@ -76,7 +75,7 @@ export class DirectoryComposite extends EntryComponent {
 
     constructor(id: string, name: string, created: string) {
         super(id, name, 'Directory', 0, created);
-        this.attributes = { iconType: 'Folder' };
+        this.attributes = {};
     }
 
     add(child: EntryComponent): void {
@@ -124,7 +123,7 @@ export class WordDocument extends FileLeaf {
     constructor(id: string, name: string, size: number, created: string, pageCount = 1) {
         super(id, name, 'Word', size, created);
         this.pageCount = pageCount;
-        this.attributes = { iconType: 'FileText', pages: pageCount };
+        this.attributes = { pages: pageCount };
     }
     override clone(): WordDocument {
         const newId = `${this.id}_copy_${Date.now()}`;
@@ -135,7 +134,7 @@ export class WordDocument extends FileLeaf {
 export class ImageFile extends FileLeaf {
     constructor(id: string, name: string, size: number, created: string, public width = 800, public height = 600) {
         super(id, name, 'Image', size, created);
-        this.attributes = { iconType: 'ImageIcon', res: `${width}x${height}` };
+        this.attributes = { res: `${width}x${height}` };
     }
     override clone(): ImageFile {
         const newId = `${this.id}_copy_${Date.now()}`;
@@ -146,7 +145,7 @@ export class ImageFile extends FileLeaf {
 export class PlainText extends FileLeaf {
     constructor(id: string, name: string, size: number, created: string, public encoding = 'UTF-8') {
         super(id, name, 'Text', size, created);
-        this.attributes = { iconType: 'File', enc: encoding };
+        this.attributes = { enc: encoding };
     }
     override clone(): PlainText {
         const newId = `${this.id}_copy_${Date.now()}`;

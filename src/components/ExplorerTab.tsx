@@ -31,19 +31,23 @@ const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setS
     const isSelected = selectedId === entry.id;
     const isMatched = matchedIds.includes(entry.id);
 
-    const { iconType, ...otherAttrs } = entry.attributes;
+    const otherAttrs = entry.attributes;
 
-    const infoString = Object.entries(otherAttrs)
+    const attrString = Object.entries(otherAttrs)
         .map(([key, value]) => `, ${key}: ${value}`)
         .join('');
 
+    const infoString = entry instanceof DirectoryComposite
+        ? attrString
+        : `(${entry.size} KB${attrString})`;
+
     const iconMap: Record<string, any> = {
-        'Folder': Folder,
-        'FileText': FileText,
-        'ImageIcon': ImageIcon,
-        'File': File
+        'Directory': Folder,
+        'Word': FileText,
+        'Image': ImageIcon,
+        'Text': File
     };
-    const Icon = iconMap[iconType] || File;
+    const Icon = iconMap[entry.type] || File;
 
     const labels = facade.getLabels(entry.id);
 
@@ -61,7 +65,7 @@ const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setS
                 <span className={`text-sm ${isMatched ? 'font-bold text-amber-700' : 'font-medium text-slate-700'}`}>
                     {entry.name}
                     <span className="ml-1 text-[10px] opacity-60">
-                        ({Number(entry.size)} KB{infoString})
+                        {infoString}
                     </span>
                 </span>
                 <div className="ml-auto flex gap-1 items-center">
@@ -155,16 +159,16 @@ const ExplorerTab: React.FC = () => {
 
         logger = new BoldDecorator(logger, ['[符合]', '[Undo]', '[Redo]', '[System]', '[Clipboard]', '[Command]', '[Error]']);
 
-        logger = new HighlightDecorator(logger, '[符合]', 'text-green-400');
-        logger = new HighlightDecorator(logger, '[Undo]', 'text-yellow-400');
-        logger = new HighlightDecorator(logger, '[Redo]', 'text-orange-400');
-        logger = new HighlightDecorator(logger, '[Selection]', 'text-indigo-300');
-        logger = new HighlightDecorator(logger, '[System]', 'text-blue-300');
-        logger = new HighlightDecorator(logger, '[Clipboard]', 'text-purple-400');
-        logger = new HighlightDecorator(logger, '[Command]', 'text-cyan-400');
-        logger = new HighlightDecorator(logger, '刪除', 'text-red-400');
+        logger = new HighlightDecorator(logger, '[符合]', 'text-emerald-600');
+        logger = new HighlightDecorator(logger, '[Undo]', 'text-amber-600');
+        logger = new HighlightDecorator(logger, '[Redo]', 'text-orange-600');
+        logger = new HighlightDecorator(logger, '[Selection]', 'text-indigo-600');
+        logger = new HighlightDecorator(logger, '[System]', 'text-blue-600');
+        logger = new HighlightDecorator(logger, '[Clipboard]', 'text-purple-600');
+        logger = new HighlightDecorator(logger, '[Command]', 'text-cyan-700');
+        logger = new HighlightDecorator(logger, '刪除', 'text-red-600');
 
-        logger = new IconDecorator(logger, '[Command]', '⚡');
+        logger = new IconDecorator(logger, '[Command]', '⌘');
         logger = new IconDecorator(logger, '[符合]', '🔍');
         logger = new IconDecorator(logger, '[Undo]', '↩️');
         logger = new IconDecorator(logger, '[Redo]', '↪️');
@@ -172,7 +176,6 @@ const ExplorerTab: React.FC = () => {
         logger = new IconDecorator(logger, '貼上標籤', '🏷️');
         logger = new IconDecorator(logger, '移除標籤', '🧹');
         logger = new IconDecorator(logger, '[Clipboard]', '📋');
-        logger = new IconDecorator(logger, '[System]', '🔧');
         logger = new IconDecorator(logger, '[Error]', '❌');
 
         highlightLoggerRef.current = logger;
