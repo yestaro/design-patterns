@@ -464,7 +464,7 @@ const ExplorerTab: React.FC = () => {
                             </div>
 
                             {/* Right: Version */}
-                            <a className="absolute right-0 tracking-tight flex items-center gap-4" href="https://github.com/yestaro/design-patterns" target="_blank" rel="noopener noreferrer" title="前往 GitHub 檢視原始碼">
+                            <a className="absolute right-0 tracking-tight flex items-center gap-1" href="https://github.com/yestaro/design-patterns" target="_blank" rel="noopener noreferrer" title="前往 GitHub 檢視原始碼">
                                 <Github size={14} />
                                 Git
                             </a>
@@ -514,4 +514,5 @@ const ExplorerTab: React.FC = () => {
 };
 
 export default ExplorerTab;
+
 
