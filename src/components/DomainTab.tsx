@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Layout, Code, ArrowLeft } from 'lucide-react';
-import CodeBlock from './CodeBlock';
+import CodeBlock from './shared/CodeBlock';
 import mermaid from 'mermaid';
 import { patterns } from '../data/patterns';
 

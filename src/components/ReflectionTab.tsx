@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
     Lightbulb, Sparkles, Brain, Scale, Globe, ChevronDown, HelpCircle, X, FileText, Code, Copy, Check, Coffee, ArrowRightLeft
 } from 'lucide-react';
-import CodeBlock from './CodeBlock';
+import CodeBlock from './shared/CodeBlock';
 
 // --- Constants: Simulated Embedded Rules ---
 

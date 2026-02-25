@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Layers2, Share2, Play, Map, Sparkles, Landmark } from 'lucide-react';
 import mermaid from 'mermaid';
-import CodeBlock from './CodeBlock';
+import CodeBlock from './shared/CodeBlock';
 import { patterns } from '../data/patterns';
 
-import { MindMapDialog } from './MindMapDialog';
+import { MindMapDialog } from './shared/MindMapDialog';
 
 const CodeTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('composite');
@@ -237,17 +237,17 @@ const CodeTab: React.FC = () => {
               架構層次的原則：<b>分層、相依性、跨層</b>。深入瞭解「依賴反轉 (Dependency Inversion)」與「解耦 (Decoupling)」的意涵。
             </p>
 
-            <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 overflow-hidden">
-              <h4 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-8 text-center">模式互動全生命週期 (Pattern Interaction Sequence)</h4>
-              <div className="mermaid opacity-90">
-                {`sequenceDiagram
+
+            <h4 className="text-lg font-black text-slate-600 uppercase tracking-widest mb-8 text-center">架構分層與責任歸屬 (Clean Architecture)</h4>
+            <div className="mermaid opacity-90">
+              {`sequenceDiagram
                                         autonumber
                                         
                                         box rgb(219, 234, 254) Presentation Layer
                                             participant UI as Observer: ExplorerUI
                                         end
 
-                                        box rgb(243, 232, 255) Use Cases - Application Action Layer
+                                        box rgb(243, 232, 255) Use Cases - Business Layer
                                             participant CM as CommandInvoker
                                             participant CMD as Command
                                             participant VIS as Visitor
@@ -309,27 +309,25 @@ const CodeTab: React.FC = () => {
                                         deactivate CMD
                                         deactivate CM
                                     `}
-              </div>
             </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left items-stretch">
               <div className="space-y-4 text-left flex flex-col h-full">
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Layers2 size={18} /> 1. 模式組合 (Composition)</h5>
                 <p className="text-base text-slate-500 text-left flex-grow">
                   各個模式像積木一樣組合，內部都「持有」其他的模式
                 </p>
-                <div className="bg-slate-900 p-5 rounded-xl text-xs lg:text-sm font-mono text-slate-300 border border-slate-700 text-left h-full overflow-hidden">
-                  <span className="text-blue-400">class</span> FileSearchVisitor <span className="text-blue-400">implements</span> IVisitor &#123;<br />
-                  &nbsp;&nbsp;private notifier: Subject;<br />
-                  &nbsp;&nbsp;constructor() &#123;<br />
-                  &nbsp;&nbsp;&nbsp;&nbsp;this.notifier = <span className="text-pink-400">new Subject()</span>;<br />
-                  &nbsp;&nbsp;&#125;<br />
-                  &#125;<br />
-                  <br />
-                  <span className="text-blue-400">class</span> SortCommand <span className="text-blue-400">implements</span> ICommand &#123;<br />
-                  &nbsp;&nbsp;public execute(): <span className="text-blue-400">void</span> &#123;<br />
-                  &nbsp;&nbsp;&nbsp;&nbsp;this.root.<span className="text-pink-400">accept</span>(visitor);<br />
-                  &nbsp;&nbsp;&#125;<br />
-                  &#125;
+                <div className="bg-slate-900 rounded-3xl text-sm text-slate-300 border border-slate-700 text-left h-full overflow-hidden w-full flex flex-col">
+                  <div className="p-5 flex-1 w-full">
+                    <CodeBlock code={`// 模式組合 (Composition)
+class FileSearchVisitor implements IVisitor {
+  // Visitor 持有 Observer                    
+  private notifier: Subject;
+  constructor() {
+    this.notifier = new Subject();
+  }
+}`} language="typescript" showLineNumbers={false} />
+                  </div>
                 </div>
               </div>
 
@@ -338,29 +336,34 @@ const CodeTab: React.FC = () => {
                 <p className="text-base text-slate-500 text-left flex-grow">
                   透過掛載或注入不同的策略物件，提供更靈活的行為
                 </p>
-                <div className="bg-slate-900 p-5 rounded-xl text-xs lg:text-sm font-mono text-slate-300 border border-slate-700 text-left h-full overflow-hidden">
-                  <span className="text-gray-500">// 掛載觀察者 (Observer)</span><br />
-                  v.<span className="text-pink-400">notifier.subscribe</span>(o1);<br />
-                  v.<span className="text-pink-400">notifier.subscribe</span>(o2);<br />
-                  <br />
-                  <span className="text-gray-500">// 注入策略 (Strategy)</span><br />
-                  <span className="text-blue-400">const</span> s: ISortStrategy = <span className="text-pink-400">new LabelSortStrategy</span>(mediator);<br />
-                  <span className="text-blue-400">const</span> c: ICommand = new SortCommand(r, s);<br />
+                <div className="bg-slate-900 rounded-3xl text-sm text-slate-300 border border-slate-700 text-left h-full overflow-hidden w-full flex flex-col">
+                  <div className="p-5 flex-1 w-full">
+                    <CodeBlock code={`// 掛載觀察者 (Observer)
+v.notifier.subscribe(o1);
+// 掛載另一個觀察者
+v.notifier.subscribe(o2);
+
+// 注入策略 (Strategy)
+const s: ISortStrategy = new LabelSortStrategy();
+const c: ICommand = new SortCommand(r, s);`} language="typescript" showLineNumbers={false} />
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4 text-left flex flex-col h-full">
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Play size={18} /> 3. 觸發執行 (Execution)</h5>
                 <p className="text-base text-slate-500 text-left flex-grow">執行操作的入口點因不同的行為角色，而有所不同</p>
-                <div className="bg-slate-900 p-5 rounded-xl text-xs lg:text-sm font-mono text-slate-300 border border-slate-700 text-left h-full overflow-hidden">
-                  <span className="text-gray-500">// Visitor (唯讀分析)</span><br />
-                  root.<span className="text-pink-400">accept</span>(visitor);<br />
-                  <br />
-                  <span className="text-gray-500">// Command (狀態寫入)</span><br />
-                  invoker.<span className="text-pink-400">execute</span>(cmd);<br />
-                  <br />
-                  <span className="text-gray-500">// Mediator (關聯更新)</span><br />
-                  tagMediator.<span className="text-pink-400">attach</span>(id, "Urgent");
+                <div className="bg-slate-900 rounded-3xl text-sm text-slate-300 border border-slate-700 text-left h-full overflow-hidden w-full flex flex-col">
+                  <div className="p-5 flex-1 w-full">
+                    <CodeBlock code={`// Visitor (唯讀分析)
+root.accept(visitor);
+
+// Command (狀態寫入)
+invoker.execute(cmd);
+
+// Mediator (關聯更新)
+tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false} />
+                  </div>
                 </div>
               </div>
             </div>

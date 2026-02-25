@@ -15,7 +15,7 @@ import { FileSystemFacade } from '../patterns/Facade';
 import { ConsoleObserver, IObserver, LogEntry, NotificationEvent } from '../patterns/Observer';
 import { DashboardObserver, DashboardAdapter } from '../patterns/Adapter';
 import { HighlightDecorator, IconDecorator, BoldDecorator } from '../patterns/Decorator';
-import RoadmapDialog from './RoadmapDialog';
+import RoadmapDialog from './shared/RoadmapDialog';
 
 interface RenderTreeProps {
     entry: EntryComponent;
@@ -463,9 +463,7 @@ const ExplorerTab: React.FC = () => {
                             </div>
 
                             {/* Right: Version */}
-                            <div className="absolute right-0 opacity-50 font-mono text-sm tracking-tight">
-                                v3000
-                            </div>
+                            <a className="absolute right-0 font-mono text-sm tracking-tight flex items-center gap-4" href="https://github.com/yestaro/design-patterns" target="_blank" rel="noopener noreferrer" title="前往 GitHub 檢視原始碼">Source Code</a>
                         </div>
                         <div
                             ref={consoleContainerRef}

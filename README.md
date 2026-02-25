@@ -71,6 +71,7 @@
 ```text
 src/
 ├── components/      # UI 元件 (View Layer)
+│   ├── shared/          # 共用組件 (CodeBlock, RoadmapDialog)
 │   ├── ExplorerTab.tsx  # 檔案總管互動介面
 │   ├── DomainTab.tsx    # 領域模型圖 (UML)
 │   ├── ERTab.tsx        # 先體關聯圖 (ER Diagram)

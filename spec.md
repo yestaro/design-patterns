@@ -293,6 +293,7 @@ stateDiagram-v2
 依據 Clean Architecture 分層原則：
 
 - `src/components/`: **Interface Adapter / View**. UI 元件。
+    - `shared/`: **共用元件**. 包含跨分頁共用的 `CodeBlock`, `RoadmapDialog` 等。
 - `src/patterns/`: **Entities / Use Cases**. 核心商業邏輯與設計模式實作。
 - `src/data/`: **Data Source**. 模擬資料來源。
 - `src/assets/`: **Assets**. 靜態資源。

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LoaderPinwheel, UserRound, Route, Sparkles, ArrowRight } from 'lucide-react';
-import RoadmapDialog from './RoadmapDialog';
+import RoadmapDialog from './shared/RoadmapDialog';
 
 /** Landing Page 的四張價值卡片資料 */
 const valueCards = [
