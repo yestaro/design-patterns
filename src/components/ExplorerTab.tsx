@@ -3,6 +3,7 @@ import {
     RotateCcw, RotateCw, LayoutList, SortAsc, SortDesc, Tag, Trash2,
     Folder, File, FileText, User, Calculator, FileJson, Search, X, Activity, Copy, ClipboardPaste, Image as ImageIcon,
     Calendar,
+    Github,
     Play,
     Command,
     Zap,
@@ -463,7 +464,10 @@ const ExplorerTab: React.FC = () => {
                             </div>
 
                             {/* Right: Version */}
-                            <a className="absolute right-0 font-mono text-sm tracking-tight flex items-center gap-4" href="https://github.com/yestaro/design-patterns" target="_blank" rel="noopener noreferrer" title="前往 GitHub 檢視原始碼">Source Code</a>
+                            <a className="absolute right-0 tracking-tight flex items-center gap-4" href="https://github.com/yestaro/design-patterns" target="_blank" rel="noopener noreferrer" title="前往 GitHub 檢視原始碼">
+                                <Github size={14} />
+                                Git
+                            </a>
                         </div>
                         <div
                             ref={consoleContainerRef}
@@ -510,3 +514,4 @@ const ExplorerTab: React.FC = () => {
 };
 
 export default ExplorerTab;
+
