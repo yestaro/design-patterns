@@ -3,14 +3,21 @@ import { Layers2, Share2, Play, Map, Sparkles, Landmark } from 'lucide-react';
 import mermaid from 'mermaid';
 import CodeBlock from './shared/CodeBlock';
 import { patterns } from '../data/patterns';
+import { MacOSDock } from './shared/MacOSDock';
 
 import { MindMapDialog } from './shared/MindMapDialog';
 
 const CodeTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('composite');
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMindMapOpen, setIsMindMapOpen] = useState(false);
+
+  const DOCK_COLOR_MAP: Record<string, string> = {
+    composite: 'text-amber-300', visitor: 'text-emerald-300', template: 'text-indigo-300',
+    observer: 'text-pink-300', decorator: 'text-cyan-300', adapter: 'text-orange-300',
+    command: 'text-red-300', strategy: 'text-purple-300', flyweight: 'text-lime-300',
+    mediator: 'text-teal-300', singleton: 'text-stone-300', facade: 'text-sky-300'
+  };
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -318,7 +325,7 @@ const CodeTab: React.FC = () => {
                   各個模式像積木一樣組合，內部都「持有」其他的模式
                 </p>
                 <div className="bg-slate-900 rounded-3xl text-sm text-slate-300 border border-slate-700 text-left h-full overflow-hidden w-full flex flex-col">
-                  <div className="p-5 flex-1 w-full">
+                  <div className="p-0 flex-1 w-full">
                     <CodeBlock code={`// 模式組合 (Composition)
 class FileSearchVisitor implements IVisitor {
   // Visitor 持有 Observer                    
@@ -337,7 +344,7 @@ class FileSearchVisitor implements IVisitor {
                   透過掛載或注入不同的策略物件，提供更靈活的行為
                 </p>
                 <div className="bg-slate-900 rounded-3xl text-sm text-slate-300 border border-slate-700 text-left h-full overflow-hidden w-full flex flex-col">
-                  <div className="p-5 flex-1 w-full">
+                  <div className="p-0 flex-1 w-full">
                     <CodeBlock code={`// 掛載觀察者 (Observer)
 v.notifier.subscribe(o1);
 // 掛載另一個觀察者
@@ -354,7 +361,7 @@ const c: ICommand = new SortCommand(r, s);`} language="typescript" showLineNumbe
                 <h5 className="font-bold text-blue-700 flex items-center gap-2 text-left"><Play size={18} /> 3. 觸發執行 (Execution)</h5>
                 <p className="text-base text-slate-500 text-left flex-grow">執行操作的入口點因不同的行為角色，而有所不同</p>
                 <div className="bg-slate-900 rounded-3xl text-sm text-slate-300 border border-slate-700 text-left h-full overflow-hidden w-full flex flex-col">
-                  <div className="p-5 flex-1 w-full">
+                  <div className="p-0 flex-1 w-full">
                     <CodeBlock code={`// Visitor (唯讀分析)
 root.accept(visitor);
 
@@ -423,74 +430,16 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
           <h2 className="text-xl font-black text-slate-800 mb-2 border-l-4 border-blue-600 pl-4 text-left">5. 類別設計 vs 傳統直覺</h2>
 
           {/* Tab Navigation: MacOS Dock Effect */}
-          <div className="relative mb-20">
-            <div
-              className={`${isMobile ? 'grid grid-cols-4 gap-y-14 gap-x-2 px-2 py-6 h-auto' : 'flex justify-center items-end gap-3 h-32 px-6'} relative z-10`}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              {patterns.map((tab, index) => {
-                const isActive = activeTab === tab.id;
-
-                // Calculate Scale & Translate
-                let scale = 1;
-                let translateY = 0;
-                let zIndex = 0;
-
-                if (!isMobile && hoveredIndex !== null) {
-                  // Desktop Fisheye Effect
-                  const dist = Math.abs(hoveredIndex - index);
-                  if (dist === 0) {
-                    scale = 1.4; translateY = -30; zIndex = 20;
-                  } else if (dist === 1) {
-                    scale = 1.2; translateY = -15; zIndex = 10;
-                  } else if (dist === 2) {
-                    scale = 1.05; translateY = -8; zIndex = 5;
-                  }
-                } else if (isActive) {
-                  // Active State (Mobile & Desktop)
-                  scale = isMobile ? 1.1 : 1.15;
-                  translateY = isMobile ? -5 : -12;
-                  zIndex = 10;
-                }
-
-                // Color Map for inactive state (Subtle tint)
-                const colorMap: Record<string, string> = {
-                  composite: 'text-amber-300', visitor: 'text-emerald-300', template: 'text-indigo-300',
-                  observer: 'text-pink-300', decorator: 'text-cyan-300', adapter: 'text-orange-300',
-                  command: 'text-red-300', strategy: 'text-purple-300', flyweight: 'text-lime-300',
-                  mediator: 'text-teal-300', singleton: 'text-stone-300', facade: 'text-sky-300'
-                };
-                const subtleColor = colorMap[tab.id] || 'text-slate-300';
-
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    onMouseEnter={() => !isMobile && setHoveredIndex(index)}
-                    className={`group relative flex flex-col items-center justify-end transition-all duration-200 ease-out p-1 md:mx-2 shrink-0`}
-                    style={{
-                      transform: `scale(${scale}) translateY(${translateY}px)`,
-                      zIndex
-                    }}
-                    title={tab.chapter}
-                  >
-                    <div className={`rounded-[1.2rem] shadow-xl border flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-400 shadow-blue-500/50 w-[60px] h-[60px] md:w-[68px] md:h-[68px]' : 'bg-white border-slate-200 w-[60px] h-[60px] md:w-[68px] md:h-[68px] hover:border-blue-200'}`}>
-                      <tab.icon size={36} className={`transition-all duration-300 ${isActive ? 'text-white' : subtleColor}`} />
-                    </div>
-
-                    {/* Tooltip Label */}
-                    <span className={`absolute -bottom-10 md:-bottom-12 whitespace-nowrap px-3 py-1 text-slate-500 text-[10px] md:text-xs font-bold transition-all duration-200 pointer-events-none ${hoveredIndex === index || isActive ? 'opacity-100 text-slate-800 scale-110 -translate-y-1' : 'opacity-60 scale-90'}`}>
-                      {tab.name}
-                    </span>
-
-                    {/* Active Indicator */}
-                    {isActive && <div className="absolute -bottom-4 w-10 h-1.5 bg-blue-500/50 rounded-full blur-md"></div>}
-                  </button>
-                );
-              })}
-            </div>
-            {/* Dock Shelf Separator */}
-            <div className="absolute bottom-6 left-10 right-10 h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent z-0"></div>
+          <div className="relative mb-16 flex justify-center w-full">
+            <MacOSDock
+              items={patterns}
+              activeId={activeTab}
+              onSelect={setActiveTab}
+              isMobile={isMobile}
+              colorMap={DOCK_COLOR_MAP}
+              gap={36}
+              baseSize={68}
+            />
           </div>
 
           <div className="min-h-[500px]">
@@ -506,10 +455,10 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
                     </h3>
                   </div>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
-                    <div className="bg-slate-900 p-8 rounded-3xl text-slate-300 border-l-8 border-green-500 shadow-xl text-left overflow-hidden">
+                    <div className="bg-slate-900 p-0 rounded-3xl text-slate-300 border-l-8 border-green-500 shadow-xl text-left overflow-hidden">
                       <CodeBlock code={pattern.comparison.positive} language="typescript" />
                     </div>
-                    <div className="bg-slate-900 p-8 rounded-3xl text-slate-300 border-l-8 border-red-500 text-left overflow-hidden">
+                    <div className="bg-slate-900 p-0 rounded-3xl text-slate-300 border-l-8 border-red-500 text-left overflow-hidden">
                       <CodeBlock code={pattern.comparison.negative} language="typescript" />
                     </div>
                   </div>

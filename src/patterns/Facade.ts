@@ -8,7 +8,7 @@ import {
     CommandInvoker, SortState
 } from './Command';
 import { LabelSortStrategy, AttributeSortStrategy } from './Strategy';
-import { DirectoryComposite, EntryComponent } from './Composite';
+import { DirectoryComposite, EntryComponent, WordDocument, ImageFile, PlainText } from './Composite';
 import { tagMediator, TagMediator } from './Mediator';
 import { StatisticsVisitor, FileSearchVisitor, FinderVisitor, BaseVisitor, StatisticsResults } from './Visitor';
 import { XmlExporterTemplate } from './Template';
@@ -25,6 +25,31 @@ export class FileSystemFacade {
         this.invoker = commandInvokerInstance;
         this.clipboard = Clipboard.getInstance();
         this.mediator = tagMediator;
+    }
+
+    /**
+     * 獲取樣本根目錄
+     */
+    public static getSampleRoot(): EntryComponent {
+        const root = new DirectoryComposite('root', '我的根目錄', '2025-01-01');
+        const d1 = new DirectoryComposite('d1', '專案文件', '2025-01-10');
+
+        d1.add(new WordDocument('f1', '產品開發規畫.docx', 500, '2025-01-10', 35));
+        d1.add(new WordDocument('f_api', 'API介面定義書.docx', 120, '2025-01-12', 12));
+        d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-10', 1920, 1080));
+
+        const d2 = new DirectoryComposite('d2', '個人備份', '2025-01-15');
+        d2.add(new PlainText('f3', '密碼記事.txt', 1, '2025-01-15', 'UTF-8'));
+
+        const d2_1 = new DirectoryComposite('d2_1', '2025旅遊', '2025-01-20');
+        d2_1.add(new WordDocument('f4', '行程規劃.docx', 200, '2025-01-20', 5));
+        d2.add(d2_1);
+
+        root.add(d1);
+        root.add(d2);
+        root.add(new PlainText('f5', 'README.txt', 0.5, '2025-01-01', 'ASCII'));
+
+        return root;
     }
 
     /**

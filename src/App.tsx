@@ -89,7 +89,7 @@ const App: React.FC = () => {
                   className="text-4xl md:text-6xl font-black tracking-tight drop-shadow-sm cursor-pointer hover:opacity-80 transition-opacity duration-200"
                 >
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Beyond</span>
-                  <span className="whitespace-nowrap ml-1 text-slate-500/30" style={{ WebkitTextStroke: '1px #64748b' }}> Design Patterns</span>
+                  <span className="whitespace-nowrap ml-1 text-transparent bg-clip-text bg-gradient-to-r from-purple-400/40 to-blue-400/40" style={{ WebkitTextStroke: '1.5px', WebkitTextStrokeColor: 'rgba(124,58,237,0.5)' }}> Design Patterns</span>
                 </h1>
 
                 {/* Divider removed */}

@@ -344,9 +344,15 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 text-left">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={onClose} />
-            <div className="bg-white w-full h-full md:w-11/12 md:max-w-7xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+                className="absolute inset-0 bg-slate-900/60 animate-backdrop-in"
+                onClick={onClose}
+            ></div>
+
+            {/* Content */}
+            <div className="relative bg-white w-full h-full md:w-11/12 md:max-w-[1400px] md:h-[90vh] md:max-h-[1000px] rounded-none md:rounded-3xl shadow-2xl z-10 flex flex-col overflow-hidden animate-premium-in border border-slate-200">
 
                 {/* Header */}
                 <div className="relative flex items-center justify-center px-6 py-2 border-b border-slate-100 bg-white shrink-0">
@@ -379,9 +385,10 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
 
                     <button
                         onClick={onClose}
-                        className="absolute right-6 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600"
+                        className="absolute right-6 p-2 bg-white hover:bg-red-50 border border-slate-100 hover:border-red-100 rounded-full transition-all text-slate-400 hover:text-red-500 group/close active:scale-90"
+                        title="關閉"
                     >
-                        <X size={24} />
+                        <X size={24} className="group-hover/close:rotate-90 transition-transform" />
                     </button>
                 </div>
 
@@ -706,7 +713,7 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                                                     {copiedCodeIdx === idx ? <Check size={16} /> : <Copy size={16} />}
                                                                 </button>
                                                             </div>
-                                                            <div className="bg-slate-950/80 p-8 rounded-3xl border border-slate-800 text-slate-300 shadow-inner overflow-hidden">
+                                                            <div className="bg-slate-950/80 p-0 rounded-3xl border border-slate-800 text-slate-300 shadow-inner overflow-hidden">
                                                                 <CodeBlock
                                                                     code={code}
                                                                     language="typescript"
@@ -740,9 +747,9 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
-        </div>
+                </div >
+            </div >
+        </div >
     );
 };
 

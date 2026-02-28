@@ -89,7 +89,7 @@ export class SortCommand extends BaseCommand {
         public override oldSortState: SortState,
         public override newSortState: SortState
     ) {
-        super(`${newSortState.attr} 排序策略`);
+        super(`${newSortState.attr} 排序策略 ${newSortState.dir}`);
     }
 
     private applyToTree(strategy: ISortStrategy): void {

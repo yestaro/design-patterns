@@ -1,40 +1,52 @@
 import {
-  Workflow, Zap, Activity, Component, Share2,
-  RefreshCcwDot, Boxes, Box, AppWindow, Plug2,
-  LayoutTemplate, LucideIcon, Command
-} from 'lucide-react';
+  Workflow,
+  Zap,
+  Activity,
+  Component,
+  Share2,
+  RefreshCcwDot,
+  Tags,
+  Box,
+  AppWindow,
+  Plug2,
+  LayoutTemplate,
+  LucideIcon,
+  Command,
+} from "lucide-react";
 
 export interface DesignPattern {
   id: string;
-  name: string;        // 模式名稱 (e.g. "Composite + Prototype")
-  chapter: string;     // 章節名稱 (e.g. "1. 結構與複製")
+  name: string; // 模式名稱 (e.g. "Composite + Prototype")
+  chapter: string; // 章節名稱 (e.g. "1. 結構與複製")
   description: string; // 簡短描述 (用於 DomainTab 列表)
-  icon: LucideIcon;    // 圖示 (用於 CodeTab Dock)
+  icon: LucideIcon; // 圖示 (用於 CodeTab Dock)
 
-  mermaid: string;     // UML 類別圖定義
+  mermaid: string; // UML 類別圖定義
+  sequence?: string; // UML 序列圖定義 (關鍵流程)
 
   // DomainTab 的使用範例
   usage: {
-    title: string;       // 情境標題 (e.g. "統一操作介面")
+    title: string; // 情境標題 (e.g. "統一操作介面")
     description: string; // 情境描述
-    code: string;        // 使用範例代碼
+    code: string; // 使用範例代碼
   };
 
   // CodeTab 的正反例對比
   comparison: {
     positiveTitle?: string; // 正面標題 (Default: Pattern Title)
-    positive: string;       // 正面範例代碼
+    positive: string; // 正面範例代碼
     negativeTitle?: string; // 反面標題 (Default: Anti/God Function)
-    negative: string;       // 反面範例代碼 (God Function)
+    negative: string; // 反面範例代碼 (God Function)
   };
 }
 
 export const patterns: DesignPattern[] = [
   {
-    id: 'composite',
-    name: 'Composite + Prototype',
-    chapter: '結構與複製',
-    description: '定義檔案系統共通介面 (EntryComponent)，讓 Client 不需區分檔案與目錄，並實作 Prototype 模式讓可自我複製。',
+    id: "composite",
+    name: "Composite + Prototype",
+    chapter: "結構與複製",
+    description:
+      "定義共通介面 (EntryComponent)，讓 Client 不需區分檔案或目錄，並實作 Clone 自我複製。",
     icon: Workflow,
     mermaid: `classDiagram
     class EntryComponent {
@@ -90,22 +102,55 @@ export const patterns: DesignPattern[] = [
     EntryComponent <|-- DirectoryComposite : 繼承
     FileLeaf <|-- WordDocument : 繼承
     FileLeaf <|-- ImageFile : 繼承
-    FileLeaf <|-- PlainText : 繼承
+    EntryComponent <|-- PlainText : 繼承
     DirectoryComposite o-- EntryComponent : 組合
     DirectoryComposite ..> ISortStrategy : 使用`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Client as FileSystemFacade
+    participant Dir as DirectoryComposite
+    participant Comp as child: EntryComponent (Directory/Word/Image/PlainText)
+    
+    Note over Client, Comp: 【統一操作：增刪與管理】
+    Client->>Dir: add(EntryComponent)
+    Note over Dir, Comp: 不論是目錄或任何檔案類型，均視為抽象基底
+    Client->>Dir: remove(id)
+    
+    Note over Client, Comp: 【階層複製：遞迴與多型】
+    Client->>Dir: clone()
+    loop 對每個 child 子節點
+        Dir->>Comp: clone()
+        Note right of Dir: 觸發多型，複製自身屬性與子節點
+        Comp-->>Dir: 返回複本實體
+    end
+    Dir-->>Client: 返回完整階層複本`,
     usage: {
-      title: '統一操作介面',
-      description: 'Client 因依賴抽象介面 EntryComponent，無需區分檔案或目錄，即可進行一致的操作。',
-      code: `const dir = new DirectoryComposite('Root');
-// 加入檔案
-dir.add(new FileLeaf('Doc.pdf', 1024));
-// 加入目錄 (Composite) - 操作完全相同
-dir.add(new DirectoryComposite('SubFolder'));
+      title: "統一操作介面",
+      description:
+        "Client 因依賴抽象介面 EntryComponent，無需區分檔案或目錄，即可進行一致的操作。",
+      code: `/* ------ 1. FileSystemFacade.ts (Composite 樹狀結構建構) ------ */
+public static getSampleRoot(): EntryComponent {
+    const root = new DirectoryComposite('root', '我的根目錄', '2025-01-01');
+    const d1 = new DirectoryComposite('d1', '專案文件', '2025-01-10');
 
-// [Prototype] 複製整棵樹
-const clone = dir.clone();
-console.log(clone !== dir); // true (新的實體)
-console.log(clone.name);   // "Root" (狀態相同)`
+    // 統一介面：對目錄新增實體檔案與子目錄，Client 操作完全一致
+    d1.add(new WordDocument('f1', '產品開發規畫.docx', 500, '2025-01-10', 35));
+    d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-10', 1920, 1080));
+    root.add(d1);
+    // ...更多檔案
+    return root;
+}
+
+/* ------ 2. Singleton.ts (Prototype 自我複製的實際應用) ------ */
+// 當 ExplorerTab 呼叫貼上時，會從統一的 Clipboard 取出節點。
+// 為了避免 Call by reference 修改到原始物件，這裡運用了 Prototype 模式
+public get(): EntryComponent | null {
+    if (!this._content) return null;
+    
+    // .clone() 把複製自己欄位的責任交還給元件本身（各有所異，如 Word 的頁數）
+    // 也能自動遞迴複製其底下所有子目錄，呼叫端都不需介入
+    return this._content.clone(); 
+}`,
     },
     comparison: {
       positive: `// 正面：結構遞迴與自我複製 (多型注入，只認抽象介面 EntryComponent)
@@ -116,7 +161,7 @@ abstract class EntryComponent {
 }
 
 class DirectoryComposite extends EntryComponent {
-  // [Composite] 核心：不論子節點是檔案(各類型檔案，例：Image、Word、Text)或目錄，操作一致。
+  // [Composite] 核心：不論子節點是檔案(各類型 Image、Word、Text)或目錄，操作一致
   public add(component: EntryComponent): void {
     this.#children.push(component);
     this.#applySort();
@@ -146,21 +191,26 @@ class Directory {
 function cloneDir(orig: any): any {
   const copy = new Directory(orig.name);
   orig.children.forEach((c: any) => {
-    // 痛點 1：【類型判斷】外部必須認識所有具體類別 (Image, Word...)，每加一種就多一個 if
-    if(c.isDir) copy.addDir(cloneDir(c));
-    // 痛點 2：【屬性依賴】外部必須知道每個類別的「配方」，漏掉長寬或頁數就複製出半殘物件
-    else if(c.type === 'image') copy.addImage(new Image(c.name, c.width, c.height));
-    else if(c.type === 'word') copy.addFile(new WordDoc(c.name, c.pageCount));
+    // 痛點 1：外部必須認識所有具體類別 (Image, Word...)，每加一種就多一個 if
+    if(c.type === 'Directory') { 
+      copy.addDir(cloneDir(c));
+    } else if(c.type === 'Image') {
+      // 痛點 2：外部必須知道每個類別的「配方」，漏掉長寬或頁數就複製出半殘物件
+      copy.addImage(new Image(c.name, c.width, c.height));
+    } else if(c.type === 'Word') {
+      copy.addFile(new WordDoc(c.name, c.pageCount));
+    }
   });
   return copy;
-}`
-    }
+}`,
+    },
   },
   {
-    id: 'visitor',
-    name: 'Visitor',
-    chapter: '行為分離',
-    description: '將操作邏輯 (統計、搜尋、輸出 XML) 從資料結構中分離，實現功能插件化擴展。',
+    id: "visitor",
+    name: "Visitor",
+    chapter: "行為分離",
+    description:
+      "將操作邏輯 (統計、搜尋、輸出 XML) 從資料結構中分離，實現功能插件化擴展。",
     icon: Zap,
     mermaid: `classDiagram
     class BaseVisitor {
@@ -212,22 +262,50 @@ function cloneDir(orig: any): any {
     BaseVisitor <|-- FinderVisitor : 繼承
     BaseVisitor <|-- BaseExporterTemplate : 繼承
     EntryComponent ..> BaseVisitor : 使用`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Client as FileSystemFacade
+    participant Visitor as StatisticsVisitor
+    participant Root as root: DirectoryComposite
+    participant Comp as child: EntryComponent
+    
+    Note over Client, Comp: 【雙重分派：Double Dispatch】
+    Client->>Root: 1. accept(visitor)
+    Root->>Visitor: 2. visitDirectory(this)
+    Note right of Visitor: 執行目錄統計邏輯
+    
+    Note over Root, Comp: 遞迴走訪結構
+    Root->>Comp: 3. accept(visitor)
+    Comp->>Visitor: 4. visitFile(this)
+    Note right of Visitor: 執行檔案統計邏輯
+    
+    Client->>Visitor: 5. getResults()
+    Visitor-->>Client: 返回運算結果`,
     usage: {
-      title: '業務邏輯解耦',
-      description: '透過 accept 方法實現兩次分派 (Double Dispatch)。Entry 節點只需負責結構走訪，而具體的匯出、搜尋、甚至節點查找邏輯都封裝在不同的 Visitor 中。',
-      code: `// A. 統計全目錄容量與數量
-const stats = new StatisticsVisitor();
-root.accept(stats);
-console.log(stats.getResults());
+      title: "業務邏輯解耦",
+      description:
+        "透過 accept 方法實現分派。Entry 節點只需負責結構走訪，而具體的匯出、搜尋、節點查找邏輯都由不同的 Visitor 專門負責。",
+      code: `/* ------ FileSystemFacade.ts (Visitor 的分派) ------ */
+// 1. 商業邏輯 A：計算大小與總項次
+public calculateSize(): number {
+    const visitor = new StatisticsVisitor();
+    this.root.accept(visitor); // 呼叫端只需分派任務 (Double Dispatch)
+    return visitor.totalSize;  // 取回插件運算完的結果
+}
 
-// B. 全域搜尋檔案
-const searcher = new FileSearchVisitor("config");
-root.accept(searcher);
-console.log(searcher.foundIds);
+// 2. 商業邏輯 B：匯出成 XML 格式
+public exportXml(): string {
+    const visitor = new XmlExporterTemplate();
+    this.root.accept(visitor); 
+    return visitor.getResult(); // 取出組合完畢的字串
+}
 
-// C. 查找特定節點及其父節點
-const finder = new FinderVisitor("target-id");
-root.accept(finder);`
+// 3. 商業邏輯 C：搜尋含有特定關鍵字的檔案
+public searchFiles(keyword: string): string[] {
+    const visitor = new FileSearchVisitor(keyword);
+    this.root.accept(visitor);
+    return visitor.foundIds;   // 取得符合條件的檔案 ID 陣列
+}`,
     },
     comparison: {
       positive: `// 正面：行為插件化，結構不需要改動
@@ -256,14 +334,15 @@ function exportXML(node) {
   if(node.isDir) node.children.forEach(c => exportXML(c));
   else handleXML(node); // 痛點 3：重複遞迴遍歷
 }
-`
-    }
+`,
+    },
   },
   {
-    id: 'template',
-    name: 'Template Method',
-    chapter: '行為骨架',
-    description: '封裝演算法骨架（如：遞迴走訪、層級縮排、字元脫逸），將具體實作交給子類別（如 XML、Markdown 格式匯出）。',
+    id: "template",
+    name: "Template Method",
+    chapter: "行為骨架",
+    description:
+      "處理一致的演算法骨架（遞迴走訪、層級縮排、字元脫逸），將差異化實作交由子類別（格式匯出）。",
     icon: LayoutTemplate,
     mermaid: `classDiagram
     class BaseExporterTemplate {
@@ -292,38 +371,60 @@ function exportXML(node) {
     
     BaseExporterTemplate <|-- MarkdownExporterTemplate : 繼承
     BaseExporterTemplate <|-- XmlExporterTemplate : 繼承`,
+    sequence: `sequenceDiagram
+    participant Client
+    participant Template as BaseExporterTemplate
+    participant Concrete as XmlExporterTemplate
+    
+    Note over Client, Concrete: 樣板方法骨架流程
+    Client->>Template: visitDirectory(dir)
+    Template->>Concrete: renderDirectoryStart(dir)
+    Concrete-->>Template: return <Directory...>
+    Template->>Template: depth++
+    Note right of Template: 遞迴處理子節點
+    Template->>Template: depth--
+    Template->>Concrete: renderDirectoryEnd(dir)
+    Concrete-->>Template: return </Directory>
+    Template-->>Client: 輸出完整格式`,
     usage: {
-      title: '自動化縮排與內容脫逸',
-      description: '基底類別的 `visit` 方法負責維護 `depth` (深度) 並自動插入縮排空白，確保輸出格式整齊；同時透過 `format` 標籤模板強制進行 `escape` (脫逸) 處理，防止如 XML 注入等安全隱患。',
-      code: `// 子類別只需專注於「單行內容」的定義
+      title: "自動化縮排與內容脫逸",
+      description:
+        "基底的 `visit` 負責維護 `depth` 並插入縮排空白；同時透過 `format` 模板強制 `escape` 處理，防止如 XML 注入等安全隱患。",
+      code: `/* ------ 1. Template.ts (定義樣板) ------ */
 class XmlExporterTemplate extends BaseExporterTemplate {
     constructor() {
-        const xmlMap = { '&': '&amp;', '<': '&lt;' }; // 注入 XML 專用脫逸表
-        super(xmlMap, 2); // 指定縮排為 2 個空白
+      // 設定各自的跳脫字元庫，與深度縮排數量
+      super({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }, 2);
+      this.output = '<?xml version="1.0" encoding="UTF-8"?>\\n';
     }
 
-    // 只需定義標籤，父類別 visit 會自動處理前方的縮排
-    renderFile(file) {
-        return this.format\`<File Name="\${file.name}" \${file.attributes} />\`;
+    // 只需要實作「變化點 (Hook)」，走訪與縮排都由 BaseExporterTemplate 統一處理
+    override renderDirectoryStart(dir: DirectoryComposite): SafeFragment {
+      return this.format\`<Directory Name="\${dir.name}">\`;
     }
 
-    renderDirectoryStart(dir) {
-        return this.format\`<Directory Name="\${dir.name}">\`;
-    }
-
-    renderDirectoryEnd(dir) {
+    override renderDirectoryEnd(_dir: DirectoryComposite): SafeFragment {
         return this.format\`</Directory>\`;
+    }
+
+    override renderFile(file: FileLeaf): SafeFragment {
+        const attrs = file.attributes ? this.format\` \${file.attributes}\` : this.format\`\`;
+        return this.format\`<File Name="\${file.name}" Size="\${file.size}KB"\${attrs} />\`;
     }
 }
 
-const exporter = new XmlExporterTemplate();
-root.accept(exporter);
-console.log(exporter.getResult());`
+/* ------ 2. FileSystemFacade.ts (使用樣板) ------ */
+public exportXml(): string {
+    // 實例化特定的 Template，然後傳入 Visitor 進行走訪
+    const visitor = new XmlExporterTemplate();
+    this.root.accept(visitor); 
+    return visitor.getResult(); // 取出組合好的 XML 字串
+}`,
     },
     comparison: {
       positive: `// 正面：封裝不變流程 (走訪)，開放變化細節 (標籤格式)
 abstract class BaseExporterTemplate extends BaseVisitor {
-  // [Template Method] 實作 Visitor 的遞迴走訪、但多加處理縮排深度、字元脫逸等細節。
+  // [Template Method] 實作 Visitor 的走訪、但多加處理縮排深度、字元脫逸等細節。
   public visitDirectory(dir: DirectoryComposite): void {
     this.output += this.renderDirectoryStart(dir); // Hook 1: 開始
     this.depth++;
@@ -351,14 +452,15 @@ function exportToXml(node, depth) {
 function exportToMarkdown(dir: any): string {
   // 實作輸出 Markdown 格式
 }
-`
-    }
+`,
+    },
   },
   {
-    id: 'observer',
-    name: 'Observer',
-    chapter: '解耦通訊',
-    description: '建立發佈-訂閱機制，讓核心邏輯（如 Visitor、Command）能在不耦合 UI 的情況下，透過介面同步狀態更新。',
+    id: "observer",
+    name: "Observer",
+    chapter: "解耦通訊",
+    description:
+      "建立發佈-訂閱機制，讓核心邏輯（如 Visitor、Command）能在不耦合 UI 的情況下，透過介面同步狀態更新。",
     icon: Activity,
     mermaid: `classDiagram
     class NotificationEvent {
@@ -395,32 +497,60 @@ function exportToMarkdown(dir: any): string {
     Subject ..> NotificationEvent : 廣播
     IObserver <|-- ConsoleObserver : 實作
     IObserver <|-- DashboardObserver : 實作`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Client
+    participant Obs1 as ConsoleObserver
+    participant Obs2 as DashboardObserver
+    participant Vis as StatisticsVisitor
+    
+    Note over Client, Vis: 【建立觀察者與訂閱事件】
+    Client->>Obs2: new ConsoleObserver(fn) / DashboardObserver(fn)
+    
+    Client->>+Vis: new StatisticsVisitor()
+    create participant Sub as Subject
+    Vis->>Sub: 內部 notifier
+    Client->>+Sub: subscribe(consoleObs) / subscribe(dashboardObs) 
+    
+    Note over Client, Vis: 【執行業務並觸發通知】
+    Client->>+Vis: visitFile(entry)
+    Vis->>+Sub: notify(event)
+    
+    loop 逐一通知 (Update)
+        Sub->>+Obs1: update(event)
+        Sub->>+Obs2: update(event)
+    end
+    deactivate Sub
+    `,
     usage: {
-      title: '事件訂閱與廣播',
-      description: '主體 (Subject) 不需知道觀察者 (Observer) 的具體實作，僅透過 notify 進行廣播，達成鬆散耦合。',
-      code: `// 1. 初始化 Subject
-const subject = new Subject();
+      title: "事件訂閱與廣播",
+      description:
+        "主體 (Subject) 不需知道觀察者 (Observer) 的具體實作，僅透過 notify 進行廣播，達成鬆散耦合。",
+      code: `/* ------ ExplorerTab.tsx (Observer 的註冊與廣播) ------ */
+// 1. 準備觀察者 A: Dashboard（綁定圓形進度條）
+const dashboardObs = new DashboardObserver(
+    stats => setLiveStats(stats), 
+    facade.totalItems()
+);
 
-// 2. 準備不同功能的觀察者
-const logger = new ConsoleObserver(entry => setLogs(prev => [...prev, entry]));
-const dashboard = new DashboardObserver(stats => setProgress(stats), totalNodes);
+// 2. 準備觀察者 B: Console 終端機（綁定日誌歷史）
+const consoleObs = new ConsoleObserver(
+    log => setVisitorLogs(prev => [...prev, log])
+);
 
-// 3. 建立訂閱連結
-subject.subscribe(logger);
-subject.subscribe(dashboard);
+// 3. 直接建立一個 Visitor 作為 Subject
+const visitor = new StatisticsVisitor();
 
-// 4. 觸發通知
-subject.notify({
-    source: 'system',
-    type: 'progress',
-    message: '執行中...',
-    data: { count: 1, total: 10 }
-});`
+// 4. 將這兩個「互不相處」的 UI 觀察者，掛載(訂閱)到 Visitor 身上
+// 當 Visitor 去巡覽結構時，就會不斷觸發 Notify 廣播，更新兩個畫面啦！
+visitor.notifier.subscribe(consoleObs);
+visitor.notifier.subscribe(dashboardObs);`,
     },
     comparison: {
       positive: `// 正面：通知器廣播機制，UI 與核心完全解耦
 class FileSearchVisitor implements IVisitor {
-  private notifier: Subject = new Subject(); // 使用組合 (Has-a) Observer Pattern
+  // 使用組合 (Has-a) Observer Pattern
+  private notifier: Subject = new Subject();
   public visitFile(f: File): void {
     if (f.name.includes(this.keyword)) {
       // 任務物件不須認識 UI 組件，只需廣播「我找到了」
@@ -436,14 +566,15 @@ function search(node: any, kw: string): void {
     // 痛點：直接操作 DOM，無法由終端機或其他框架複用。綁定太深
     document.getElementById('status')!.innerText = '...';
   }
-}`
-    }
+}`,
+    },
   },
   {
-    id: 'decorator',
-    name: 'Decorator',
-    chapter: '裝飾鏈條',
-    description: '動態地為 Observer 附加額外行為 (如日誌樣式)，不修改原始 Observer 的程式碼，展現層層包裹的靈活性。',
+    id: "decorator",
+    name: "Decorator",
+    chapter: "裝飾鏈條",
+    description:
+      "動態地為 Observer 附加額外行為 (如日誌樣式)，不修改原始 Observer 的程式碼，展現層層包裹的靈活性。",
     icon: Component,
     mermaid: `classDiagram
     class IObserver {
@@ -486,20 +617,54 @@ function search(node: any, kw: string): void {
     BaseDecorator <|-- IconDecorator : 繼承
     BaseDecorator <|-- BoldDecorator : 繼承
     BaseDecorator o-- IObserver : 包裝`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Client
+    participant Sub as Subject
+    participant Real as ConsoleObserver
+    
+    Note over Client, Real: 【初始化：套娃包裝】
+    create participant D2 as BoldDecorator
+    Client->>D2: new BoldDecorator(consoleObs)
+    create participant D1 as IconDecorator
+    Client->>D1: new IconDecorator(boldObs, "⛔")
+    Note right of D2: 最後 IconDecorator 變成了最外層
+    
+    Note over Sub, D1: 【執行期：訊息穿透流程】
+    Sub->>D1: update(event)
+    activate D1
+    Note right of D2: 1. 匹配關鍵字，裝飾圖示
+    D1->>D2: update(event)
+    activate D2
+    Note right of D2: 2. 匹配關鍵字，裝飾粗體
+    D2->>Real: update(event)
+    activate Real
+    Note right of Real: 3. 核心物件執行最終輸出
+    deactivate Real
+    deactivate D2
+    deactivate D1`,
     usage: {
-      title: '物件行為疊加',
-      description: '像俄羅斯套娃一樣層層包裹物件，每一層 Decorator 加入新的行為，且客戶端無需修改程式碼。',
-      code: `let obs = new ConsoleObserver();
+      title: "物件行為疊加",
+      description:
+        "像俄羅斯套娃一樣層層包裹物件，每一層 Decorator 加入新的行為，且客戶端無需修改程式碼。",
+      code: `/* ------ ExplorerTab.tsx (套娃般的物件疊加) ------ */
+// 1. 初始化最內層、最單純的目標物件 (只負責純文字日誌紀錄)
+let logger: IObserver = new ConsoleObserver(entry => setLogs(prev => [...prev, entry]));
 
-// 1. 疊加顏色裝飾
-obs = new HighlightDecorator(obs, 'Error', 'text-red-500');
+// 2. 像洋蔥一樣層層疊上不同的樣式行為 (回傳的都是包著舊物件的新物件)
+// --- [加粗處理] ---
+logger = new BoldDecorator(logger, ['[Command]', '[Error]']);
 
-// 2. 疊加圖標裝飾
-obs = new IconDecorator(obs, 'Error', '⚠️');
+// --- [顏色處理] ---
+logger = new HighlightDecorator(logger, '[Command]', 'text-cyan-700');
+logger = new HighlightDecorator(logger, '刪除', 'text-red-600');
 
-// 3. 執行 (裝飾器鏈條會直接修改 event.message 內容)
-obs.update({ message: 'Error occurred' });
-// 最終 message: ⚠️ <span class="text-red-500">Error occurred</span>`
+// --- [圖示處理] ---
+logger = new IconDecorator(logger, '刪除', '⛔');
+logger = new IconDecorator(logger, '[Error]', '❌');
+
+// 3. 實際執行時，訊息會從最外層 (Icon) -> 中間層 (Highlight) -> 核心 (Console) 一路穿透進去
+highlightLoggerRef.current = logger;`,
     },
     comparison: {
       positive: `// 正面：多維度裝飾，動態組合行為
@@ -520,7 +685,7 @@ class HighlightDecorator extends BaseDecorator {
   }  
 }`,
       negative: `// 反面：企圖用一堆參數來控制所有樣式，結果邏輯互相打架。
-function notify(msg: string, action: number, level: string, withIcon: boolean) {
+function notify(msg: string, action: number, level: string, icon: boolean) {
   // 痛點：邏輯耦合，宣告所有可能用到的變數
   let prefix = "";
   let color = "text-gray-500";
@@ -530,19 +695,20 @@ function notify(msg: string, action: number, level: string, withIcon: boolean) {
     color = "text-red-500";
     if (action === 1) prefix = "⚡";
     else if (action === 2) prefix = "↩️";
-    if (withIcon) prefix += "❌ ";
+    if (icon) prefix += "❌ ";
   } else if (level === 'warning') {
     color = "text-yellow-500";
     // 略…
   }
-}`
-    }
+}`,
+    },
   },
   {
-    id: 'adapter',
-    name: 'Adapter',
-    chapter: '介面轉換',
-    description: '將不相容的事件資料 (NotificationEvent) 轉換為 UI 期待的格式 (Dashboard)，解決介面不對接問題。',
+    id: "adapter",
+    name: "Adapter",
+    chapter: "介面轉換",
+    description:
+      "將不相容的事件資料 (NotificationEvent) 轉換為 UI 期待的格式 (Dashboard)，解決介面不對接問題。",
     icon: Plug2,
     mermaid: `classDiagram
     class NotificationEvent {
@@ -571,23 +737,53 @@ function notify(msg: string, action: number, level: string, withIcon: boolean) {
     DashboardObserver ..> NotificationEvent : 收到更新訊息
     DashboardObserver ..> DashboardAdapter : 建立並使用
     DashboardAdapter ..> NotificationEvent : 轉換自`,
+    sequence: `sequenceDiagram
+    participant Sub as Subject
+    participant Obs as DashboardObserver
+    participant Adapter as DashboardAdapter
+    participant UI as React Dashboard
+    
+    Sub->>Obs: update(event)
+    Note right of Obs: event 為原始不相容格式
+    Obs->>Adapter: new DashboardAdapter(event)
+    Note left of Adapter: 重新映射欄位與計算
+    Adapter-->>Obs: return adaptedData
+    Obs->>UI: setStats(adaptedData)
+    Note right of UI: UI 拿到專屬格式`,
     usage: {
-      title: '資料形狀的橋接',
-      description: '當「原始事件 (Adaptee)」與「UI 組件 (Target)」需要的資料模型不一致時，透過 Adapter 進行欄位映射（例如將 event.data.currentNode 轉向給 adapter.name）。',
-      code: `// 1. 原始事件 (Adaptee)
-const event = { 
-    data: { currentNode: 'Doc.pdf', count: 5, nodeType: 'file' } 
-};
+      title: "資料形狀的橋接",
+      description:
+        "當「原始事件 (Adaptee)」與「UI 組件 (Target)」需要的資料模型不一致，並要調用 UI 組件方法時，透過 Adapter 進行橋接。",
+      code: `/* ------ 1. Adapter 轉換邏輯 (Adapter 實體化) ------ */
+export class DashboardAdapter {
+    public readonly name: string;
+    public readonly total: number;
+    // ...略去其它給 Dashboard 使用的屬性
 
-// 2. DashboardObserver 的內部程式碼 - 收到 event 後，透過 Adapter 進行轉換 (補全數據並重新映射欄位)
-const adaptedData = new DashboardAdapter(event, 10);
+    // 傳入系統規格的 Adaptee (NotificationEvent) 與 總數
+    constructor(event: NotificationEvent, total: number) {
+        // [適配轉接] 把深層的 event.data.currentNode 重新映射成平坦的 name
+        this.name = event.data?.currentNode || '-';
+        this.total = total; // 補齊 UI 所需的短缺欄位
+    }
+}
 
-console.log(adaptedData.name);  // "Doc.pdf" (對應自 currentNode)
-console.log(adaptedData.total); // 10 (建構時傳入的補全數據)
+/* ------ 2. Adapter 的使用者 (DashboardObserver) ------ */
+export class DashboardObserver implements IObserver {
+    constructor(
+        private updateUI: (stats: DashboardAdapter) => void, 
+        private total: number
+    ) {}
 
-// 3. 在 Observer 中整合 (誰在使用 Adapter)
-const dashObs = new DashboardObserver(data => updateUI(data), 10);
-dashObs.update(event);`
+    // 當 Visitor 廣播時，只會傳來生硬且不相容的 NotificationEvent
+    update(event: NotificationEvent): void {
+        // [核心樞紐] 將接收到的訊號塞入轉接器，獲得完美符合 UI 要求的物件
+        const adaptedStats = new DashboardAdapter(event, this.total);
+        
+        // 直接將轉接好的物件拋給 React SetState
+        this.updateUI(adaptedStats);
+    }
+}`,
     },
     comparison: {
       positive: `// 正面：透過轉接器橋接原始資料與 UI 期待
@@ -601,7 +797,7 @@ class DashboardAdapter {
 
 class DashboardObserver implements IObserver {
   update(event: NotificationEvent) {
-    // 將原始 NotificationEvent 轉換成 UI 需要的格式
+    // 將原始 NotificationEvent 轉換成 UI 需要的格式，並調用 UI 方法
     const stats = new DashboardAdapter(event, this.total);
     this.updateStatsFn(stats); // UI 仍是接收到自己的格式 name / total
   }
@@ -609,7 +805,7 @@ class DashboardObserver implements IObserver {
       negative: `// 反面：UI 依賴實作細節 (Coupled to Implementation)
 
 // 痛點 1：UI 遷就於資料來源的設計
-// 因為後端傳 event 過來，UI 就只好設計成接收 event，而不是設計成接收它真正需要的 { name, total }
+// 因為後端傳 event 過來，UI 就只好設計成接收 event，加深依賴
 function MonitorDashboard({ event }: { event: any }) {
 
   // 痛點 2：洩漏的底層知識 (Leaky Abstraction)
@@ -621,14 +817,15 @@ function MonitorDashboard({ event }: { event: any }) {
   // 後端將不再純粹，無法複用於 Mobile App 或其他場景。
 
   return <div className="card">{name}</div>;
-}`
-    }
+}`,
+    },
   },
   {
-    id: 'command',
-    name: 'Command',
-    chapter: '行為物件化',
-    description: '將操作封裝成一致的物件，才能管理 (Undo/Redo 功能)，實現操作的歷史記錄追溯。',
+    id: "command",
+    name: "Command",
+    chapter: "行為物件化",
+    description:
+      "將操作封裝成一致的物件，才能管理 (Undo/Redo 功能)，實現操作的歷史記錄追溯。",
     icon: Command,
     mermaid: `classDiagram
     class BaseCommand {
@@ -675,27 +872,50 @@ function MonitorDashboard({ event }: { event: any }) {
     BaseCommand <|-- TagCommand : 繼承
     BaseCommand <|-- CopyCommand : 繼承
     CommandInvoker o-- BaseCommand : 管理歷程`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Facade as FileSystemFacade
+    participant Invoker as CommandInvoker
+    participant Cmd as DeleteCommand
+    participant Dest as DirectoryComposite
+    
+    Note over Facade, Dest: 【執行流程 (Execute)】
+    Facade->>Cmd: new DeleteCommand(id, parent)
+    Facade->>Invoker: execute(cmd)
+    Invoker->>Cmd: execute()
+    Cmd->>Dest: remove(id)
+    Invoker->>Invoker: 紀錄至 undoStack 並清空 redoStack
+    
+    Note over Facade, Dest: 【復原流程 (Undo)】
+    Facade->>Invoker: undo()
+    Invoker->>Invoker: 從 undoStack 彈出(pop) 最近一筆命令
+    Invoker->>Cmd: undo()
+    Cmd->>Dest: add(targetEntry)
+    Invoker->>Invoker: 移至 redoStack`,
     usage: {
-      title: '行為物件化與復原系統',
-      description: '透過將操作封裝成 Command 物件，Invoker 可以統一管理執行 (Execute)、復原 (Undo) 與重做 (Redo)，並透過 Subject 通知 UI 狀態變更。',
-      code: `// 1. 準備 Invoker
-const invoker = new CommandInvoker();
+      title: "行為物件化與復原系統",
+      description:
+        "透過將操作封裝成 Command 物件，Invoker 可以統一管理執行 (Execute)、復原 (Undo) 與重做 (Redo)。",
+      code: `/* ------ FileSystemFacade.ts (建構並發送指令) ------ */
+// 1. 商業邏輯：使用者點擊刪除按鈕
+public deleteItem(id: string): void {
+    const parent = this.findParent(id);
+    
+    if (parent && id !== 'root') {
+        // 2. 將「刪除」這個行為，以及所需的受詞與環境變數，打包進 Command 物件中
+        const command = new DeleteCommand(id, parent);
+        
+        // 3. 不直接執行，而是交給負責統一調度的 Invoker
+        // Invoker 會觸發 execute() 並將其推入 UndoStack 中記錄
+        this.invoker.execute(command);
+    }
+}
 
-// 2. 將 "刪除" 行為打包成物件 (尚未執行)
-const deleteCmd = new DeleteCommand(fileId, parentDirectory);
-
-// 3. 透過 Invoker 執行 (這會觸發 execute 並推入 undoStack)
-invoker.execute(deleteCmd);
-
-// 4. 將 "貼標籤" 行為打包
-const tagCmd = new TagCommand(tagMediator, fileId, 'Urgent', true);
-invoker.execute(tagCmd);
-
-// 5. 復原上一步 (貼標籤 -> 取消貼標籤)
-invoker.undo();
-
-// 6. 再次復原 (刪除項目 -> 恢復項目)
-invoker.undo();`
+// 4. 當使用者在 UI 上點擊「[Undo] 復原」按鈕
+public undo(): void {
+    // 5. Invoker 從 Stack 彈出剛才的 DeleteCommand，呼叫它的 undo() 來恢復該檔案
+    this.invoker.undo();
+}`,
     },
     comparison: {
       positive: `// 正面：將動作打包成可紀錄、可復原的物件
@@ -729,14 +949,15 @@ function onDeleteClick(id: string) {
 function onPasteClick(targetId: string) {
   // 每個操作都要自己手寫備份邏輯，容易漏寫或寫錯。
   // 複製貼上邏輯混在 UI 裡...
-}`
-    }
+}`,
+    },
   },
   {
-    id: 'strategy',
-    name: 'Strategy',
-    chapter: '策略注入',
-    description: '定義排序演算法家族，讓排序規則 (名稱、大小、標籤) 可在需要時選擇切換，彈性應用。',
+    id: "strategy",
+    name: "Strategy",
+    chapter: "策略注入",
+    description:
+      "定義排序演算法家族，讓排序規則 (名稱、大小、標籤) 可在需要時選擇切換，彈性應用。",
     icon: RefreshCcwDot,
     mermaid: `classDiagram
     class ISortStrategy {
@@ -769,20 +990,55 @@ function onPasteClick(targetId: string) {
     BaseStrategy <|-- AttributeSortStrategy : 繼承
     BaseStrategy <|-- LabelSortStrategy : 繼承
     DirectoryComposite o-- ISortStrategy : 使用策略`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Facade as FileSystemFacade
+    participant Strat as ISortStrategy
+    participant Cmd as SortCommand
+    participant Invoker as CommandInvoker
+    participant Dir as DirectoryComposite
+    
+    Note over Facade, Strat: 根據 UI 選擇產生排序策略
+    Facade->>Strat: new LabelSortStrategy(dir)
+    Note over Strat, Cmd: 將策略注入 Command
+    Facade->>Cmd: new SortCommand(root, old, new, state)
+    
+    Facade->>Invoker: execute(cmd)
+    Invoker->>Cmd: execute()
+    
+    Cmd->>Dir: sort(strategy)
+    Dir->>Strat: sort(children)
+    Note right of Strat: 具體執行排序演算法
+    Strat-->>Dir: 返回排序後結果`,
     usage: {
-      title: '動態演算法切換',
-      description: '將排序邏輯抽離成策略物件，讓目錄 (Context) 在執行時可以動態注入不同的排序規則，而不需修改目錄本身的程式碼。',
-      code: `// 1. 準備策略 A: 依標籤排序 (由小到大)
-const tagStrategy = new LabelSortStrategy(tagMediator, 'asc');
-root.sort(tagStrategy); // 目錄現在會按標籤排序
+      title: "動態演算法切換",
+      description:
+        "將排序邏輯抽離成策略物件，讓目錄 (Context) 在執行時可以動態注入不同的排序規則，而不需修改目錄本身的程式碼。",
+      code: `/* ------ FileSystemFacade.ts (動態演算法切換) ------ */
+public sortItems(attribute: string, currentSortState: SortState): SortState {
+    const nextDir = (currentSortState.attr === attribute && currentSortState.dir === 'asc') ? 'desc' : 'asc';
 
-// 2. 準備策略 B: 依名稱排序 (由大到小)
-const nameStrategy = new AttributeSortStrategy('name', 'desc');
+    // 1. 準備一個「策略工廠函數」
+    // 如果是要按標籤排序，就生出需要 Mediator 協助的 LabelStrategy
+    // 如果是按其它屬性，就生出單純比較屬性的 AttributeStrategy
+    const getStrategy = (attr: string, dir: 'asc' | 'desc') =>
+        (attr === 'label' 
+            ? new LabelSortStrategy(this.mediator, dir) 
+            : new AttributeSortStrategy(attr, dir));
 
-// 3. 動態更換策略
-root.sort(nameStrategy); // 瞬間切換排序行為
+    // 2. 製造出「我們原本的策略」與「我們即將要切換的策略」
+    const oldStrategy = getStrategy(currentSortState.attr, currentSortState.dir);
+    const newStrategy = getStrategy(attribute, nextDir);
+    const nextState: SortState = { attr: attribute, dir: nextDir };
 
-// 目錄 (DirectoryComposite) 內部只需呼叫 strategy.sort(this.children)`
+    // 3. 將新舊策略一起打包進去 Command 裡
+    // DirectoryComposite 的內部在執行時，其實就只是無腦的：this.children.sort(strategy.sort)
+    this.invoker.execute(
+        new SortCommand(this.root, oldStrategy, newStrategy, currentSortState, nextState)
+    );
+
+    return nextState;
+}`,
     },
     comparison: {
       positive: `// 正面：動態注入演算策略，演算法與執行者解耦
@@ -795,24 +1051,25 @@ const s2: ISortStrategy = new AttributeSortStrategy('name');
 // 依需求，動態注入策略，可達到不同的排序結果
 commandInvoker.execute(new SortCommand(root, s2));`,
       negative: `// 反面：參數混亂與條件地獄
-// 痛點 1：為了支援「依標籤排序」，傳入 tagManager。函式簽名「有時需要、有時不需要」的參數，調用端困惑。
+// 痛點 1：為了支援「依標籤排序」，傳入 tagManager。之後依需求增加更多參數
+// 函式簽名「有時需要、有時不需要」的參數，調用端困惑。
 function sort(nodes: any[], type: 'name' | 'tag', tagManager?: any) {
   // 痛點 2：條件地獄...無限增長的 if-else
   if (type === 'name') {
     nodes.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (type === 'size') { 
   } else if (type === 'tag') {
     if (!tagManager) throw new Error("Missing dependency");
     nodes.sort((a, b) => tagManager.getRank(a) - tagManager.getRank(b));
   }
-}`
-    }
+}`,
+    },
   },
   {
-    id: 'singleton',
-    name: 'Singleton',
-    chapter: '全域狀態',
-    description: '保證 Clipboard (剪貼簿) 在全應用程式中只有一個實例，集中管理複製的內容。',
+    id: "singleton",
+    name: "Singleton",
+    chapter: "全域狀態",
+    description:
+      "保證 Clipboard (剪貼簿) 在全應用程式中只有一個實例，集中管理複製的內容。",
     icon: Box,
     mermaid: `classDiagram
     class Clipboard {
@@ -840,23 +1097,48 @@ function sort(nodes: any[], type: 'name' | 'tag', tagManager?: any) {
     CopyCommand ..> Clipboard : set() via getInstance()
     PasteCommand ..> Clipboard : get() via getInstance()
     `,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Copy as CopyCommand
+    participant Paste as PasteCommand
+    participant Clip as Clipboard (Singleton)
+    
+    Note over Copy, Clip: 【操作 A：複製內容】
+    Copy->>Clip: getInstance()
+    Clip-->>Copy: return unique instance
+    Copy->>Clip: set(content)
+    
+    Note over Paste, Clip: 【操作 B：貼上內容】
+    Paste->>Clip: getInstance()
+    Clip-->>Paste: return same instance
+    Paste->>Clip: get() 取得內容`,
     usage: {
-      title: '全域唯一存取點與副本機制',
-      description: '保證剪貼簿實體在記憶體中只有一份。雖然實體唯一，但透過 get() 取出資料時會利用 Prototype 模式進行 clone，避免原始資料被外部意外修改。',
-      code: `// 1. 獲取全域唯一實體
-const cb1 = Clipboard.getInstance();
-cb1.set(sourceFile); // 存入一個檔案
+      title: "全域唯一存取點與副本機制",
+      description:
+        "保證剪貼簿實體在記憶體中只有一份。雖然實體唯一，但透過 get() 取出資料時會利用 Prototype 模式進行 clone。",
+      code: `/* ------ Command.ts (任意指令、任意模組 都能操作同一份實體) ------ */
+export class CopyCommand extends BaseCommand {
+    public execute(): void {
+        if (this.component) {
+            // 透過 getInstance() 取得全域唯一的剪貼簿
+            Clipboard.getInstance().set(this.component);
+        }
+    }
+}
 
-// 2. 在應用的任何角落獲取，保證是同一個實例
-const cb2 = Clipboard.getInstance();
-console.log(cb1 === cb2); // true (同一個位址)
+export class PasteCommand extends BaseCommand {
+    public execute(): void {
+        const clipboard = Clipboard.getInstance();
+        
+        // 從同樣的實體中取出內容 (此處運用 Prototype 模式複製了新位址)
+        const content = clipboard.get();
 
-// 3. 取得內容 (內部實作了 .clone() 複製品)
-const pastedFile = cb2.get(); 
-
-// 4. 驗證：雖然內容相同，但參考位址不同 (安全複製品)
-console.log(pastedFile === sourceFile); // false
-console.log(pastedFile.name === sourceFile.name); // true`
+        if (content) {
+            // 這個獨立拷貝出來的元件可以安全地塞進目錄裡了
+            this.destinationDirectory.add(content);
+        }
+    }
+}`,
     },
     comparison: {
       positive: `// 正面：唯一入口，保證狀態全域一致
@@ -896,15 +1178,16 @@ class ContextMenu {
 }
 
 // 3. 解決方案？Props Drilling 地獄，只能被迫把 instance 從最上層一路傳下來...
-// <App clipboard={cb}>`
-    }
+// <App clipboard={cb}>`,
+    },
   },
   {
-    id: 'flyweight',
-    name: 'Flyweight + Factory',
-    chapter: '資源共享',
-    description: '透過標籤工廠共享相同配色的標籤實體，達成一致化，並減少記憶體開銷。',
-    icon: Boxes,
+    id: "flyweight",
+    name: "Flyweight + Factory",
+    chapter: "資源共享",
+    description:
+      "透過標籤工廠共享相同配色的標籤實體，達成一致化，並減少記憶體開銷。",
+    icon: Tags,
     mermaid: `classDiagram
     class Label {
         +name : string
@@ -919,20 +1202,61 @@ class ContextMenu {
     
     LabelFactory ..> Label : 創建並共享快取實體
     LabelFactory o-- Label : 管理共享池`,
+    sequence: `sequenceDiagram
+    autonumber
+    participant Med as TagMediator
+    participant Factory as LabelFactory
+    participant Label as Label (Flyweight)
+    
+    Note over Med, Factory: 1. 請求標籤實體 (第一次)
+    Med->>Factory: getLabel('Urgent')
+    Note right of Factory: 檢查 Pool (不存在)
+    Factory->>Label: new Label('Urgent', 'bg-red-500')
+    Label-->>Factory: return new Instance
+    Factory-->>Med: return Label
+    
+    Note over Med, Factory: 2. 請求標籤實體 (第二次)
+    Med->>Factory: getLabel('Urgent')
+    Note right of Factory: 檢查 Pool (已存在)
+    Factory-->>Med: return same Instance (快取共享)`,
     usage: {
-      title: '享元物件的共享快取',
-      description: '標籤工廠會控管所有 Label 實體的建立。當請求同名的標籤時，直接回傳記憶體中已存在的實體，並自動套用預設色票。',
-      code: `// 1. 第一次請求 "Urgent": 工廠會 new 一個紅色標籤並快取
-const urgent1 = labelFactory.getLabel('Urgent');
+      title: "享元物件的共享快取",
+      description:
+        "標籤工廠會控管所有 Label 實體的建立。當請求同名的標籤時，直接回傳記憶體中已存在的實體，並自動套用預設色票。",
+      code: `/* ------ Flyweight.ts (享元物件與工廠) ------ */
+// 1. 享元實體: 不論外面誰要用，Label 紀錄的屬性都是共享不變的
+export class Label {
+    constructor(public name: string, public color: string) { }
+}
 
-// 2. 第二次請求 "Urgent": 工廠直接從 Map 吐出同一個實體
-const urgent2 = labelFactory.getLabel('Urgent');
+// 2. 享元工廠: 負責控管所有的實體池 (Pool)
+export class LabelFactory {
+    private labels: Record<string, Label> = {};
 
-// 3. 驗證：兩者指向同一個記憶體位址，達成節省記憶體開銷
-console.log(urgent1 === urgent2); // true
+    getLabel(name: string): Label {
+        // [核心機制] 若快取中還沒建立過，才真的去 new 一個新實體
+        if (!this.labels[name]) {
+            this.labels[name] = new Label(name, 'bg-slate-500'); 
+        }
+        // 反之，永遠回傳記憶體裡同一個位址的實體
+        return this.labels[name];
+    }
+}
 
-// 4. 請求不同的名稱，則會建立新實體
-const workLabel = labelFactory.getLabel('Work');`
+/* ------ Mediator.ts (客戶端搭配延遲載入) ------ */
+// 3. 綁定標籤時：為節省記憶體，我們連物件參考都不存，只存極輕量的「字串」！
+public attach(fileId: string, labelName: string): void {
+    this.fileToLabels.get(fileId)!.add(labelName);
+}
+
+// 4. 當 UI 真的需要畫出檔案標籤時，才拿著字串去向工廠「借用」實體
+public getLabels(fileId: string): Label[] {
+    const names = this.fileToLabels.get(fileId);
+    
+    // 如果有一萬個檔案都綁定 "Urgent"，這裡就只會跟工廠借一萬次，
+    // 拿到的永遠是同一個夾帶 bg-red-500 屬性的 Label 實體！
+    return names ? Array.from(names).map(n => labelFactory.getLabel(n)) : [];
+}`,
     },
     comparison: {
       positive: `// 正面：工廠控管實體，達成資源共享
@@ -962,14 +1286,15 @@ fileX.tags.push(new Label('Urgent', 'bg-red-500'));
 fileX.tags.push(new Label('Personal', 'bg-green-500'));
 
 // 痛點：若 1000 個檔案標註 Urgent，就 new 了 1000 次。
-// 記憶體浪費嚴重，且無法統一管理標籤外觀。`
-    }
+// 記憶體浪費嚴重，且無法統一管理標籤外觀。`,
+    },
   },
   {
-    id: 'mediator',
-    name: 'Mediator',
-    chapter: '關係管理',
-    description: '集中管理檔案與標籤的多對多關聯，避免物件間的網狀依賴,實現 O(1) 雙向查詢。',
+    id: "mediator",
+    name: "Mediator",
+    chapter: "關係管理",
+    description:
+      "集中管理檔案與標籤的多對多關聯，避免物件間的網狀依賴,實現 O(1) 雙向查詢。",
     icon: Share2,
     mermaid: `classDiagram
     class TagMediator {
@@ -987,20 +1312,42 @@ fileX.tags.push(new Label('Personal', 'bg-green-500'));
     
     TagMediator ..> LabelFactory : 取得享元實體
     TagMediator ..> Label : 傳回繪製用的標籤`,
+    sequence: `sequenceDiagram
+    participant Cmd as TagCommand
+    participant Med as TagMediator
+    participant UI as RenderTree
+    
+    Note over Cmd, UI: 解耦關聯管理
+    Cmd->>Med: attach(fileId, 'Work')
+    Note right of Med: 記錄 Map<file, labels>
+    
+    Note over Cmd, UI: UI 需要渲染時
+    UI->>Med: getLabels(fileId)
+    Med-->>UI: return Label[]`,
     usage: {
-      title: '複雜關聯的集中化',
-      description: '檔案不需要知道自己有哪些標籤，標籤也不需要知道有哪些檔案。所有的連線資訊都儲存在 Mediator 的雙向索引 (Index) 中。',
-      code: `// 1. 建立關連 (透過 Mediator 進行，不需改動 File 物件)
-tagMediator.attach(file.id, 'Urgent');
-tagMediator.attach(file.id, 'Work');
+      title: "複雜關聯的集中化",
+      description:
+        "檔案不需要知道自己有哪些標籤，標籤也不需要知道有哪些檔案。所有的連線資訊都儲存在 Mediator 的雙向索引 (Index) 中。",
+      code: `/* ------ 各個模組是如何透過 Mediator (中央聯絡簿) 來互動的？ ------ */
 
-// 2. 正向查詢: 拿到的是結合了 Flyweight 顏色的標籤物件列表
-const labels = tagMediator.getLabels(file.id); 
-// Output: [{name: 'Urgent', color: 'bg-red-500'}, ...]
+// 1. 在 TagCommand (專注於編輯操作)：
+// 只管對 Mediator 下指令建立關聯，完全不用去修改 FileLeaf 原本的結構
+if (this.isAttach) {
+    this.tagMediator.attach(this.fileId, this.labelName);
+} else {
+    this.tagMediator.detach(this.fileId, this.labelName);
+}
 
-// 3. 反向查詢: 哪些檔案有 'Urgent' 標籤？ (O(1) 高效率)
-const fileIds = tagMediator.getFiles('Urgent');
-console.log(fileIds); // [file.id, ...]`
+// 2. 在 RenderTree (專注於 UI 渲染)：
+// 畫面上要繪製檔案圖示時，直接向 Mediator 取回對應的顏色實體 (O(1) 正向查詢)
+const labels = tagMediator.getLabels(node.id);
+
+// 3. 在 LabelSortStrategy (專注於整理分類)：
+// 想找出所有 "Urgent" 的檔案優先排在最前面，直接問 Mediator (O(1) 反向查詢)
+const priorityFileIds = tagMediator.getFiles('Urgent');
+
+// >> 由於將「關聯關係」獨立抽出來統一由 Mediator 管理
+// >> 這三個四散在邏輯層、演算法層、與 UI 層的程式，就完全不會互相卡死了！`,
     },
     comparison: {
       positive: `// 正面：中介者管理多對多關聯，避免網狀依賴
@@ -1030,14 +1377,15 @@ file.tags.push(new Label('Urgent', 'bg-red-500'));
 // 痛點：如果要查詢「哪些檔案貼了 Work」？
 const results = files.filter(f => f.tags.includes('Work'));
 
-// 災難：這是一個 O(N) 暴力掃描。又要再遞迴遍歷所有檔案。`
-    }
+// 災難：這是一個 O(N) 暴力掃描。又要再遞迴遍歷所有檔案。`,
+    },
   },
   {
-    id: 'facade',
-    name: 'Facade',
-    chapter: '簡易存取',
-    description: '提供一個簡易的使用介面 (FileSystemFacade) 來操作複雜的功能 (Command, Visitor, Mediator)，降低 Client 與系統的耦合度。',
+    id: "facade",
+    name: "Facade",
+    chapter: "簡易存取",
+    description:
+      "提供簡易的使用介面 (FileSystemFacade) 來操作複雜的功能 (Command, Visitor, Mediator)，降低 Client 耦合度。",
     icon: AppWindow,
     mermaid: `classDiagram
     class FileSystemFacade {
@@ -1080,23 +1428,39 @@ const results = files.filter(f => f.tags.includes('Work'));
     FileSystemFacade --> Clipboard : 操作剪貼簿
     FileSystemFacade --> TagMediator : 管理標籤
     FileSystemFacade --> DirectoryComposite : 持有 Root`,
+    sequence: `sequenceDiagram
+    participant Client (UI)
+    participant Facade
+    participant Finder as FinderVisitor
+    participant Invoker
+    participant Cmd as DeleteCommand
+    
+    Note over Client, Facade: 簡化介面調用
+    Client->>Facade: deleteItem(id)
+    Facade->>Finder: new FinderVisitor(id)
+    Note right of Finder: 找出父節點資訊
+    Facade->>Cmd: new DeleteCommand(id, parent)
+    Facade->>Invoker: execute(cmd)
+    Invoker->>Cmd: execute()`,
     usage: {
-      title: '高層次介面的簡化開發',
-      description: 'Facade 隱藏了內部 Visitor、Command 與 Mediator 的複雜交互過程。Client 只需呼叫一個簡單的方法，後端會自動完成物件建立、Subject 訂閱與流程執行。',
-      code: `// 1. 初始化系統外觀 (一次性注入 Root)
-const facade = new FileSystemFacade(rootDirectory);
+      title: "高層次介面的簡化開發",
+      description:
+        "Facade 隱藏了內部 Visitor、Command、Observer 與 Mediator 的複雜交互過程。Client 只需呼叫一個簡單的方法。",
+      code: `/* ------ ExplorerTab.tsx (Client 視角：無腦操作) ------ */
+// 1. 初始化系統外觀 (一次性注入並隱藏龐大的 Root)
+const facade = new FileSystemFacade(FileSystemFacade.getSampleRoot());
 
 // 2. 原本複雜的「搜尋」行為 (需手動處理 Visitor 與通知)
-// 現在只需一行，還能傳入 Observer 自動建立日誌連線
+// 現在只需一行，還能把 Observer 陣列直接傳入自動建立 UI 連線
 const result = await facade.searchFiles('config', [consoleObserver]);
 
 // 3. 原本需要多方協作的「刪除並支援復原」
-// 內部會自動處理 FinderVisitor -> DeleteCommand -> Invoker
+// Facade 會自動為你接通 FinderVisitor -> DeleteCommand -> Invoker
 facade.deleteItem('file-123');
 facade.undo(); // 直接呼叫 Facade 的 Undo 即可
 
-// 4. 匯出 XML (隱藏了正確掛載 Template 的細節)
-const xml = await facade.exportXml();`
+// 4. 匯出 XML (隱藏了正確掛載 Template 的實作細節)
+const xml = await facade.exportXml([consoleObserver]);`,
     },
     comparison: {
       positive: `// 正面：外觀模式 (Facade) - 封裝複雜性與統一入口
@@ -1221,7 +1585,7 @@ function godProcessing(type, args) {
   }
   traverse(files, 0);
   return type === 'xml' ? result + '&lt;/root&gt;' : result;
-}`
-    }
-  }
+}`,
+    },
+  },
 ];

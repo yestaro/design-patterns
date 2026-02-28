@@ -98,7 +98,7 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
         <div className="fixed inset-0 z-[9999] flex items-center justify-center">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"
+                className="absolute inset-0 bg-black/50 animate-backdrop-in"
                 onClick={onClose}
             ></div>
 
@@ -133,7 +133,7 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
             `}</style>
 
             {/* Content */}
-            <div className="relative bg-white w-full h-full md:w-11/12 md:max-w-7xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-auto md:overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
+            <div className="relative bg-white w-full h-full md:w-11/12 md:max-w-7xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-auto md:overflow-hidden animate-premium-in border border-slate-200">
 
                 {/* Header */}
                 <div className="relative flex items-center justify-center px-6 py-2 border-b border-slate-100 bg-white shrink-0">
@@ -165,9 +165,10 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
                     </div>
                     <button
                         onClick={onClose}
-                        className="absolute right-6 p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600"
+                        className="absolute right-6 p-2 bg-white hover:bg-red-50 border border-slate-100 hover:border-red-100 rounded-full transition-all text-slate-400 hover:text-red-500 group/close active:scale-90"
+                        title="關閉"
                     >
-                        <X size={24} />
+                        <X size={24} className="group-hover/close:rotate-90 transition-transform" />
                     </button>
                 </div>
 
