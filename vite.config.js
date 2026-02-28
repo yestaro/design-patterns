@@ -8,4 +8,12 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  test: {
+    include: ['tests/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/patterns/**'],
+      reporter: ['text', 'text-summary', 'json-summary'],
+    },
+  },
 })

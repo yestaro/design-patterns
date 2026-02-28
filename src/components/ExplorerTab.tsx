@@ -7,7 +7,8 @@ import {
     Play,
     Command,
     Zap,
-    Workflow
+    Workflow,
+    Move
 } from 'lucide-react';
 import { DirectoryComposite, EntryComponent, WordDocument, ImageFile, PlainText } from '../patterns/Composite';
 import { Clipboard } from '../patterns/Singleton';
@@ -26,11 +27,20 @@ interface RenderTreeProps {
     setLiveStats: (stats: DashboardAdapter) => void;
     matchedIds: string[];
     forceUpdate: () => void;
+    /** 拖曳放置回呼 */
+    onDrop: (sourceId: string, targetId: string) => void;
+    /** 目前被拖曳經過的目錄 ID */
+    dragOverId: string | null;
+    /** 設定拖曳經過的目錄 ID */
+    setDragOverId: (id: string | null) => void;
 }
 
-const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setSelectedId, setLiveStats, matchedIds, forceUpdate }) => {
+const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setSelectedId, setLiveStats, matchedIds, forceUpdate, onDrop, dragOverId, setDragOverId }) => {
     const isSelected = selectedId === entry.id;
     const isMatched = matchedIds.includes(entry.id);
+    const isDragOver = dragOverId === entry.id && entry instanceof DirectoryComposite;
+    const isDragOverInvalid = dragOverId === entry.id && !(entry instanceof DirectoryComposite);
+    const isRoot = entry.id === 'root';
 
     const otherAttrs = entry.attributes;
 
@@ -55,12 +65,42 @@ const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setS
     return (
         <div className="ml-4 text-left">
             <div
+                draggable={!isRoot}
+                onDragStart={(e) => {
+                    e.stopPropagation();
+                    e.dataTransfer.setData('text/plain', entry.id);
+                    e.dataTransfer.effectAllowed = 'move';
+                }}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (entry instanceof DirectoryComposite) {
+                        e.dataTransfer.dropEffect = 'move';
+                    } else {
+                        e.dataTransfer.dropEffect = 'none';
+                    }
+                    setDragOverId(entry.id);
+                }}
+                onDragLeave={(e) => {
+                    e.stopPropagation();
+                    if (dragOverId === entry.id) setDragOverId(null);
+                }}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const sourceId = e.dataTransfer.getData('text/plain');
+                    if (sourceId && entry instanceof DirectoryComposite) {
+                        onDrop(sourceId, entry.id);
+                    }
+                    setDragOverId(null);
+                }}
+                onDragEnd={() => setDragOverId(null)}
                 onClick={(e) => {
                     e.stopPropagation();
                     setSelectedId(entry.id);
                     setLiveStats({ name: entry.name, count: 1, total: 1, type: entry.type } as DashboardAdapter);
                 }}
-                className={`flex items-center py-2 pr-2 pl-2 border-l-2 transition-all cursor-pointer ${isSelected ? 'bg-blue-50 border-blue-500 shadow-sm' : 'border-transparent'} ${isMatched ? 'bg-amber-50 ring-1 ring-amber-200 shadow-sm' : 'hover:bg-gray-100'}`}
+                className={`flex items-center py-2 pr-2 pl-2 border-l-2 transition-all cursor-pointer ${isSelected ? 'bg-blue-50 border-blue-500 shadow-sm' : 'border-transparent'} ${isDragOver ? 'ring-2 ring-blue-400 bg-blue-50/60 rounded-lg' : ''} ${isDragOverInvalid ? 'cursor-not-allowed' : ''} ${isMatched ? 'bg-amber-50 ring-1 ring-amber-200 shadow-sm' : 'hover:bg-gray-100'}`}
             >
                 <Icon className={`mr-2 h-4 w-4 ${entry instanceof DirectoryComposite ? 'text-yellow-500' : 'text-blue-500'}`} />
                 <span className={`text-sm ${isMatched ? 'font-bold text-amber-700' : 'font-medium text-slate-700'}`}>
@@ -97,6 +137,9 @@ const RenderTree: React.FC<RenderTreeProps> = ({ entry, facade, selectedId, setS
                             setLiveStats={setLiveStats}
                             matchedIds={matchedIds}
                             forceUpdate={forceUpdate}
+                            onDrop={onDrop}
+                            dragOverId={dragOverId}
+                            setDragOverId={setDragOverId}
                         />
                     ))}
                 </div>
@@ -116,6 +159,7 @@ const ExplorerTab: React.FC = () => {
     const [, setUpdateTick] = useState(0);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
     const [showRoadmap, setShowRoadmap] = useState(true);
+    const [dragOverId, setDragOverId] = useState<string | null>(null);
 
     // Console Auto-scroll - Adjusted to scroll only the container, not the window
     const consoleContainerRef = useRef<HTMLDivElement>(null);
@@ -178,6 +222,8 @@ const ExplorerTab: React.FC = () => {
         logger = new IconDecorator(logger, '移除標籤', '🧹');
         logger = new IconDecorator(logger, '[Clipboard]', '📋');
         logger = new IconDecorator(logger, '[Error]', '❌');
+        logger = new HighlightDecorator(logger, '移動', 'text-teal-600');
+        logger = new IconDecorator(logger, '移動', '📦');
 
         highlightLoggerRef.current = logger;
     }
@@ -354,6 +400,11 @@ const ExplorerTab: React.FC = () => {
                             setLiveStats={setLiveStats}
                             matchedIds={matchedIds}
                             forceUpdate={forceUpdate}
+                            onDrop={(sourceId, targetId) => {
+                                facade.moveItem(sourceId, targetId);
+                            }}
+                            dragOverId={dragOverId}
+                            setDragOverId={setDragOverId}
                         />
                     </div>
                 </div>

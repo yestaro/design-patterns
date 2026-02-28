@@ -10,9 +10,6 @@ import type { FileLeaf, DirectoryComposite, EntryComponent } from './Composite';
  */
 export class SafeFragment {
     constructor(public content: string) { }
-    toString() {
-        return this.content;
-    }
 }
 
 /**
@@ -27,10 +24,6 @@ export abstract class BaseExporterTemplate extends BaseVisitor {
     constructor(escapeMap: Record<string, string>, indentSize = 2) {
         super();
         this.indentSize = indentSize;
-
-        if (escapeMap === undefined) {
-            throw new Error("[BaseExporterTemplate] Subclasses must provide an escapeMap.");
-        }
         this.escapeMap = escapeMap;
     }
 

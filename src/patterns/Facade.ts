@@ -4,7 +4,7 @@
 
 import {
     TagCommand, DeleteCommand, SortCommand,
-    CopyCommand, PasteCommand, commandInvokerInstance,
+    CopyCommand, PasteCommand, MoveCommand, commandInvokerInstance,
     CommandInvoker, SortState
 } from './Command';
 import { LabelSortStrategy, AttributeSortStrategy } from './Strategy';
@@ -155,14 +155,44 @@ export class FileSystemFacade {
             destinationDir = targetNode;
         } else if (targetId) {
             destinationDir = this.findParent(targetId);
-        } else {
-            // Implicit Root
-            destinationDir = this.root as DirectoryComposite;
         }
 
         if (destinationDir && this.clipboard.hasContent()) {
             this.invoker.execute(new PasteCommand(destinationDir));
         }
+    }
+
+    /**
+     * 移動項目到目標目錄
+     * @param sourceId 來源項目 ID
+     * @param destinationId 目標目錄 ID
+     * @returns 是否成功移動
+     */
+    moveItem(sourceId: string, destinationId: string): boolean {
+        // 不可移動到自身
+        if (sourceId === destinationId) return false;
+        // 不可移動根節點
+        if (sourceId === 'root') return false;
+
+        const sourceEntry = this.findItem(sourceId);
+        const sourceParent = this.findParent(sourceId);
+        const destEntry = this.findItem(destinationId);
+
+        if (!sourceEntry || !sourceParent || !destEntry) return false;
+        // 目標必須是目錄
+        if (!(destEntry instanceof DirectoryComposite)) return false;
+        // 已在同一目錄中則跳過
+        if (sourceParent.id === destEntry.id) return false;
+
+        // 循環檢查：不可將目錄移動到自己的子節點中
+        if (sourceEntry instanceof DirectoryComposite) {
+            const finder = new FinderVisitor(destinationId);
+            sourceEntry.accept(finder);
+            if (finder.foundSelf) return false;
+        }
+
+        this.invoker.execute(new MoveCommand(sourceId, sourceParent, destEntry));
+        return true;
     }
 
     sortItems(attribute: string, currentSortState: SortState): SortState {

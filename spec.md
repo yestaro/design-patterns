@@ -84,6 +84,7 @@ classDiagram
         +totalItems() number
         +calculateSize() Promise
         +searchFiles(keyword) Promise
+        +moveItem(sourceId, destId) boolean
         +undo()
         +redo()
         +copyItem(id)
@@ -164,7 +165,7 @@ erDiagram
    * `FileSystemFacade`: 提供簡易介面供 View 層呼叫。
 3. **Application Business Rules (Use Cases)**:
    * `CommandInvoker`: 管理 Undo/Redo 流程。
-   * Specific Commands (`CopyCommand`, `DeleteCommand`, `SortCommand`).
+   * Specific Commands (`CopyCommand`, `DeleteCommand`, `SortCommand`, `MoveCommand`).
    * Visitors (`StatisticsVisitor`, `FileSearchVisitor`).
 4. **Enterprise Business Rules (Entities)**:
    * `EntryComponent`, `FileLeaf`, `DirectoryComposite`: 核心領域物件。
@@ -231,6 +232,40 @@ sequenceDiagram
     Invoker->>Invoker: pop(Cmd)
     Invoker-->>Facade: (notify "undone")
     Facade-->>User: Update UI
+```
+
+### 5.3 拖曳移動與復原 (Move & Undo)
+
+描述使用者透過拖曳將檔案移動到另一個目錄，以及透過 Undo 復原的流程。
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as ExplorerTab
+    participant Facade as FileSystemFacade
+    participant Invoker as CommandInvoker
+    participant Cmd as MoveCommand
+    participant SrcDir as SourceDirectory
+    participant DstDir as DestinationDirectory
+
+    User->>UI: drag(file) → drop(targetDir)
+    UI->>Facade: moveItem(sourceId, destId)
+    Facade->>Facade: findItem / findParent / 循環檢查
+    Facade->>Invoker: execute(new MoveCommand(...))
+    Invoker->>Cmd: execute()
+    Cmd->>SrcDir: remove(sourceId)
+    Cmd->>DstDir: add(entry)
+    Invoker->>Invoker: push(Cmd) to undoStack
+    Invoker-->>Facade: notify("executed")
+    Facade-->>UI: Update Tree
+
+    User->>Facade: undo()
+    Facade->>Invoker: undo()
+    Invoker->>Cmd: undo()
+    Cmd->>DstDir: remove(sourceId)
+    Cmd->>SrcDir: add(entry)
+    Invoker-->>Facade: notify("undone")
+    Facade-->>UI: Update Tree
 ```
 
 ### 5.2 檔案搜尋 (Search Files)

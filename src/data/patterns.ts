@@ -1053,6 +1053,7 @@ const results = files.filter(f => f.tags.includes('Work'));
         +deleteItem(id)
         +undo() / redo()
         +copyItem(id) / pasteItem(target)
+        +moveItem(sourceId, destId) : boolean
         +sortItems(attr, state) : SortState
         +findItem(id) / findParent(id)
     }

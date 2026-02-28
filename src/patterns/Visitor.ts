@@ -129,9 +129,7 @@ export class StatisticsVisitor extends BaseVisitor {
         if (this.groupByExtension) {
             results.byExtension = {};
             Object.keys(this.extMap).forEach(ext => {
-                if (results.byExtension) {
-                    results.byExtension[ext] = finalize(this.extMap[ext]);
-                }
+                results.byExtension![ext] = finalize(this.extMap[ext]);
             });
         }
 

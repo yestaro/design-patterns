@@ -25,6 +25,11 @@ export class TagMediator {
         this.labelToFiles.get(labelName)?.delete(fileId);
     }
 
+    clear(): void {
+        this.fileToLabels.clear();
+        this.labelToFiles.clear();
+    }
+
     /**
      * 透過 ID 取得該檔案的所有標籤物件 (從 Flyweight Factory 拿)
      */

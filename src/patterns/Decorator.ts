@@ -17,7 +17,6 @@ export abstract class BaseDecorator implements IObserver {
      * [通用輔助方法] 判斷訊息是否符合指定的關鍵字 (支援單一字串或陣列)
      */
     protected isMatch(message: string, keyword: string | string[]): boolean {
-        if (!message) return false;
         if (Array.isArray(keyword)) {
             return keyword.some(kw => message.includes(kw));
         }

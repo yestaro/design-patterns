@@ -168,6 +168,39 @@ export class PasteCommand extends BaseCommand {
 }
 
 /**
+ * MoveCommand (移動命令)
+ * 將項目從來源目錄移動到目標目錄，支援 Undo/Redo
+ */
+export class MoveCommand extends BaseCommand {
+    private targetEntry: EntryComponent | undefined;
+
+    constructor(
+        private sourceId: string,
+        private sourceParentDir: DirectoryComposite,
+        private destinationDir: DirectoryComposite
+    ) {
+        super("移動項目");
+        this.targetEntry = sourceParentDir.getChildren().find(c => c.id === sourceId);
+    }
+
+    /** 執行移動：從來源目錄移除，加入目標目錄 */
+    override execute(): void {
+        if (this.targetEntry) {
+            this.sourceParentDir.remove(this.sourceId);
+            this.destinationDir.add(this.targetEntry);
+        }
+    }
+
+    /** 復原移動：從目標目錄移除，加回來源目錄 */
+    override undo(): void {
+        if (this.targetEntry) {
+            this.destinationDir.remove(this.sourceId);
+            this.sourceParentDir.add(this.targetEntry);
+        }
+    }
+}
+
+/**
  * CommandInvoker (命令請求者)
  */
 export class CommandInvoker {
