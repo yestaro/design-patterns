@@ -50,3 +50,19 @@
     backdrop-filter: blur(4px);
   }
 }
+
+@keyframes fast-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-live-fast {
+  animation: fast-pulse 0.4s ease-in-out infinite;
+}

@@ -395,16 +395,16 @@ const ExplorerTab: React.FC = () => {
     return (
         <div className="flex flex-col gap-0 animate-in fade-in duration-500 text-left max-w-[1440px] mx-auto bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all">
             {/* 頂部整合工具列 */}
-            <div className="bg-slate-50/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex flex-wrap items-center gap-4 gap-y-2 text-left z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative">
+            <div className="bg-slate-50/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-3 text-left z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative">
                 <div
-                    className="flex items-center gap-2 border-r border-slate-200/60 pr-4 self-stretch shrink-0"
+                    className="flex items-center gap-2 border-r border-slate-200/60 pr-4 shrink-0"
                 >
-                    <div className="font-bold text-slate-800 flex items-center gap-3 text-left px-2 py-1.5 -ml-1 rounded-2xl">
+                    <div className="font-bold text-slate-800 flex items-center gap-3 text-left py-1.5 rounded-2xl">
                         <PatternIconButton id="command" onClick={() => setPreviewPatternId("command")} />
                         <span className="text-sm tracking-tight opacity-90">Command</span>
                     </div>
                 </div>
-                <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
+                <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 shrink-0">
                     <button
                         disabled={!history.canUndo}
                         onClick={() => facade.undo()}
@@ -420,8 +420,8 @@ const ExplorerTab: React.FC = () => {
                         重做
                     </button>
                 </div>
-                <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
-                    <div className="cursor-pointer hover:bg-slate-200/40 p-1 rounded-xl transition-all group shrink-0">
+                <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 shrink-0">
+                    <div className="cursor-pointer hover:bg-slate-200/40 transition-all group shrink-0">
                         <PatternIconButton
                             id="singleton"
                             onClick={() => setPreviewPatternId("singleton")}
@@ -459,7 +459,7 @@ const ExplorerTab: React.FC = () => {
                         刪除
                     </button>
                 </div>
-                <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 text-left self-stretch shrink-0">
+                <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 text-left shrink-0">
                     <PatternIconButton
                         id="strategy"
                         onClick={() => setPreviewPatternId("strategy")}
@@ -488,7 +488,7 @@ const ExplorerTab: React.FC = () => {
                         );
                     })}
                 </div>
-                <div className="flex items-center gap-1.5 self-stretch shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                     <PatternIconButton
                         id="flyweight"
                         onClick={() => setPreviewPatternId("flyweight")}
@@ -545,7 +545,7 @@ const ExplorerTab: React.FC = () => {
             <div className="flex flex-col md:flex-row md:h-[520px] md:overflow-hidden h-auto">
                 {/* 1. 側邊欄：檔案階層 (w-[440px]) */}
                 <div className="w-full md:w-[440px] bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 p-4 text-left h-[400px] md:h-auto overflow-hidden">
-                    <div className="font-bold text-slate-800 mb-5 flex w-max items-center gap-3 text-left px-2 py-1.5 -ml-1 rounded-2xl">
+                    <div className="font-bold text-slate-800 mb-5 flex w-max items-center gap-3 text-left py-1.5 rounded-2xl">
                         <PatternIconButton id="composite" onClick={() => setPreviewPatternId("composite")} />
                         <span className="text-sm tracking-tight opacity-90">Composite</span>
                     </div>
@@ -572,7 +572,7 @@ const ExplorerTab: React.FC = () => {
                     <div className="flex-1 flex flex-col md:flex-row min-h-0 border-b border-slate-200 bg-white">
                         {/* Visitor 操作 */}
                         <div className="flex-1 p-4 flex flex-col justify-start space-y-4 border-r border-slate-100 overflow-y-auto custom-scrollbar">
-                            <div className="font-bold text-slate-800 flex items-center gap-3 text-left px-2 py-1.5 -ml-1 rounded-2xl">
+                            <div className="font-bold text-slate-800 flex items-center gap-3 text-left py-1.5 rounded-2xl">
                                 <PatternIconButton id="visitor" onClick={() => setPreviewPatternId("visitor")} />
                                 <span className="text-sm tracking-tight opacity-90">Visitor</span>
                                 <PatternIconButton id="template" onClick={() => setPreviewPatternId("template")} />
@@ -662,14 +662,14 @@ const ExplorerTab: React.FC = () => {
 
                         {/* Observer 監控 */}
                         <div className="w-full md:w-80 p-4 flex flex-col justify-start space-y-4 bg-white overflow-y-auto custom-scrollbar">
-                            <div className="font-bold text-slate-800 flex items-center justify-between text-left px-2 py-1.5 -mx-1 rounded-2xl">
+                            <div className="font-bold text-slate-800 flex items-center justify-between text-left py-1.5 rounded-2xl">
                                 <div className="flex items-center gap-3 text-left">
                                     <PatternIconButton id="observer" onClick={() => setPreviewPatternId("observer")} />
                                     <span className="text-sm tracking-tight opacity-90">Observer</span>
                                     <PatternIconButton id="adapter" onClick={() => setPreviewPatternId("adapter")} />
                                     <span className="text-sm tracking-tight opacity-90">Adapter</span>
                                 </div>
-                                <span className="text-[10px] px-2 py-0.5 bg-pink-500 text-white rounded-full font-bold uppercase tracking-tighter text-left shadow-sm">
+                                <span className={`text-[10px] px-2 py-0.5 bg-pink-500 text-white rounded-full font-bold uppercase tracking-tighter text-left shadow-sm ${isProcessing ? "animate-live-fast" : ""}`}>
                                     Live
                                 </span>
                             </div>
@@ -708,7 +708,7 @@ const ExplorerTab: React.FC = () => {
                     </div>
 
                     {/* 底部 Console */}
-                    <div className="h-[240px] bg-slate-50/80 px-5 pb-5 flex flex-col overflow-hidden">
+                    <div className="h-[240px] bg-slate-50/80 px-4 pb-5 flex flex-col overflow-hidden">
                         <div className="relative h-10 shrink-0">
                             {/* Left: Decorator Title & Pattern */}
                             <div className="absolute left-0 inset-y-0 flex items-center whitespace-nowrap">
