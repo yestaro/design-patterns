@@ -66,3 +66,34 @@
 .animate-live-fast {
   animation: fast-pulse 0.4s ease-in-out infinite;
 }
+
+/* Sample Data Table Component */
+.sample-table-container {
+  @apply overflow-x-auto border border-slate-100 rounded-xl bg-white;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06);
+}
+
+.sample-table {
+  @apply w-full text-sm font-mono text-left border-collapse;
+}
+
+.sample-table thead {
+  @apply bg-slate-50 border-b-2 border-slate-200 font-bold uppercase text-slate-500 text-sm;
+}
+
+.sample-table th,
+.sample-table td {
+  @apply px-3 py-2 border-r border-slate-100 last:border-r-0;
+}
+
+.sample-table tbody {
+  @apply divide-y divide-slate-100 text-slate-700;
+}
+
+.sample-table .row-highlight {
+  @apply bg-slate-50;
+}
+
+.sample-table .cell-null {
+  @apply text-slate-300 italic;
+}

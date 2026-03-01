@@ -214,168 +214,253 @@ const ERTab: React.FC = () => {
                         <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
                             <div className="flex items-center justify-between">
                                 <h5 className="text-lg font-black text-slate-700 italic">A. STI (Single Table Inheritance) - 全量寬表映射</h5>
-                                <div className="flex gap-2 text-xs font-bold">
-                                    <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">Query: ★★★★★</span>
-                                    <span className="bg-rose-100 text-rose-700 px-2 py-0.5 rounded">Maintenance: ★★☆☆☆</span>
+                                <div className="flex items-center gap-4 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-600">
+                                    <div className="flex items-center gap-1">
+                                        <span>Query:</span>
+                                        <span className="text-amber-400">★★★★★</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Integrity:</span>
+                                        <span><span className="text-amber-400">★★</span><span className="text-slate-300">☆☆☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Flexibility:</span>
+                                        <span><span className="text-amber-400">★</span><span className="text-slate-300">☆☆☆☆</span></span>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="overflow-x-auto border border-slate-300 rounded-2xl bg-white shadow-lg">
-                                <table className="w-full text-sm font-mono text-left whitespace-nowrap">
-                                    <thead className="bg-slate-50 border-b-2 border-slate-200 font-bold uppercase text-slate-500 text-xs">
+                            <div className="sample-table-container shadow-lg">
+                                <table className="sample-table whitespace-nowrap">
+                                    <thead>
                                         <tr>
-                                            <th className="px-3 py-2 border-r bg-slate-100/50">EntryID</th>
-                                            <th className="px-3 py-2 border-r text-indigo-700">Type</th>
-                                            <th className="px-3 py-2 border-r text-slate-400 italic font-normal">ParentID</th>
-                                            <th className="px-3 py-2 border-r">Name</th>
-                                            <th className="px-3 py-2 border-r">Size</th>
-                                            <th className="px-3 py-2 border-r bg-rose-50 text-rose-600 font-black">PageCount</th>
-                                            <th className="px-3 py-2 border-r bg-emerald-50 text-emerald-600 font-black text-center">Resolution</th>
-                                            <th className="px-3 py-2 border-r bg-amber-50 text-amber-700 font-black">Encoding</th>
-                                            <th className="px-3 py-2 text-slate-400 font-normal">Created</th>
+                                            <th className="bg-slate-100/50">EntryID</th>
+                                            <th className="text-indigo-700">Type</th>
+                                            <th className="italic">ParentID</th>
+                                            <th>Name</th>
+                                            <th>Size</th>
+                                            <th className="bg-rose-50 text-rose-600 font-black">PageCount</th>
+                                            <th className="bg-emerald-50 text-emerald-600 font-black text-center">Width</th>
+                                            <th className="bg-emerald-50 text-emerald-600 font-black text-center">Height</th>
+                                            <th className="bg-amber-50 text-amber-700 font-black">Encoding</th>
+                                            <th>Created</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100 text-slate-700">
-                                        <tr>
-                                            <td className="px-3 py-2 border-r">101</td>
-                                            <td className="px-3 py-2 border-r font-bold text-slate-500">Dir</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r">根目錄 (Root)</td>
-                                            <td className="px-3 py-2 border-r">0</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 text-slate-400 text-xs">2025-01-01</td>
+                                    <tbody>
+                                        <tr className="row-highlight">
+                                            <td>101</td>
+                                            <td className="font-bold text-slate-500">Dir</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="font-black text-slate-700">根目錄 (Root)</td>
+                                            <td>0</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="text-slate-400">2025-01-01</td>
                                         </tr>
                                         <tr>
-                                            <td className="px-3 py-2 border-r">202</td>
-                                            <td className="px-3 py-2 border-r font-bold text-slate-500">Dir</td>
-                                            <td className="px-3 py-2 border-r text-slate-400 italic">101</td>
-                                            <td className="px-3 py-2 border-r">專案文件 (Project_Docs)</td>
-                                            <td className="px-3 py-2 border-r">0</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 text-slate-400 text-xs">2025-01-10</td>
+                                            <td>202</td>
+                                            <td className="font-bold text-slate-500">Dir</td>
+                                            <td className="text-slate-400 italic">101</td>
+                                            <td>專案文件 (Project_Docs)</td>
+                                            <td>0</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="text-slate-400">2025-01-10</td>
                                         </tr>
                                         <tr>
-                                            <td className="px-3 py-2 border-r">303</td>
-                                            <td className="px-3 py-2 border-r font-black text-indigo-600">Word</td>
-                                            <td className="px-3 py-2 border-r text-slate-400 italic">202</td>
-                                            <td className="px-3 py-2 border-r">需求規格書.docx</td>
-                                            <td className="px-3 py-2 border-r">500</td>
-                                            <td className="px-3 py-2 border-r bg-rose-50/30 font-black text-rose-700 text-center italic">15</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 text-slate-400 text-xs">2025-01-10</td>
+                                            <td>303</td>
+                                            <td className="font-black text-indigo-600">Word</td>
+                                            <td className="text-slate-400 italic">202</td>
+                                            <td>需求規格書.docx</td>
+                                            <td>500</td>
+                                            <td className="bg-rose-50/30 font-black text-rose-700 text-center italic">15</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="text-slate-400">2025-01-10</td>
                                         </tr>
                                         <tr>
-                                            <td className="px-3 py-2 border-r">404</td>
-                                            <td className="px-3 py-2 border-r font-black text-indigo-600">Image</td>
-                                            <td className="px-3 py-2 border-r text-slate-400 italic">202</td>
-                                            <td className="px-3 py-2 border-r">架構圖.png</td>
-                                            <td className="px-3 py-2 border-r">2500</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r bg-emerald-50/30 font-black text-emerald-700 text-center">1920x1080</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 text-slate-400 text-xs">2025-01-12</td>
+                                            <td>404</td>
+                                            <td className="font-black text-indigo-600">Image</td>
+                                            <td className="text-slate-400 italic">202</td>
+                                            <td>架構圖.png</td>
+                                            <td>2500</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="bg-emerald-50/30 font-black text-emerald-700 text-center">1920</td>
+                                            <td className="bg-emerald-50/30 font-black text-emerald-700 text-center">1080</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="text-slate-400">2025-01-12</td>
                                         </tr>
                                         <tr>
-                                            <td className="px-3 py-2 border-r">505</td>
-                                            <td className="px-3 py-2 border-r font-black text-indigo-600">Text</td>
-                                            <td className="px-3 py-2 border-r text-slate-400 italic">202</td>
-                                            <td className="px-3 py-2 border-r">README.txt</td>
-                                            <td className="px-3 py-2 border-r">10</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r text-slate-300 italic">NULL</td>
-                                            <td className="px-3 py-2 border-r bg-amber-50/30 font-black text-amber-700 text-center italic">UTF-8</td>
-                                            <td className="px-3 py-2 text-slate-400 text-xs">2025-01-15</td>
+                                            <td>505</td>
+                                            <td className="font-black text-indigo-600">Text</td>
+                                            <td className="text-slate-400 italic">202</td>
+                                            <td>README.txt</td>
+                                            <td>10</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="cell-null">NULL</td>
+                                            <td className="bg-amber-50/30 font-black text-amber-700 text-center italic">UTF-8</td>
+                                            <td className="text-slate-400">2025-01-15</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <p className="text-sm text-slate-500 leading-relaxed font-medium">**物理真相：** 所有子型別共用同一張大寬表。查詢極快但造成大量 `NULL` 浪費，且每增加一個物件類型就必須頻繁修改物理 Schema，維護成本最高。</p>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium"><b>物理真相：</b> 所有子型別共用同一張大寬表。查詢極快但造成大量 `NULL` 浪費，且每增加一個物件類型就必須頻繁修改物理 Schema，維護成本最高。</p>
                         </div>
 
                         {/* B. CTI */}
                         <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
                             <div className="flex items-center justify-between">
                                 <h5 className="text-lg font-black text-slate-700 italic">B. CTI (Class Table Inheritance) - 階層式正規化</h5>
-                                <div className="flex gap-2 text-xs font-bold">
-                                    <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">Query: ★★★☆☆</span>
-                                    <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded">Reliability: ★★★★★</span>
+                                <div className="flex items-center gap-4 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-600">
+                                    <div className="flex items-center gap-1">
+                                        <span>Query:</span>
+                                        <span><span className="text-amber-400">★★★</span><span className="text-slate-300">☆☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Integrity:</span>
+                                        <span className="text-amber-400">★★★★★</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Flexibility:</span>
+                                        <span><span className="text-amber-400">★★★★</span><span className="text-slate-300">☆</span></span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                <div className="space-y-2">
-                                    <div className="bg-slate-800 text-white px-3 py-1 rounded-t-lg text-xs font-bold font-mono tracking-widest text-center uppercase">TABLE: Entries_Base</div>
-                                    <div className="border border-slate-200 bg-white rounded-b-lg overflow-x-auto">
-                                        <table className="w-full text-sm font-mono text-left">
-                                            <thead className="bg-slate-50 border-b font-black text-xs uppercase text-slate-500">
-                                                <tr><th className="px-2 py-1 border-r text-red-500">EntryID(PK)</th><th className="px-2 py-1 border-r">ParentID</th><th className="px-2 py-1 border-r">Name</th><th className="px-2 py-1 text-indigo-600">Type</th></tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 italic">
-                                                <tr><td className="px-2 py-1 border-r font-bold text-red-500 underline">303</td><td className="px-2 py-1 border-r italic text-slate-400">202</td><td className="px-2 py-1 border-r font-bold">需求規格書.docx</td><td className="px-2 py-1 text-indigo-600 italic">Word</td></tr>
-                                                <tr><td className="px-2 py-1 border-r font-bold text-red-500 underline">404</td><td className="px-2 py-1 border-r italic text-slate-400">202</td><td className="px-2 py-1 border-r font-bold">架構圖.png</td><td className="px-2 py-1 text-indigo-600 italic">Image</td></tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg shadow-slate-100/50">
+                                    <div className="bg-slate-800 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Main Table: Entries_Base</div>
+                                    <table className="sample-table">
+                                        <thead>
+                                            <tr>
+                                                <th className="text-red-500">EntryID(PK)</th>
+                                                <th className="italic">ParentID</th>
+                                                <th>Name</th>
+                                                <th className="text-indigo-600">Type</th>
+                                                <th>Size</th>
+                                                <th>Created</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-slate-700">
+                                            <tr className="row-highlight"><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">根目錄 (Root)</td><td className="font-bold text-slate-500">Dir</td><td>0</td><td className="text-slate-400 text-nowrap">2025-01-01</td></tr>
+                                            <tr><td>202</td><td className="text-slate-400 italic text-sm">101</td><td>專案文件 (Project_Docs)</td><td className="font-bold text-slate-500">Dir</td><td>0</td><td className="text-slate-400 text-nowrap">2025-01-10</td></tr>
+                                            <tr><td className="underline text-red-500">303</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">需求規格書.docx</td><td className="font-black text-indigo-600 text-sm">Word</td><td>500</td><td className="text-slate-400 text-nowrap">2025-01-10</td></tr>
+                                            <tr><td className="underline text-red-500">404</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">架構圖.png</td><td className="font-black text-indigo-600 text-sm">Image</td><td>2500</td><td className="text-slate-400 text-nowrap">2025-01-12</td></tr>
+                                            <tr><td className="underline text-red-500">505</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">README.txt</td><td className="font-black text-indigo-600 text-sm">Text</td><td>10</td><td className="text-slate-400 text-nowrap">2025-01-15</td></tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <div className="grid grid-cols-1 gap-4">
-                                    <div className="bg-white border-2 border-rose-200 rounded-lg overflow-hidden shadow-sm">
-                                        <div className="bg-rose-600 text-white px-3 py-0.5 text-xs font-black uppercase tracking-widest text-center">TABLE: Word_Extensions</div>
-                                        <table className="w-full text-sm font-mono text-left bg-white">
-                                            <thead className="bg-rose-50 border-b text-rose-600 text-xs font-black uppercase"><tr><th className="px-2 py-1 border-r text-red-500">EntryID(FK)</th><th className="px-2 py-1">PageCount</th></tr></thead>
-                                            <tbody><tr><td className="px-2 py-1 border-r text-red-500 font-bold">303</td><td className="px-2 py-1 font-black underline text-rose-700">15</td></tr></tbody>
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="border border-rose-200 rounded-xl overflow-hidden shadow-lg shadow-rose-100/50">
+                                        <div className="bg-rose-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Extension: Word_Only</div>
+                                        <table className="sample-table">
+                                            <thead className="bg-rose-50 text-rose-600 font-black"><tr><th className="text-red-500 text-sm">EntryID(FK)</th><th>PageCount</th></tr></thead>
+                                            <tbody><tr><td className="text-red-500 font-bold px-3 py-2">303</td><td className="font-black underline text-rose-700 px-3 py-2">15</td></tr></tbody>
                                         </table>
                                     </div>
-                                    <div className="bg-white border-2 border-emerald-200 rounded-lg overflow-hidden shadow-sm">
-                                        <div className="bg-emerald-600 text-white px-3 py-0.5 text-xs font-black uppercase tracking-widest text-center">TABLE: Image_Extensions</div>
-                                        <table className="w-full text-sm font-mono text-left bg-white">
-                                            <thead className="bg-emerald-50 border-b text-emerald-600 text-xs font-black uppercase"><tr><th className="px-2 py-1 border-r text-red-500">EntryID(FK)</th><th className="px-2 py-1">Resolution</th></tr></thead>
-                                            <tbody><tr><td className="px-2 py-1 border-r text-red-500 font-bold">404</td><td className="px-2 py-1 font-black underline text-emerald-700">1920x1080</td></tr></tbody>
+                                    <div className="border border-emerald-200 rounded-xl overflow-hidden shadow-lg shadow-emerald-100/50">
+                                        <div className="bg-emerald-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Extension: Image_Only</div>
+                                        <table className="sample-table">
+                                            <thead className="bg-emerald-50 text-emerald-600 font-black"><tr><th className="text-red-500 text-sm">EntryID(FK)</th><th>Width</th><th>Height</th></tr></thead>
+                                            <tbody><tr><td className="text-red-500 font-bold px-3 py-2">404</td><td className="font-black underline text-emerald-700 px-3 py-2">1920</td><td className="font-black underline text-emerald-700 px-3 py-2">1080</td></tr></tbody>
+                                        </table>
+                                    </div>
+                                    <div className="border border-amber-200 rounded-xl overflow-hidden shadow-lg shadow-amber-100/50">
+                                        <div className="bg-amber-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Extension: Text_Only</div>
+                                        <table className="sample-table">
+                                            <thead className="bg-amber-50 text-amber-600 font-black"><tr><th className="text-red-500 text-sm">EntryID(FK)</th><th>Encoding</th></tr></thead>
+                                            <tbody><tr><td className="text-red-500 font-bold px-3 py-2">505</td><td className="font-black underline text-amber-700 px-3 py-2">UTF-8</td></tr></tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-sm text-slate-500 leading-relaxed font-medium">**結構化：** 分離共用與特有屬性。模型乾淨但每次強制 `JOIN`。</p>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium"><b>結構化：</b> 分離共用與特有屬性。模型乾淨但每次強制 `JOIN`，查詢負擔隨層級增加。</p>
                         </div>
 
                         {/* C. Concrete Table Inheritance */}
                         <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
                             <div className="flex items-center justify-between">
-                                <h5 className="text-lg font-black text-slate-700 italic">C. Concrete Table Inheritance - 實體表物化隔離</h5>
-                                <div className="flex gap-2 text-xs font-bold text-center">
-                                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Query: ★★★★☆</span>
-                                    <span className="bg-orange-100 text-orange-700 px-2 py-0.5 rounded">Versatility: ★★☆☆☆</span>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                <div className="border border-indigo-200 rounded-xl overflow-hidden shadow-lg shadow-indigo-100/50">
-                                    <div className="bg-indigo-600 text-white px-4 py-1 font-black text-xs uppercase tracking-widest text-center italic">Physical Table: Words_Only</div>
-                                    <table className="w-full text-sm font-mono bg-white text-left">
-                                        <thead className="bg-slate-50 border-b font-bold text-indigo-600 uppercase text-xs">
-                                            <tr><th className="p-2 border-r">EntryID</th><th className="p-2 border-r italic text-xs">ParentID</th><th className="p-2 border-r">Name</th><th className="p-2 bg-rose-50 text-rose-600 font-black">PageCount</th></tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100">
-                                            <tr><td className="p-2 border-r font-bold underline text-red-500">303</td><td className="p-2 border-r text-slate-400 italic">202</td><td className="p-2 border-r font-black italic">需求規格書.docx</td><td className="p-2 bg-rose-50/20 text-rose-700 font-black text-center italic underline">15</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div className="border border-emerald-200 rounded-xl overflow-hidden shadow-lg shadow-emerald-100/50">
-                                    <div className="bg-emerald-600 text-white px-4 py-1 font-black text-xs uppercase tracking-widest text-center italic">
-                                        Physical Table: Images_Only
+                                <h5 className="text-lg font-black text-slate-700 italic">C. Concrete Table Inheritance - 物理隔離</h5>
+                                <div className="flex items-center gap-4 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-600">
+                                    <div className="flex items-center gap-1">
+                                        <span>Query:</span>
+                                        <span><span className="text-amber-400">★★★★</span><span className="text-slate-300">☆</span></span>
                                     </div>
-                                    <table className="w-full text-sm font-mono bg-white text-left text-xs font-mono bg-white text-left">
-                                        <thead className="bg-slate-50 border-b font-bold text-emerald-600 uppercase text-xs">
-                                            <tr><th className="p-2 border-r">EntryID</th><th className="p-2 border-r italic text-xs">ParentID</th><th className="p-2 border-r">Name</th><th className="p-2 bg-emerald-50 text-emerald-600 font-black text-center">Resolution</th></tr>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Integrity:</span>
+                                        <span><span className="text-amber-400">★★★</span><span className="text-slate-300">☆☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Flexibility:</span>
+                                        <span className="text-amber-400">★★★★★</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                                {/* Dirs Table */}
+                                <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg shadow-slate-100/50">
+                                    <div className="bg-slate-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Directories_Only</div>
+                                    <table className="sample-table">
+                                        <thead className="text-slate-600">
+                                            <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th>Size</th><th>Created</th></tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100 italic">
-                                            <tr><td className="p-2 border-r font-bold underline text-red-500">404</td><td className="p-2 border-r text-slate-400">202</td><td className="p-2 border-r font-black italic">架構圖.png</td><td className="p-2 bg-emerald-50/20 text-emerald-700 font-black text-center underline">1920x1080</td></tr>
+                                        <tbody className="text-slate-700">
+                                            <tr><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">根目錄 (Root)</td><td>0</td><td className="text-slate-400 text-xs">2025-01-01</td></tr>
+                                            <tr><td>202</td><td className="text-slate-400 italic">101</td><td>專案文件 (Project_Docs)</td><td>0</td><td className="text-slate-400 text-xs">2025-01-10</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Words Table */}
+                                <div className="border border-rose-200 rounded-xl overflow-hidden shadow-lg shadow-rose-100/50">
+                                    <div className="bg-rose-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Words_Only</div>
+                                    <table className="sample-table">
+                                        <thead className="text-rose-600">
+                                            <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-rose-50 text-rose-600 font-black">PageCount</th><th>Size</th><th>Created</th></tr>
+                                        </thead>
+                                        <tbody className="text-slate-700">
+                                            <tr><td className="font-bold underline text-red-500">303</td><td className="text-slate-400 italic">202</td><td className="italic text-rose-700">需求規格書.docx</td><td className="bg-rose-50/20 text-rose-700 font-black text-center italic underline">15</td><td>500</td><td className="text-slate-400 text-xs text-nowrap">2025-01-10</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Images Table */}
+                                <div className="border border-emerald-200 rounded-xl overflow-hidden shadow-lg shadow-emerald-100/50">
+                                    <div className="bg-emerald-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Images_Only</div>
+                                    <table className="sample-table">
+                                        <thead className="text-emerald-600">
+                                            <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-emerald-50 text-emerald-600 font-black text-center">Width</th><th className="bg-emerald-50 text-emerald-600 font-black text-center">Height</th><th>Size</th><th>Created</th></tr>
+                                        </thead>
+                                        <tbody className="text-slate-700">
+                                            <tr><td className="font-bold underline text-red-500">404</td><td className="text-slate-400 italic">202</td><td className="font-black italic text-emerald-700">架構圖.png</td><td className="bg-emerald-50/20 text-emerald-700 font-black text-center underline">1920</td><td className="bg-emerald-50/20 text-emerald-700 font-black text-center underline">1080</td><td>2500</td><td className="text-slate-400 text-xs text-nowrap">2025-01-12</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Texts Table */}
+                                <div className="border border-amber-200 rounded-xl overflow-hidden shadow-lg shadow-amber-100/50">
+                                    <div className="bg-amber-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Texts_Only</div>
+                                    <table className="sample-table">
+                                        <thead className="text-amber-600">
+                                            <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-amber-50 text-amber-600 font-black text-center">Encoding</th><th>Size</th><th>Created</th></tr>
+                                        </thead>
+                                        <tbody className="text-slate-700">
+                                            <tr><td className="font-bold underline text-red-500">505</td><td className="text-slate-400 italic">202</td><td className="italic text-amber-700">README.txt</td><td className="bg-amber-50/20 text-amber-700 font-black text-center italic underline">UTF-8</td><td>10</td><td className="text-slate-400 text-xs text-nowrap">2025-01-15</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                            <p className="text-sm text-slate-500 leading-relaxed font-medium">**物理隔離：** 零 JOIN 但維護困難。</p>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium"><b>物理隔離：</b> 每張表完全獨立存儲父類與子類欄位。雖然 `JOIN` 為零，但資料完整性與共用欄位的維護（如 Size 統計）極為困難。</p>
                         </div>
                     </div>
                 </section>
@@ -386,61 +471,187 @@ const ERTab: React.FC = () => {
                         <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">2</span>
                         <h4 className="text-xl font-bold text-slate-800">階層存儲模式 (Hierarchy Patterns)</h4>
                     </div>
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                    <div className="space-y-12">
                         {/* A. Adjacency List */}
-                        <div className="space-y-4">
-                            <h5 className="text-sm font-black uppercase text-slate-400 tracking-tighter italic">A. Adjacency List (鄰接表)</h5>
-                            <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm font-mono text-sm">
-                                <table className="w-full text-left">
-                                    <thead className="bg-slate-50 border-b font-bold text-slate-500 uppercase text-xs">
-                                        <tr><th className="px-2 py-2 border-r text-red-600">EntryID</th><th className="px-2 py-2 border-r">Name</th><th className="px-2 py-2 text-indigo-600 underline text-right italic font-black text-xs">ParentID</th></tr>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <div className="flex items-center justify-between">
+                                <h5 className="text-lg font-black text-slate-700 italic">A. Adjacency List (鄰接表) - 最簡物理指標</h5>
+                                <div className="flex items-center gap-4 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-600">
+                                    <div className="flex items-center gap-1">
+                                        <span>Query:</span>
+                                        <span><span className="text-amber-400">★</span><span className="text-slate-300">☆☆☆☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Integrity:</span>
+                                        <span className="text-amber-400">★★★★★</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Flexibility:</span>
+                                        <span className="text-amber-400">★★★★★</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="sample-table-container shadow-lg shadow-slate-100/50">
+                                <table className="sample-table">
+                                    <thead>
+                                        <tr><th className="text-red-600">EntryID(PK)</th><th className="text-slate-400 italic">ParentID(FK)</th><th>Name</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100 italic">
-                                        <tr className="bg-slate-50 text-slate-600"><td className="px-2 py-1 border-r font-bold">101</td><td className="px-2 py-1 border-r font-bold">根目錄 (Root)</td><td className="px-2 py-1 text-right text-slate-400">NULL</td></tr>
-                                        <tr><td className="px-2 py-1 border-r font-bold text-slate-600">202</td><td className="px-2 py-1 border-r text-blue-600 font-bold">專案文件</td><td className="px-2 py-1 text-right font-black text-indigo-600 underline">101</td></tr>
-                                        <tr><td className="px-2 py-1 border-r font-bold text-red-600 underline">303</td><td className="px-2 py-1 border-r text-blue-800 font-black italic">需求規格書.docx</td><td className="px-2 py-1 text-right font-black text-indigo-600 underline">202</td></tr>
+                                    <tbody className="text-slate-700">
+                                        <tr className="row-highlight"><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">根目錄 (Root)</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
+                                        <tr><td>202</td><td className="text-slate-400 underline italic font-black">101</td><td>專案文件 (Project_Docs)</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
+                                        <tr><td>303</td><td className="text-slate-400 underline italic font-black">202</td><td className="italic">需求規格書.docx</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
+                                        <tr><td>404</td><td className="text-slate-400 underline italic font-black">202</td><td className="italic">架構圖.png</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">2</td><td>2500</td><td className="text-slate-400">2025-01-12</td></tr>
+                                        <tr><td>505</td><td className="text-slate-400 underline italic font-black">202</td><td className="italic">README.txt</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">3</td><td>10</td><td className="text-slate-400">2025-01-15</td></tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <p className="text-xs text-slate-500 italic">**簡單模型：** 僅存父節點。隨意搬移，但下鑽查詢效能極差。</p>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium"><b>物理真相：</b> 每個節點只知道自己的父節點。移動節點極快。排序時需增加 <b>Sort</b> 欄位並依 `ORDER BY ParentID, Sort` 查詢。</p>
                         </div>
 
                         {/* B. Path Enumeration */}
-                        <div className="space-y-4">
-                            <h5 className="text-sm font-black uppercase text-slate-400 tracking-tighter italic">B. Path Enumeration (路徑枚舉)</h5>
-                            <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm font-mono text-sm">
-                                <table className="w-full text-left italic">
-                                    <thead className="bg-slate-50 border-b font-bold text-slate-500 uppercase text-xs">
-                                        <tr><th className="px-2 py-2 border-r text-red-600">EntryID</th><th className="px-2 py-2 border-r">Name</th><th className="px-2 py-2 text-emerald-600 font-black">Materialized Path</th></tr>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <div className="flex items-center justify-between">
+                                <h5 className="text-lg font-black text-slate-700 italic">B. Path Enumeration (路徑枚舉) - 預計算字串存儲</h5>
+                                <div className="flex items-center gap-4 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-600">
+                                    <div className="flex items-center gap-1">
+                                        <span>Query:</span>
+                                        <span><span className="text-amber-400">★★★★</span><span className="text-slate-300">☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Integrity:</span>
+                                        <span><span className="text-amber-400">★★</span><span className="text-slate-300">☆☆☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Flexibility:</span>
+                                        <span><span className="text-amber-400">★★★</span><span className="text-slate-300">☆☆</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="sample-table-container shadow-lg shadow-emerald-100/50">
+                                <table className="sample-table">
+                                    <thead>
+                                        <tr><th>EntryID</th><th>Name</th><th className="text-emerald-600 font-black italic">Materialized Path (Weight-Encoded)</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
                                     </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        <tr className="bg-slate-50 text-slate-600"><td className="px-2 py-1 border-r font-bold">101</td><td className="px-2 py-1 border-r font-bold">根目錄 (Root)</td><td className="px-2 py-1 font-bold">/101/</td></tr>
-                                        <tr><td className="px-2 py-1 border-r font-bold text-slate-600">202</td><td className="px-2 py-1 border-r text-blue-600 font-bold">專案文件</td><td className="px-2 py-1 text-emerald-600 font-black italic">/101/202/</td></tr>
-                                        <tr><td className="px-2 py-1 border-r font-bold text-red-600 underline">303</td><td className="px-2 py-1 border-r text-blue-800 font-black">需求規格書.docx</td><td className="px-2 py-1 text-emerald-600 font-black italic">/101/202/303/</td></tr>
+                                    <tbody className="text-slate-700">
+                                        <tr className="row-highlight"><td>101</td><td className="font-black">根目錄 (Root)</td><td className="text-slate-400 font-bold">/001:101/</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
+                                        <tr><td>202</td><td>專案文件</td><td className="text-emerald-700 font-black italic">/001:101/001:202/</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
+                                        <tr><td>303</td><td className="italic">需求規格書.docx</td><td className="text-emerald-700 font-black italic">/001:101/001:202/001:303/</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
+                                        <tr><td>404</td><td className="italic">架構圖.png</td><td className="text-emerald-700 font-black italic">/001:101/001:202/002:404/</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">2</td><td>2500</td><td className="text-slate-400">2025-01-12</td></tr>
+                                        <tr><td>505</td><td className="italic">README.txt</td><td className="text-emerald-700 font-black italic">/001:101/001:202/003:505/</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">3</td><td>10</td><td className="text-slate-400">2025-01-15</td></tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <p className="text-xs text-slate-500 italic">**預計算路徑：** 透過 LIKE 查詢。子樹獲取極快。</p>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium"><b>字串匹配：</b> 可將排序權重直接編入路徑（如 `/001:ID/`）實現「天然排序免計算」，或像上方一樣維持獨立 <b>Sort</b> 欄位以求靈活。</p>
                         </div>
 
                         {/* C. Closure Table */}
-                        <div className="space-y-4 font-mono">
-                            <h5 className="text-sm font-black uppercase text-indigo-600 tracking-tighter italic">C. Closure Table (閉包表)</h5>
-                            <div className="border border-indigo-200 rounded-lg overflow-hidden shadow-sm">
-                                <div className="bg-indigo-600 text-white px-2 py-0.5 font-bold uppercase tracking-widest text-xs text-center italic">Relations (代際空間表)</div>
-                                <table className="w-full text-left bg-white text-sm italic">
-                                    <thead className="bg-indigo-50 border-b border-indigo-100 text-indigo-600 font-black uppercase text-xs">
-                                        <tr><th className="px-1 py-1 border-r">Ancestor</th><th className="px-1 py-1 border-r">Descendant</th><th className="px-1 py-1 text-center">Depth</th></tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-indigo-50">
-                                        <tr><td className="px-1 border-r text-rose-500">101</td><td className="px-1 border-r font-black">101</td><td className="px-1 text-center font-bold">0</td></tr>
-                                        <tr><td className="px-1 border-r text-rose-500 font-bold underline">101</td><td className="px-1 border-r text-indigo-600 font-black">303</td><td className="px-1 text-center font-bold">2</td></tr>
-                                        <tr><td className="px-1 border-r text-rose-500 font-bold underline">202</td><td className="px-1 border-r text-indigo-600 font-black">303</td><td className="px-1 text-center font-bold">1</td></tr>
-                                        <tr><td className="px-1 border-r text-rose-500">303</td><td className="px-1 border-r font-black">303</td><td className="px-1 text-center font-bold">0</td></tr>
-                                    </tbody>
-                                </table>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <div className="flex items-center justify-between">
+                                <h5 className="text-lg font-black text-slate-700 italic">C. Closure Table (閉包表) - 笛卡兒積空間表</h5>
+                                <div className="flex items-center gap-4 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-slate-600">
+                                    <div className="flex items-center gap-1">
+                                        <span>Query:</span>
+                                        <span className="text-amber-400">★★★★★</span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Integrity:</span>
+                                        <span><span className="text-amber-400">★★★★</span><span className="text-slate-300">☆</span></span>
+                                    </div>
+                                    <div className="w-px h-3 bg-slate-300"></div>
+                                    <div className="flex items-center gap-1">
+                                        <span>Flexibility:</span>
+                                        <span><span className="text-amber-400">★★</span><span className="text-slate-300">☆☆☆</span></span>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-xs text-slate-500 italic">**極致效能：** 儲存所有代際關係。最強大的層級搜尋。</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                                <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg shadow-slate-100/50">
+                                    <div className="bg-slate-800 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Main Table: Entries_Base</div>
+                                    <table className="sample-table">
+                                        <thead>
+                                            <tr><th>EntryID(PK)</th><th>Name</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
+                                        </thead>
+                                        <tbody className="text-slate-700 border-b border-slate-100">
+                                            <tr className="row-highlight"><td>101</td><td className="font-black">根目錄 (Root)</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
+                                            <tr><td>202</td><td>專案文件</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
+                                            <tr><td>303</td><td className="italic">需求規格書.docx</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
+                                            <tr><td>404</td><td className="italic">架構圖.png</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">2</td><td>2500</td><td className="text-slate-400">2025-01-12</td></tr>
+                                            <tr><td>505</td><td className="italic">README.txt</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">3</td><td>10</td><td className="text-slate-400">2025-01-15</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="sample-table-container shadow-lg shadow-indigo-100/50">
+                                        <div className="bg-indigo-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Closure Relations Table</div>
+                                        <table className="sample-table">
+                                            <thead>
+                                                <tr><th className="text-rose-600">Ancestor</th><th className="text-indigo-600">Descendant</th><th className="text-center font-black">Depth</th></tr>
+                                            </thead>
+                                            <tbody className="italic text-slate-700 text-xs">
+                                                <tr><td className="text-slate-400">101</td><td>101</td><td className="text-center">0</td></tr>
+                                                <tr><td className="font-bold text-slate-500">101</td><td className="font-black text-indigo-700">202</td><td className="text-center">1</td></tr>
+                                                <tr><td className="font-bold text-slate-500">101</td><td className="font-black text-rose-700">303</td><td className="text-center">2</td></tr>
+                                                <tr><td className="font-bold text-slate-500">202</td><td className="font-black text-rose-700">303</td><td className="text-center">1</td></tr>
+                                                <tr className="bg-slate-50"><td>...</td><td>...</td><td className="text-center">...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="p-4 bg-indigo-50 border-l-4 border-indigo-400 rounded-r-lg">
+                                        <p className="text-xs text-indigo-700 font-bold mb-1 uppercase tracking-widest text-nowrap">Hierarchy Sorting Tip</p>
+                                        <p className="text-xs text-indigo-900 leading-relaxed italic">在 <b>Closure Table</b> 中，排序邏輯通常<b>不放在</b>關係表，而是維持在主表（左側）以保持關係表純粹。如果要實作跨層級排序，通常會配合 `TreePath` 字串預計算。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="text-sm text-slate-500 leading-relaxed font-medium"><b>空間換時間：</b> 它是最正規、查詢最強大的層級設計。透過一張專門的關聯表紀錄所有「祖先-子代」的笛卡兒積。</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 3. Polymorphic Associations */}
+                <section className="pt-12 border-t border-slate-100 space-y-6">
+                    <div className="flex items-center gap-3">
+                        <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">3</span>
+                        <h4 className="text-xl font-bold text-slate-800">多型關聯模式 (Polymorphic Associations)</h4>
+                    </div>
+                    <div className="space-y-12">
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <h5 className="text-lg font-black text-slate-700 italic">A. Polymorphic Belongs-To (多型外部鍵)</h5>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed italic">**動態映射：** 使用 ID + Type 固定欄位指向不同型別的父標的。</p>
+                        </div>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <h5 className="text-lg font-black text-slate-700 italic">B. Exclusive Foreign Keys (互斥外部鍵)</h5>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed italic">**約束優化：** 每個型別都有獨立 FK 欄位，配合可為空性與約束確保資料品質。</p>
+                        </div>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <h5 className="text-lg font-black text-slate-700 italic">C. Reverse Polymorphic (交叉中間表)</h5>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed italic">**高度解耦：** 透過專門的中間關聯表達成多型關連，性能最好但 Schema 較多。</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 4. Metadata & Attribute Patterns */}
+                <section className="pt-12 border-t border-slate-100 space-y-6 pb-12">
+                    <div className="flex items-center gap-3">
+                        <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">4</span>
+                        <h4 className="text-xl font-bold text-slate-800">元數據與屬性擴充 (Metadata & Attribute Patterns)</h4>
+                    </div>
+                    <div className="space-y-12">
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <h5 className="text-lg font-black text-slate-700 italic">A. EAV (Entity-Attribute-Value)</h5>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed italic">**屬性列化：** 以垂直擴展代替水平橫向擴表，解決資料庫欄位限制問題。</p>
+                        </div>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <h5 className="text-lg font-black text-slate-700 italic">B. Hybrid JSON / Document Storage</h5>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed italic">**混合存儲：** 利用 JSONB 欄位存儲半結構化數據，平衡查詢性能與靈活性。</p>
+                        </div>
+                        <div className="group space-y-4 border-l-4 border-slate-200 pl-6 py-2">
+                            <h5 className="text-lg font-black text-slate-700 italic">C. Multi-Column Overload (溢出表格)</h5>
+                            <p className="text-sm text-slate-500 font-medium leading-relaxed italic">**分層寬表：** 核心屬性在高頻表，變動/長屬性在溢出表，優化掃描性能。</p>
                         </div>
                     </div>
                 </section>
