@@ -2,13 +2,13 @@
 // --- Singleton / Flyweight / Adapter / Mediator 單元測試 ---
 // =============================================================================
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Clipboard } from '../src/patterns/Singleton';
-import { LabelFactory, labelFactory } from '../src/patterns/Flyweight';
-import { DashboardAdapter, DashboardObserver } from '../src/patterns/Adapter';
-import { TagMediator } from '../src/patterns/Mediator';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { DashboardAdapter } from '../src/patterns/Adapter';
 import { PlainText } from '../src/patterns/Composite';
+import { LabelFactory } from '../src/patterns/Flyweight';
+import { TagMediator } from '../src/patterns/Mediator';
 import { NotificationEvent } from '../src/patterns/Observer';
+import { Clipboard } from '../src/patterns/Singleton';
 
 // ======================== Singleton ========================
 
@@ -79,52 +79,44 @@ describe('LabelFactory (Flyweight)', () => {
     });
 });
 
-// ======================== Adapter ========================
-
 describe('DashboardAdapter', () => {
-    it('正確映射 event data 到 adapter 欄位', () => {
+    it('update 時正確過濾資料並呼叫 updateStatsFn', () => {
+        let result: any = null;
+        const adapter = new DashboardAdapter((stats) => { result = stats; }, 10);
+
         const event: NotificationEvent = {
             source: 'visitor',
             type: 'progress',
             message: 'test',
             data: { currentNode: 'readme.txt', count: 3, nodeType: 'Text' }
         };
-        const adapter = new DashboardAdapter(event, 10);
-        expect(adapter.name).toBe('readme.txt');
-        expect(adapter.count).toBe(3);
-        expect(adapter.total).toBe(10);
-        expect(adapter.type).toBe('Text');
+
+        adapter.update(event);
+
+        expect(result).not.toBeNull();
+        expect(result.name).toBe('readme.txt');
+        expect(result.count).toBe(3);
+        expect(result.total).toBe(10);
+        expect(result.type).toBe('Text');
     });
 
     it('data 為空時使用預設值', () => {
+        let result: any = null;
+        const adapter = new DashboardAdapter((stats) => { result = stats; }, 5);
+
         const event: NotificationEvent = {
             source: 'system',
             type: 'executed',
             message: 'test'
         };
-        const adapter = new DashboardAdapter(event, 5);
-        expect(adapter.name).toBe('-');
-        expect(adapter.count).toBe(0);
-        expect(adapter.type).toBe('-');
-        expect(adapter.total).toBe(5);
-    });
-});
 
-describe('DashboardObserver', () => {
-    it('update 時呼叫 updateStatsFn 並傳入 adapted 資料', () => {
-        let received: DashboardAdapter | null = null;
-        const obs = new DashboardObserver((stats) => { received = stats; }, 20);
+        adapter.update(event);
 
-        obs.update({
-            source: 'visitor',
-            type: 'progress',
-            message: 'test',
-            data: { currentNode: 'file.txt', count: 5, nodeType: 'Word' }
-        });
-
-        expect(received).not.toBeNull();
-        expect(received!.name).toBe('file.txt');
-        expect(received!.total).toBe(20);
+        expect(result).not.toBeNull();
+        expect(result.name).toBe('-');
+        expect(result.count).toBe(0);
+        expect(result.total).toBe(5);
+        expect(result.type).toBe('-');
     });
 });
 

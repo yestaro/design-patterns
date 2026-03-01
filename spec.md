@@ -161,7 +161,7 @@ erDiagram
    * Browser DOM / Console
    * Storage (Memory)
 2. **Interface Adapters**:
-   * `DashboardAdapter`: 將內部統計資料轉換為 UI 可用的格式。
+   * `DashboardAdapter`: 實作 `IObserver` 介面，攔截系統事件並將其適配/轉接為 UI 專屬格式。
    * `FileSystemFacade`: 提供簡易介面供 View 層呼叫。
 3. **Application Business Rules (Use Cases)**:
    * `CommandInvoker`: 管理 Undo/Redo 流程。
@@ -177,14 +177,14 @@ erDiagram
 graph TB
     subgraph "Browser"
         UI[React UI Components]
-      
+    
         subgraph "Application Logic"
             Facade[FileSystem Facade]
             Commands[Command Pattern]
             Visitors[Visitor Pattern]
             Mediator[Tag Mediator]
         end
-      
+    
         subgraph "Domain Model"
             Composite[Composite Tree Structure]
             Entities[File/Directory Entities]
@@ -234,7 +234,7 @@ sequenceDiagram
     Facade-->>User: Update UI
 ```
 
-### 5.3 拖曳移動與復原 (Move & Undo)
+### 5.2 拖曳移動與復原 (Move & Undo)
 
 描述使用者透過拖曳將檔案移動到另一個目錄，以及透過 Undo 復原的流程。
 
@@ -268,7 +268,7 @@ sequenceDiagram
     Facade-->>UI: Update Tree
 ```
 
-### 5.2 檔案搜尋 (Search Files)
+### 5.3 檔案搜尋 (Search Files)
 
 描述透過 Visitor 模式遍歷樹狀結構進行搜尋的流程。
 
@@ -300,6 +300,27 @@ sequenceDiagram
     Facade->>User: cloudIds[]
 ```
 
+### 5.4 統計數據轉接 (Dashboard Statistics Adaptation)
+
+描述 `DashboardAdapter` 如何在訂閱 `Visitor` 事件的同時，將資料轉接給 React UI。
+
+```mermaid
+sequenceDiagram
+    participant UI as React UI (ExplorerTab)
+    participant Adapter as DashboardAdapter (IObserver)
+    participant Sub as Subject (Visitor.notifier)
+  
+    Note over UI, Adapter: [初始化] 注入更新函式與依賴
+    UI->>Adapter: new DashboardAdapter(setStateFn, total)
+    UI->>Sub: subscribe(Adapter)
+  
+    Note over Sub, UI: [執行期] 自動轉接與推播
+    Sub->>Adapter: update(event)
+    Note right of Adapter: 1. 攔截不相容事件<br/>2. 重新映射與適配欄位
+    Adapter->>UI: setStateFn(adaptedStats)
+    Note right of UI: UI 獲得專屬格式，實現無縫更新
+```
+
 ## 6. 狀態圖 (State Diagram)
 
 描述 `CommandInvoker` 中 Undo/Redo Stack 的狀態變化概念。
@@ -328,7 +349,7 @@ stateDiagram-v2
 依據 Clean Architecture 分層原則：
 
 - `src/components/`: **Interface Adapter / View**. UI 元件。
-    - `shared/`: **共用元件**. 包含跨分頁共用的 `CodeBlock`, `RoadmapDialog` 等。
+  - `shared/`: **共用元件**. 包含跨分頁共用的 `CodeBlock`, `RoadmapDialog` 等。
 - `src/patterns/`: **Entities / Use Cases**. 核心商業邏輯與設計模式實作。
 - `src/data/`: **Data Source**. 模擬資料來源。
 - `src/assets/`: **Assets**. 靜態資源。

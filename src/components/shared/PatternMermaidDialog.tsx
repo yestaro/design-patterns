@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { X, Layout, ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, Network, X } from "lucide-react";
 import mermaid from "mermaid";
+import React, { useEffect, useRef, useState } from "react";
 import { patterns } from "../../data/patterns";
 import CodeBlock from "./CodeBlock";
 
@@ -76,6 +76,23 @@ const PatternMermaidDialog: React.FC<PatternMermaidDialogProps> = ({
 
     const Icon = pattern.icon;
 
+    // 動態配色的 Mapper 以確保 Tailwind 正常建置
+    const themeMaps: Record<string, string> = {
+        amber: "text-amber-600",
+        emerald: "text-emerald-600",
+        indigo: "text-indigo-600",
+        pink: "text-pink-600",
+        cyan: "text-cyan-600",
+        orange: "text-orange-600",
+        red: "text-red-600",
+        purple: "text-purple-600",
+        lime: "text-lime-600",
+        fuchsia: "text-fuchsia-600",
+        sky: "text-sky-600",
+        blue: "text-blue-600",
+    };
+    const c = themeMaps[pattern.themeColor] || themeMaps.blue;
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
@@ -105,11 +122,11 @@ const PatternMermaidDialog: React.FC<PatternMermaidDialogProps> = ({
                 <div className="w-full md:w-[360px] lg:w-[400px] bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200 p-6 flex flex-col shrink-0 z-20 shadow-[2px_0_10px_rgba(0,0,0,0.02)] relative">
 
                     <div className="flex items-center gap-4 mb-6 mt-2 md:mt-0">
-                        <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-blue-600 shrink-0">
-                            <Icon size={24} />
+                        <div className={`w-12 h-12 ${c}`}>
+                            <Icon size={52} />
                         </div>
                         <div>
-                            <span className="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded font-bold uppercase tracking-wider mb-1 inline-block">
+                            <span className="text-[10px] text-blue-600 px-2 font-bold uppercase tracking-wider inline-block">
                                 {pattern.chapter}
                             </span>
                             <h2 className="text-xl md:text-2xl font-black text-slate-800 leading-tight">
@@ -159,7 +176,7 @@ const PatternMermaidDialog: React.FC<PatternMermaidDialogProps> = ({
                                     }`}
                                 title="類別圖 (Class Diagram)"
                             >
-                                <Layout size={20} />
+                                <Network size={20} />
                             </button>
                             <button
                                 onClick={() => setDiagramType("sequence")}

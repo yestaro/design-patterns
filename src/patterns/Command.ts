@@ -2,7 +2,7 @@
 // --- [Command Implementation] ---
 // =============================================================================
 
-import { Subject, NotificationEvent } from './Observer';
+import { Subject } from './Observer';
 import { FinderVisitor, BaseVisitor } from './Visitor';
 import { Clipboard } from './Singleton';
 import { DirectoryComposite, EntryComponent, FileLeaf, ISortStrategy } from './Composite';

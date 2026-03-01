@@ -1,4 +1,4 @@
-import { Subject, NotificationEvent } from "./Observer";
+import { Subject } from "./Observer";
 import type { EntryComponent } from "./Composite";
 
 // =============================================================================

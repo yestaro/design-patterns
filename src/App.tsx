@@ -1,14 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
 import {
-  Network, Code, Layout, Database, Sparkles, ChessKnight,
+  ChessKnight,
+  Code,
+  Database,
+  FolderTree,
+  Network,
+  Sparkles
 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import ExplorerTab from './components/ExplorerTab';
+import CodeTab from './components/CodeTab';
 import DomainTab from './components/DomainTab';
 import ERTab from './components/ERTab';
-import CodeTab from './components/CodeTab';
-import ReflectionTab from './components/ReflectionTab';
+import ExplorerTab from './components/ExplorerTab';
 import LandingPage from './components/LandingPage';
+import ReflectionTab from './components/ReflectionTab';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('explorer');
@@ -111,8 +116,8 @@ const App: React.FC = () => {
             <div className="flex justify-center mb-8 sticky top-4 z-50">
               <div className="flex w-full justify-between p-2 bg-white/70 backdrop-blur-2xl rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 ring-1 ring-black/5">
                 {[
-                  { id: 'explorer', l: '互動探索', i: Network },
-                  { id: 'domain', l: '領域模型', i: Layout },
+                  { id: 'explorer', l: '互動探索', i: FolderTree },
+                  { id: 'domain', l: '領域模型', i: Network },
                   { id: 'er', l: '資料關聯', i: Database },
                   { id: 'code', l: '實作解析', i: Code },
                   { id: 'reflection', l: 'AI 時代', i: Sparkles }

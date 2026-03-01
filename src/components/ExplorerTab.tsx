@@ -1,42 +1,30 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
+    Calculator,
+    Calendar,
+    File,
+    FileJson,
+    FileText,
+    Folder,
+    Github,
+    Image as ImageIcon,
+    Search,
     SortAsc,
     SortDesc,
-    Folder,
-    File,
-    FileText,
-    User,
-    Calculator,
-    FileJson,
-    Search,
     X,
-    Activity,
-    Copy,
-    ClipboardPaste,
-    Image as ImageIcon,
-    Calendar,
-    Github,
-    Play,
-    Command,
-    Zap,
-    Workflow,
-    Move,
-    Box,
-    RefreshCcwDot,
-    Tags,
-    LayoutTemplate,
-    Plug2,
-    Component,
 } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { patterns } from "../data/patterns";
+import { DashboardAdapter } from "../patterns/Adapter";
+import { commandInvokerInstance, SortState } from "../patterns/Command";
 import {
     DirectoryComposite,
     EntryComponent,
-    WordDocument,
-    ImageFile,
-    PlainText,
 } from "../patterns/Composite";
-import { Clipboard } from "../patterns/Singleton";
-import { commandInvokerInstance, SortState } from "../patterns/Command";
+import {
+    BoldDecorator,
+    HighlightDecorator,
+    IconDecorator,
+} from "../patterns/Decorator";
 import { FileSystemFacade } from "../patterns/Facade";
 import {
     ConsoleObserver,
@@ -44,21 +32,55 @@ import {
     LogEntry,
     NotificationEvent,
 } from "../patterns/Observer";
-import { DashboardObserver, DashboardAdapter } from "../patterns/Adapter";
-import {
-    HighlightDecorator,
-    IconDecorator,
-    BoldDecorator,
-} from "../patterns/Decorator";
-import RoadmapDialog from "./shared/RoadmapDialog";
+import { Clipboard } from "../patterns/Singleton";
 import PatternMermaidDialog from "./shared/PatternMermaidDialog";
+import RoadmapDialog from "./shared/RoadmapDialog";
+
+export const PatternIconButton = ({
+    id,
+    onClick,
+    className = "",
+}: {
+    id: string;
+    onClick: () => void;
+    className?: string;
+}) => {
+    const p = patterns.find((x) => x.id === id);
+    if (!p) return null;
+    const Icon = p.icon;
+    const themeMaps: Record<string, string> = {
+        amber: "bg-amber-50 text-amber-500 border-amber-100/50",
+        emerald: "bg-emerald-50 text-emerald-600 border-emerald-100/50",
+        indigo: "bg-indigo-50 text-indigo-500 border-indigo-100/50",
+        pink: "bg-pink-50 text-pink-500 border-pink-100/50",
+        cyan: "bg-cyan-50 text-cyan-500 border-cyan-100/50",
+        orange: "bg-orange-50 text-orange-500 border-orange-100/50",
+        red: "bg-red-50 text-red-500 border-red-100/50",
+        purple: "bg-purple-50 text-purple-500 border-purple-100/50",
+        lime: "bg-lime-50 text-lime-600 border-lime-100/50",
+        sky: "bg-sky-50 text-sky-500 border-sky-100/50",
+        fuchsia: "bg-fuchsia-50 text-fuchsia-500 border-fuchsia-100/50",
+        blue: "bg-blue-50 text-blue-500 border-blue-100/50",
+    };
+    const c = themeMaps[p.themeColor] || "bg-slate-50 text-slate-500 border-slate-100/50";
+
+    return (
+        <button
+            onClick={onClick}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center shadow-sm border cursor-pointer hover:scale-110 transition-transform shrink-0 ${c} ${className}`}
+            title={`點擊查看 ${p.name} UML`}
+        >
+            <Icon size={18} />
+        </button>
+    );
+};
 
 interface RenderTreeProps {
     entry: EntryComponent;
     facade: FileSystemFacade;
     selectedId: string | null;
     setSelectedId: (id: string | null) => void;
-    setLiveStats: (stats: DashboardAdapter) => void;
+    setLiveStats: (stats: { name: string; count: number; total: number; type: string }) => void;
     matchedIds: string[];
     forceUpdate: () => void;
     /** 拖曳放置回呼 */
@@ -151,7 +173,7 @@ const RenderTree: React.FC<RenderTreeProps> = ({
                         count: 1,
                         total: 1,
                         type: entry.type,
-                    } as DashboardAdapter);
+                    });
                 }}
                 className={`flex items-center py-2 pr-2 pl-2 border-l-2 transition-all cursor-pointer ${isSelected ? "bg-blue-50 border-blue-500 shadow-sm" : "border-transparent"} ${isDragOver ? "ring-2 ring-blue-400 bg-blue-50/60 rounded-lg" : ""} ${isDragOverInvalid ? "cursor-not-allowed" : ""} ${isMatched ? "bg-amber-50 ring-1 ring-amber-200 shadow-sm" : "hover:bg-gray-100"}`}
             >
@@ -205,12 +227,17 @@ const RenderTree: React.FC<RenderTreeProps> = ({
 
 const ExplorerTab: React.FC = () => {
     const [visitorLogs, setVisitorLogs] = useState<LogEntry[]>([]);
-    const [liveStats, setLiveStats] = useState<DashboardAdapter>({
+    const [liveStats, setLiveStats] = useState<{
+        name: string;
+        count: number;
+        total: number;
+        type: string;
+    }>({
         name: "-",
         count: 0,
         total: 0,
         type: "-",
-    } as DashboardAdapter);
+    });
     const [results, setResults] = useState<React.ReactNode | null>(null);
     const [searchKeyword, setSearchKeyword] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
@@ -334,13 +361,13 @@ const ExplorerTab: React.FC = () => {
 
         try {
             const totalNodes = facade.totalItems();
-            const dashboardObserver = new DashboardObserver(
+            const dashboardAdapter = new DashboardAdapter(
                 (stats) => setLiveStats(stats),
                 totalNodes,
             );
             const observers: IObserver[] = [
                 highlightLoggerRef.current!,
-                dashboardObserver,
+                dashboardAdapter,
             ];
 
             await analysisAction(observers);
@@ -371,17 +398,11 @@ const ExplorerTab: React.FC = () => {
             <div className="bg-slate-50/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex flex-wrap items-center gap-4 gap-y-2 text-left z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative">
                 <div
                     className="flex items-center gap-2 border-r border-slate-200/60 pr-4 self-stretch shrink-0"
-                    title="點擊查看 Command UML"
                 >
-                    <h3
-                        onClick={() => setPreviewPatternId("command")}
-                        className="font-bold text-slate-800 flex items-center gap-3 text-left cursor-pointer hover:bg-slate-200/40 px-2 py-1.5 -ml-1 rounded-2xl transition-all group"
-                    >
-                        <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 shadow-sm border border-red-100/50 group-hover:scale-110 transition-transform">
-                            <Command size={18} />
-                        </div>
+                    <div className="font-bold text-slate-800 flex items-center gap-3 text-left px-2 py-1.5 -ml-1 rounded-2xl">
+                        <PatternIconButton id="command" onClick={() => setPreviewPatternId("command")} />
                         <span className="text-sm tracking-tight opacity-90">Command</span>
-                    </h3>
+                    </div>
                 </div>
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
                     <button
@@ -400,14 +421,12 @@ const ExplorerTab: React.FC = () => {
                     </button>
                 </div>
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 self-stretch shrink-0">
-                    <div
-                        onClick={() => setPreviewPatternId("singleton")}
-                        className="cursor-pointer hover:bg-slate-200/40 p-1 rounded-xl transition-all group"
-                        title="點擊查看 Singleton UML"
-                    >
-                        <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center text-stone-600 shadow-sm border border-stone-200/50 group-hover:scale-110 transition-transform">
-                            <Box size={18} />
-                        </div>
+                    <div className="cursor-pointer hover:bg-slate-200/40 p-1 rounded-xl transition-all group shrink-0">
+                        <PatternIconButton
+                            id="singleton"
+                            onClick={() => setPreviewPatternId("singleton")}
+                            className="group-hover:scale-110 transition-transform"
+                        />
                     </div>
                     <button
                         disabled={!selectedId}
@@ -441,15 +460,10 @@ const ExplorerTab: React.FC = () => {
                     </button>
                 </div>
                 <div className="flex items-center gap-1.5 border-r border-slate-200 pr-3 text-left self-stretch shrink-0">
-                    <div
+                    <PatternIconButton
+                        id="strategy"
                         onClick={() => setPreviewPatternId("strategy")}
-                        className="cursor-pointer hover:bg-slate-200/40 p-1 rounded-xl transition-all group"
-                        title="點擊查看 Strategy UML"
-                    >
-                        <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500 shadow-sm border border-purple-100/50 group-hover:scale-110 transition-transform">
-                            <RefreshCcwDot size={18} />
-                        </div>
-                    </div>
+                    />
                     {[
                         { id: "name", l: "名稱" },
                         { id: "size", l: "大小" },
@@ -475,15 +489,10 @@ const ExplorerTab: React.FC = () => {
                     })}
                 </div>
                 <div className="flex items-center gap-1.5 self-stretch shrink-0">
-                    <div
+                    <PatternIconButton
+                        id="flyweight"
                         onClick={() => setPreviewPatternId("flyweight")}
-                        className="cursor-pointer hover:bg-slate-200/40 p-1 rounded-xl transition-all group"
-                        title="點擊查看 Flyweight UML"
-                    >
-                        <div className="w-8 h-8 rounded-lg bg-lime-50 flex items-center justify-center text-lime-600 shadow-sm border border-lime-100/50 group-hover:scale-110 transition-transform">
-                            <Tags size={18} />
-                        </div>
-                    </div>
+                    />
                     <div className="flex gap-1.5 text-left">
                         {["Urgent", "Work", "Personal"].map((lbl) => {
                             const count = facade.mediator.getFiles(lbl).length;
@@ -536,16 +545,10 @@ const ExplorerTab: React.FC = () => {
             <div className="flex flex-col md:flex-row md:h-[520px] md:overflow-hidden h-auto">
                 {/* 1. 側邊欄：檔案階層 (w-[440px]) */}
                 <div className="w-full md:w-[440px] bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col shrink-0 p-4 text-left h-[400px] md:h-auto overflow-hidden">
-                    <h3
-                        onClick={() => setPreviewPatternId("composite")}
-                        className="font-bold text-slate-800 mb-5 flex w-max items-center gap-3 text-left cursor-pointer hover:bg-slate-100 px-2 py-1.5 -ml-1 rounded-2xl transition-all group"
-                        title="點擊查看 Composite UML"
-                    >
-                        <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500 shadow-sm border border-amber-100/50 group-hover:scale-110 transition-transform">
-                            <Workflow size={18} />
-                        </div>
+                    <div className="font-bold text-slate-800 mb-5 flex w-max items-center gap-3 text-left px-2 py-1.5 -ml-1 rounded-2xl">
+                        <PatternIconButton id="composite" onClick={() => setPreviewPatternId("composite")} />
                         <span className="text-sm tracking-tight opacity-90">Composite</span>
-                    </h3>
+                    </div>
                     <div className="flex-1 overflow-y-auto custom-scrollbar text-left">
                         <RenderTree
                             entry={facade.root as DirectoryComposite}
@@ -569,17 +572,13 @@ const ExplorerTab: React.FC = () => {
                     <div className="flex-1 flex flex-col md:flex-row min-h-0 border-b border-slate-200 bg-white">
                         {/* Visitor 操作 */}
                         <div className="flex-1 p-4 flex flex-col justify-start space-y-4 border-r border-slate-100 overflow-y-auto custom-scrollbar">
-                            <h3
-                                onClick={() => setPreviewPatternId("visitor")}
-                                className="font-bold text-slate-800 flex w-max items-center gap-3 text-left cursor-pointer hover:bg-slate-100 px-2 py-1.5 -ml-1 rounded-2xl transition-all group"
-                                title="點擊查看 Visitor UML"
-                            >
-                                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100/50 group-hover:scale-110 transition-transform">
-                                    <Zap size={18} />
-                                </div>
+                            <div className="font-bold text-slate-800 flex items-center gap-3 text-left px-2 py-1.5 -ml-1 rounded-2xl">
+                                <PatternIconButton id="visitor" onClick={() => setPreviewPatternId("visitor")} />
                                 <span className="text-sm tracking-tight opacity-90">Visitor</span>
-                            </h3>
-                            <div className="flex flex-col gap-2">
+                                <PatternIconButton id="template" onClick={() => setPreviewPatternId("template")} />
+                                <span className="text-sm tracking-tight opacity-90">Template Method</span>
+                            </div>
+                            <div className="flex flex-col gap-3">
                                 <button
                                     onClick={() =>
                                         handleAnalysis(async (obs) => {
@@ -587,7 +586,7 @@ const ExplorerTab: React.FC = () => {
                                             setResults(`總大小：${size} KB`);
                                         })
                                     }
-                                    className="py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-sm font-bold flex justify-between px-4 items-center transition-all text-left"
+                                    className="py-2.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl text-sm font-bold flex justify-between px-4 items-center transition-all text-left"
                                 >
                                     <span>計算大小</span>
                                     <Calculator size={18} />
@@ -603,110 +602,104 @@ const ExplorerTab: React.FC = () => {
                                             );
                                         })
                                     }
-                                    className="py-2.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-xl text-sm font-bold flex justify-between px-4 items-center transition-all text-left"
+                                    className="flex-1 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-sm font-bold flex justify-between px-4 items-center transition-all text-left"
                                 >
                                     <span>匯出 XML</span>
                                     <FileJson size={18} />
                                 </button>
                             </div>
-                            <div className="pt-1 text-left">
-                                <div className="flex flex-row gap-1.5 flex-nowrap items-center text-left">
-                                    <div className="relative flex-1 min-w-0 text-left">
-                                        <input
-                                            type="text"
-                                            value={searchKeyword}
-                                            onChange={(e) => setSearchKeyword(e.target.value)}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Enter" && searchKeyword) {
-                                                    handleAnalysis(async (obs) => {
-                                                        const ids = await facade.searchFiles(
-                                                            searchKeyword,
-                                                            obs,
-                                                        );
-                                                        setMatchedIds(ids);
-                                                        setResults(`找到 ${ids.length} 項`);
-                                                    });
-                                                }
+                            <div className="flex flex-row gap-1.5 flex-nowrap items-center text-left">
+                                <div className="relative flex-1 min-w-0 text-left">
+                                    <input
+                                        type="text"
+                                        value={searchKeyword}
+                                        onChange={(e) => setSearchKeyword(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" && searchKeyword) {
+                                                handleAnalysis(async (obs) => {
+                                                    const ids = await facade.searchFiles(
+                                                        searchKeyword,
+                                                        obs,
+                                                    );
+                                                    setMatchedIds(ids);
+                                                    setResults(`找到 ${ids.length} 項`);
+                                                });
+                                            }
+                                        }}
+                                        className="w-full px-2.5 py-1.5 pr-7 bg-slate-50 rounded-xl border border-slate-200 text-sm outline-none focus:ring-1 focus:ring-blue-400 truncate text-left"
+                                        placeholder="輸入關鍵字..."
+                                    />
+                                    {(searchKeyword || matchedIds.length > 0) && (
+                                        <button
+                                            onClick={() => {
+                                                setSearchKeyword("");
+                                                setMatchedIds([]);
                                             }}
-                                            className="w-full px-2.5 py-1.5 pr-7 bg-slate-50 rounded-xl border border-slate-200 text-sm outline-none focus:ring-1 focus:ring-blue-400 truncate text-left"
-                                            placeholder="輸入關鍵字..."
-                                        />
-                                        {(searchKeyword || matchedIds.length > 0) && (
-                                            <button
-                                                onClick={() => {
-                                                    setSearchKeyword("");
-                                                    setMatchedIds([]);
-                                                }}
-                                                className="absolute right-1.5 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        )}
-                                    </div>
-                                    <button
-                                        disabled={!searchKeyword}
-                                        onClick={() =>
-                                            handleAnalysis(async (obs) => {
-                                                const ids = await facade.searchFiles(
-                                                    searchKeyword,
-                                                    obs,
-                                                );
-                                                setMatchedIds(ids);
-                                                setResults(`找到 ${ids.length} 項`);
-                                            })
-                                        }
-                                        className="whitespace-nowrap px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-bold text-sm py-2 transition-all flex items-center gap-1 text-left"
-                                    >
-                                        搜尋 <Search size={16} />
-                                    </button>
+                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
                                 </div>
+                                <button
+                                    disabled={!searchKeyword}
+                                    onClick={() =>
+                                        handleAnalysis(async (obs) => {
+                                            const ids = await facade.searchFiles(
+                                                searchKeyword,
+                                                obs,
+                                            );
+                                            setMatchedIds(ids);
+                                            setResults(`找到 ${ids.length} 項`);
+                                        })
+                                    }
+                                    className="whitespace-nowrap px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-bold text-sm py-2 transition-all flex items-center gap-1 text-left"
+                                >
+                                    搜尋 <Search size={16} />
+                                </button>
                             </div>
                         </div>
 
                         {/* Observer 監控 */}
                         <div className="w-full md:w-80 p-4 flex flex-col justify-start space-y-4 bg-white overflow-y-auto custom-scrollbar">
-                            <h3
-                                onClick={() => setPreviewPatternId("observer")}
-                                className="font-bold text-slate-800 flex items-center justify-between text-left cursor-pointer hover:bg-slate-100 px-2 py-1.5 -mx-1 rounded-2xl transition-all group"
-                                title="點擊查看 Observer UML"
-                            >
+                            <div className="font-bold text-slate-800 flex items-center justify-between text-left px-2 py-1.5 -mx-1 rounded-2xl">
                                 <div className="flex items-center gap-3 text-left">
-                                    <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-pink-500 shadow-sm border border-pink-100/50 group-hover:scale-110 transition-transform">
-                                        <Activity size={18} />
-                                    </div>
+                                    <PatternIconButton id="observer" onClick={() => setPreviewPatternId("observer")} />
                                     <span className="text-sm tracking-tight opacity-90">Observer</span>
+                                    <PatternIconButton id="adapter" onClick={() => setPreviewPatternId("adapter")} />
+                                    <span className="text-sm tracking-tight opacity-90">Adapter</span>
                                 </div>
                                 <span className="text-[10px] px-2 py-0.5 bg-pink-500 text-white rounded-full font-bold uppercase tracking-tighter text-left shadow-sm">
                                     Live
                                 </span>
-                            </h3>
+                            </div>
                             <div className="space-y-4">
                                 <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
                                     <span className="text-sm text-slate-400 font-bold uppercase mb-1.5 text-left">
                                         目前節點
                                     </span>
-                                    <span className="text-sm font-black text-blue-700 truncate text-left">
+                                    <span className="text-sm font-black text-blue-700 truncate mb-2 text-left">
                                         {liveStats.name}
                                     </span>
-                                </div>
-                                <div className="bg-slate-50 p-3.5 rounded-xl border border-blue-50 flex flex-col text-left">
                                     <div className="flex justify-between items-center mb-2 text-left">
                                         <span className="text-sm text-slate-400 font-bold uppercase text-left">
                                             掃描進度
                                         </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1 h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner text-left">
+                                            <div
+                                                className="h-full bg-blue-500 transition-all duration-300 ease-out relative overflow-hidden text-left"
+                                                style={{ width: `${progressPercent}%` }}
+                                            >
+                                                <div className="absolute inset-0 bg-white/20 animate-[pulse_2s_infinite]"></div>
+                                            </div>
+                                        </div>
                                         <span className="text-sm font-black text-blue-600 text-left">
                                             {progressPercent}%
                                         </span>
                                     </div>
-                                    <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner text-left">
-                                        <div
-                                            className="h-full bg-blue-500 transition-all duration-300 ease-out relative overflow-hidden text-left"
-                                            style={{ width: `${progressPercent}%` }}
-                                        >
-                                            <div className="absolute inset-0 bg-white/20 animate-[pulse_2s_infinite]"></div>
-                                        </div>
-                                    </div>
-                                    <p className="text-[10px] text-slate-400 mt-2 text-right font-bold tracking-tight text-left">
+                                    <p className="text-[10px] text-slate-400 text-right font-bold tracking-tight mt-2 text-left">
                                         {liveStats.count} / {liveStats.total} Nodes
                                     </p>
                                 </div>
@@ -719,18 +712,12 @@ const ExplorerTab: React.FC = () => {
                         <div className="relative h-10 shrink-0">
                             {/* Left: Decorator Title & Pattern */}
                             <div className="absolute left-0 inset-y-0 flex items-center whitespace-nowrap">
-                                <h3
-                                    onClick={() => setPreviewPatternId("decorator")}
-                                    className="font-bold text-slate-800 flex items-center gap-3 text-left cursor-pointer hover:bg-white/60 rounded-2xl transition-all group"
-                                    title="查看 Decorator UML"
-                                >
-                                    <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center text-cyan-500 shadow-sm border border-cyan-100/50 group-hover:scale-110 transition-transform">
-                                        <Component size={18} />
-                                    </div>
+                                <div className="font-bold text-slate-800 flex items-center gap-3 text-left rounded-2xl">
+                                    <PatternIconButton id="decorator" onClick={() => setPreviewPatternId("decorator")} />
                                     <span className="text-sm font-bold tracking-tight">
                                         Decorator
                                     </span>
-                                </h3>
+                                </div>
                             </div>
 
                             {/* Middle: Output Label */}

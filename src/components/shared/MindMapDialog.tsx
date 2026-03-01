@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Map, Zap, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import mermaid from 'mermaid';
 
 const MINDMAP_DEFINITION = `

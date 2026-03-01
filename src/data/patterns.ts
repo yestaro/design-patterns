@@ -1,17 +1,17 @@
 import {
-  Workflow,
-  Zap,
   Activity,
-  Component,
-  Share2,
-  RefreshCcwDot,
-  Tags,
-  Box,
   AppWindow,
-  Plug2,
+  Box,
+  Command,
+  Component,
   LayoutTemplate,
   LucideIcon,
-  Command,
+  Plug2,
+  RefreshCcwDot,
+  Share2,
+  Tags,
+  Workflow,
+  Zap,
 } from "lucide-react";
 
 export interface DesignPattern {
@@ -20,6 +20,7 @@ export interface DesignPattern {
   chapter: string; // 章節名稱 (e.g. "1. 結構與複製")
   description: string; // 簡短描述 (用於 DomainTab 列表)
   icon: LucideIcon; // 圖示 (用於 CodeTab Dock)
+  themeColor: string; // 模式主題色 (e.g. "amber", "emerald", 不含 500 等亮度數值)
 
   mermaid: string; // UML 類別圖定義
   sequence?: string; // UML 序列圖定義 (關鍵流程)
@@ -48,6 +49,7 @@ export const patterns: DesignPattern[] = [
     description:
       "定義共通介面 (EntryComponent)，讓 Client 不需區分檔案或目錄，並實作 Clone 自我複製。",
     icon: Workflow,
+    themeColor: "amber",
     mermaid: `classDiagram
     class EntryComponent {
         <<abstract>>
@@ -212,6 +214,7 @@ function cloneDir(orig: any): any {
     description:
       "將操作邏輯 (統計、搜尋、輸出 XML) 從資料結構中分離，實現功能插件化擴展。",
     icon: Zap,
+    themeColor: "emerald",
     mermaid: `classDiagram
     class BaseVisitor {
         <<abstract>>
@@ -344,6 +347,7 @@ function exportXML(node) {
     description:
       "處理一致的演算法骨架（遞迴走訪、層級縮排、字元脫逸），將差異化實作交由子類別（格式匯出）。",
     icon: LayoutTemplate,
+    themeColor: "indigo",
     mermaid: `classDiagram
     class BaseExporterTemplate {
         <<abstract>>
@@ -372,19 +376,26 @@ function exportXML(node) {
     BaseExporterTemplate <|-- MarkdownExporterTemplate : 繼承
     BaseExporterTemplate <|-- XmlExporterTemplate : 繼承`,
     sequence: `sequenceDiagram
-    participant Client
+    participant Client as DirectoryComposite
     participant Template as BaseExporterTemplate
     participant Concrete as XmlExporterTemplate
     
     Note over Client, Concrete: 樣板方法骨架流程
     Client->>Template: visitDirectory(dir)
     Template->>Concrete: renderDirectoryStart(dir)
-    Concrete-->>Template: return <Directory...>
+    
+    create participant Frag as SafeFragment
+    Concrete->>Frag: new SafeFragment(escaped)
+    Note right of Concrete: 強制子類別回傳防護型別
+    Concrete-->>Template: return SafeFragment
     Template->>Template: depth++
-    Note right of Template: 遞迴處理子節點
+    Note right of Template: 處理縮排與遞迴子節點
     Template->>Template: depth--
+    
     Template->>Concrete: renderDirectoryEnd(dir)
-    Concrete-->>Template: return </Directory>
+    Note right of Concrete: 強制子類別回傳防護型別
+    Concrete-->>Template: return SafeFragment
+    
     Template-->>Client: 輸出完整格式`,
     usage: {
       title: "自動化縮排與內容脫逸",
@@ -462,6 +473,7 @@ function exportToMarkdown(dir: any): string {
     description:
       "建立發佈-訂閱機制，讓核心邏輯（如 Visitor、Command）能在不耦合 UI 的情況下，透過介面同步狀態更新。",
     icon: Activity,
+    themeColor: "pink",
     mermaid: `classDiagram
     class NotificationEvent {
         +source : EventSource
@@ -487,7 +499,7 @@ function exportToMarkdown(dir: any): string {
         +update(event)
     }
     
-    class DashboardObserver {
+    class DashboardAdapter {
         -updateStatsFn
         -total
         +update(event)
@@ -496,21 +508,21 @@ function exportToMarkdown(dir: any): string {
     Subject o-- IObserver : 訂閱
     Subject ..> NotificationEvent : 廣播
     IObserver <|-- ConsoleObserver : 實作
-    IObserver <|-- DashboardObserver : 實作`,
+    IObserver <|-- DashboardAdapter : 實作`,
     sequence: `sequenceDiagram
     autonumber
     participant Client
     participant Obs1 as ConsoleObserver
-    participant Obs2 as DashboardObserver
+    participant Obs2 as DashboardAdapter
     participant Vis as StatisticsVisitor
     
     Note over Client, Vis: 【建立觀察者與訂閱事件】
-    Client->>Obs2: new ConsoleObserver(fn) / DashboardObserver(fn)
+    Client->>Obs2: new ConsoleObserver(fn) / DashboardAdapter(fn)
     
     Client->>+Vis: new StatisticsVisitor()
     create participant Sub as Subject
     Vis->>Sub: 內部 notifier
-    Client->>+Sub: subscribe(consoleObs) / subscribe(dashboardObs) 
+    Client->>+Sub: subscribe(consoleObs) / subscribe(dashboardAdapter) 
     
     Note over Client, Vis: 【執行業務並觸發通知】
     Client->>+Vis: visitFile(entry)
@@ -528,7 +540,7 @@ function exportToMarkdown(dir: any): string {
         "主體 (Subject) 不需知道觀察者 (Observer) 的具體實作，僅透過 notify 進行廣播，達成鬆散耦合。",
       code: `/* ------ ExplorerTab.tsx (Observer 的註冊與廣播) ------ */
 // 1. 準備觀察者 A: Dashboard（綁定圓形進度條）
-const dashboardObs = new DashboardObserver(
+const dashboardAdapter = new DashboardAdapter(
     stats => setLiveStats(stats), 
     facade.totalItems()
 );
@@ -544,7 +556,7 @@ const visitor = new StatisticsVisitor();
 // 4. 將這兩個「互不相處」的 UI 觀察者，掛載(訂閱)到 Visitor 身上
 // 當 Visitor 去巡覽結構時，就會不斷觸發 Notify 廣播，更新兩個畫面啦！
 visitor.notifier.subscribe(consoleObs);
-visitor.notifier.subscribe(dashboardObs);`,
+visitor.notifier.subscribe(dashboardAdapter);`,
     },
     comparison: {
       positive: `// 正面：通知器廣播機制，UI 與核心完全解耦
@@ -576,6 +588,7 @@ function search(node: any, kw: string): void {
     description:
       "動態地為 Observer 附加額外行為 (如日誌樣式)，不修改原始 Observer 的程式碼，展現層層包裹的靈活性。",
     icon: Component,
+    themeColor: "cyan",
     mermaid: `classDiagram
     class IObserver {
         <<interface>>
@@ -710,6 +723,7 @@ function notify(msg: string, action: number, level: string, icon: boolean) {
     description:
       "將不相容的事件資料 (NotificationEvent) 轉換為 UI 期待的格式 (Dashboard)，解決介面不對接問題。",
     icon: Plug2,
+    themeColor: "orange",
     mermaid: `classDiagram
     class NotificationEvent {
         <<Adaptee>>
@@ -720,86 +734,72 @@ function notify(msg: string, action: number, level: string, icon: boolean) {
     }
 
     class DashboardAdapter {
-        <<Adapter>>
-        +name : string
-        +count : number
-        +total : number
-        +type : string
-        +constructor(event, total)
-    }
-
-    class DashboardObserver {
-        <<Client>>
+        <<Adapter / Target>>
         -updateStatsFn
+        -total
+        +constructor(updateStatsFn, total)
         +update(event)
     }
 
-    DashboardObserver ..> NotificationEvent : 收到更新訊息
-    DashboardObserver ..> DashboardAdapter : 建立並使用
-    DashboardAdapter ..> NotificationEvent : 轉換自`,
+    DashboardAdapter ..> NotificationEvent : 轉換與適配
+    DashboardAdapter ..> React_SetState : 呼叫並傳遞`,
     sequence: `sequenceDiagram
+    participant UI as React UI
+    participant Adapter as DashboardAdapter:IObserver
     participant Sub as Subject
-    participant Obs as DashboardObserver
-    participant Adapter as DashboardAdapter
-    participant UI as React Dashboard
     
-    Sub->>Obs: update(event)
-    Note right of Obs: event 為原始不相容格式
-    Obs->>Adapter: new DashboardAdapter(event)
-    Note left of Adapter: 重新映射欄位與計算
-    Adapter-->>Obs: return adaptedData
-    Obs->>UI: setStats(adaptedData)
-    Note right of UI: UI 拿到專屬格式`,
+    Note over UI, Adapter: [初始化階段 - 將依賴塞入 Adapter]
+    UI->>Adapter: new (updateStatsFn, total)
+    UI->>Sub: subscribe(Adapter)
+    
+    Note over Sub, UI: [執行期階段 - 廣播與轉接]
+    Sub->>Adapter: update(event)
+    Note right of Adapter: 1. 接收更新事件<br/>2. 重新映射欄位
+    Adapter->>UI: updateStatsFn(adaptedStats)
+    Note right of UI: UI 拿到專屬格式，無縫更新狀態`,
     usage: {
       title: "資料形狀的橋接",
       description:
         "當「原始事件 (Adaptee)」與「UI 組件 (Target)」需要的資料模型不一致，並要調用 UI 組件方法時，透過 Adapter 進行橋接。",
-      code: `/* ------ 1. Adapter 轉換邏輯 (Adapter 實體化) ------ */
-export class DashboardAdapter {
-    public readonly name: string;
-    public readonly total: number;
-    // ...略去其它給 Dashboard 使用的屬性
-
-    // 傳入系統規格的 Adaptee (NotificationEvent) 與 總數
-    constructor(event: NotificationEvent, total: number) {
-        // [適配轉接] 把深層的 event.data.currentNode 重新映射成平坦的 name
-        this.name = event.data?.currentNode || '-';
-        this.total = total; // 補齊 UI 所需的短缺欄位
-    }
-}
-
-/* ------ 2. Adapter 的使用者 (DashboardObserver) ------ */
-export class DashboardObserver implements IObserver {
+      code: `/* ------ Adapter 轉換邏輯 (身兼 Observer 橋樑) ------ */
+export class DashboardAdapter implements IObserver {
     constructor(
-        private updateUI: (stats: DashboardAdapter) => void, 
+        private updateStatsFn: (stats: any) => void,
         private total: number
     ) {}
 
-    // 當 Visitor 廣播時，只會傳來生硬且不相容的 NotificationEvent
+    // 實作 Target 的標準介面；但在此處理不相容資料的轉接
     update(event: NotificationEvent): void {
-        // [核心樞紐] 將接收到的訊號塞入轉接器，獲得完美符合 UI 要求的物件
-        const adaptedStats = new DashboardAdapter(event, this.total);
+        const payload = event.data || {};
         
-        // 直接將轉接好的物件拋給 React SetState
-        this.updateUI(adaptedStats);
+        // [適配轉接] 把深層的 event 資料重新映射成平坦的格式
+        const adaptedStats = {
+            name: payload.currentNode || '-',
+            count: payload.count || 0,
+            total: this.total,
+            type: payload.nodeType || '-'
+        };
+        
+        // 呼叫 Adaptee (React SetState)
+        this.updateStatsFn(adaptedStats);
     }
 }`,
     },
     comparison: {
-      positive: `// 正面：透過轉接器橋接原始資料與 UI 期待
-class DashboardAdapter {
-  constructor(event: NotificationEvent, total: number) {
-    // 適配動作：重新映射欄位
-    this.name = event.data?.currentNode || '-';
-    this.total = total; // 補全資料
-  }
-}
+      positive: `// 正面：透過轉接器無縫橋接系統事件與 UI 狀態
+// Target 介面為 IObserver，Adaptee 則是純粹吃特定格式的 UI updateFn
+class DashboardAdapter implements IObserver {
+  constructor(private updateFn, private total) {}
 
-class DashboardObserver implements IObserver {
   update(event: NotificationEvent) {
-    // 將原始 NotificationEvent 轉換成 UI 需要的格式，並調用 UI 方法
-    const stats = new DashboardAdapter(event, this.total);
-    this.updateStatsFn(stats); // UI 仍是接收到自己的格式 name / total
+    // 轉接動作：過濾、計算並生出目標形狀
+    const stats = {
+      name: event.data?.currentNode || '-',
+      total: this.total
+    };
+    
+    // 直接呼叫 UI 函式，完成橋接任務
+    this.updateFn(stats);
   }
 }`,
       negative: `// 反面：UI 依賴實作細節 (Coupled to Implementation)
@@ -827,6 +827,7 @@ function MonitorDashboard({ event }: { event: any }) {
     description:
       "將操作封裝成一致的物件，才能管理 (Undo/Redo 功能)，實現操作的歷史記錄追溯。",
     icon: Command,
+    themeColor: "red",
     mermaid: `classDiagram
     class BaseCommand {
         <<abstract>>
@@ -959,6 +960,7 @@ function onPasteClick(targetId: string) {
     description:
       "定義排序演算法家族，讓排序規則 (名稱、大小、標籤) 可在需要時選擇切換，彈性應用。",
     icon: RefreshCcwDot,
+    themeColor: "purple",
     mermaid: `classDiagram
     class ISortStrategy {
         <<interface>>
@@ -1071,6 +1073,7 @@ function sort(nodes: any[], type: 'name' | 'tag', tagManager?: any) {
     description:
       "保證 Clipboard (剪貼簿) 在全應用程式中只有一個實例，集中管理複製的內容。",
     icon: Box,
+    themeColor: "blue",
     mermaid: `classDiagram
     class Clipboard {
         -static instance : Clipboard
@@ -1188,6 +1191,7 @@ class ContextMenu {
     description:
       "透過標籤工廠共享相同配色的標籤實體，達成一致化，並減少記憶體開銷。",
     icon: Tags,
+    themeColor: "lime",
     mermaid: `classDiagram
     class Label {
         +name : string
@@ -1296,6 +1300,7 @@ fileX.tags.push(new Label('Personal', 'bg-green-500'));
     description:
       "集中管理檔案與標籤的多對多關聯，避免物件間的網狀依賴,實現 O(1) 雙向查詢。",
     icon: Share2,
+    themeColor: "fuchsia",
     mermaid: `classDiagram
     class TagMediator {
         -fileToLabels : Map~ID, Set~
@@ -1387,6 +1392,7 @@ const results = files.filter(f => f.tags.includes('Work'));
     description:
       "提供簡易的使用介面 (FileSystemFacade) 來操作複雜的功能 (Command, Visitor, Mediator)，降低 Client 耦合度。",
     icon: AppWindow,
+    themeColor: "sky",
     mermaid: `classDiagram
     class FileSystemFacade {
         -invoker : CommandInvoker

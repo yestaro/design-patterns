@@ -240,7 +240,7 @@ describe('CommandInvoker', () => {
 
 describe('TagCommand', () => {
     let mediator: TagMediator;
-    let fileId = 'f1';
+    const fileId = 'f1';
 
     beforeEach(() => {
         mediator = new TagMediator();

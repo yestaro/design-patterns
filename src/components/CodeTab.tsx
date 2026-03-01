@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Layers2, Share2, Play, Map, Sparkles, Landmark } from 'lucide-react';
+import { Layers2, Map, Play, Share2 } from 'lucide-react';
 import mermaid from 'mermaid';
-import CodeBlock from './shared/CodeBlock';
+import React, { useEffect, useState } from 'react';
 import { patterns } from '../data/patterns';
+import CodeBlock from './shared/CodeBlock';
 import { MacOSDock } from './shared/MacOSDock';
 
 import { MindMapDialog } from './shared/MindMapDialog';
@@ -12,11 +12,30 @@ const CodeTab: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isMindMapOpen, setIsMindMapOpen] = useState(false);
 
-  const DOCK_COLOR_MAP: Record<string, string> = {
-    composite: 'text-amber-300', visitor: 'text-emerald-300', template: 'text-indigo-300',
-    observer: 'text-pink-300', decorator: 'text-cyan-300', adapter: 'text-orange-300',
-    command: 'text-red-300', strategy: 'text-purple-300', flyweight: 'text-lime-300',
-    mediator: 'text-teal-300', singleton: 'text-stone-300', facade: 'text-sky-300'
+  // 根據 patterns 的 themeColor 自動映射出 Dock 的顏色
+  const DOCK_COLOR_MAP = React.useMemo(() => {
+    const dockThemeMap: Record<string, string> = {
+      amber: "text-amber-300", emerald: "text-emerald-300", indigo: "text-indigo-300",
+      pink: "text-pink-300", cyan: "text-cyan-300", orange: "text-orange-300",
+      red: "text-red-300", purple: "text-purple-300", lime: "text-lime-300",
+      fuchsia: "text-fuchsia-300", sky: "text-sky-300", blue: "text-blue-300",
+      teal: "text-teal-300", stone: "text-stone-300",
+    };
+    return patterns.reduce((acc, p) => {
+      acc[p.id] = dockThemeMap[p.themeColor] || "text-slate-300";
+      return acc;
+    }, {} as Record<string, string>);
+  }, []);
+
+  // 展示區塊列表的圖標主題背景
+  const iconThemeMap: Record<string, string> = {
+    amber: "bg-amber-100 text-amber-700", emerald: "bg-emerald-100 text-emerald-700",
+    indigo: "bg-indigo-100 text-indigo-700", pink: "bg-pink-100 text-pink-700",
+    cyan: "bg-cyan-100 text-cyan-700", orange: "bg-orange-100 text-orange-700",
+    red: "bg-red-100 text-red-700", purple: "bg-purple-100 text-purple-700",
+    lime: "bg-lime-100 text-lime-700", fuchsia: "bg-fuchsia-100 text-fuchsia-700",
+    sky: "bg-sky-100 text-sky-700", blue: "bg-blue-100 text-blue-700",
+    teal: "bg-teal-100 text-teal-700", stone: "bg-stone-100 text-stone-700"
   };
 
   useEffect(() => {
@@ -447,7 +466,7 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
               activeTab === pattern.id && (
                 <div key={pattern.id} className="space-y-6 text-left animate-in fade-in duration-300">
                   <div className="flex items-center gap-3 mb-2 text-left">
-                    <div className="bg-blue-100 p-2 rounded-lg text-blue-700 text-left">
+                    <div className={`p-2 rounded-lg text-left ${iconThemeMap[pattern.themeColor] || "bg-slate-100 text-slate-700"}`}>
                       <pattern.icon size={24} />
                     </div>
                     <h3 className="text-xl font-black text-slate-800 text-left">

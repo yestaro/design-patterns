@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { AttributeSortStrategy, LabelSortStrategy } from '../src/patterns/Strategy';
-import { PlainText, WordDocument, ImageFile, EntryComponent } from '../src/patterns/Composite';
+import { PlainText, WordDocument, EntryComponent } from '../src/patterns/Composite';
 import { TagMediator } from '../src/patterns/Mediator';
 
 describe('AttributeSortStrategy', () => {

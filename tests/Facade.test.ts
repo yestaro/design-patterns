@@ -7,7 +7,6 @@ import { FileSystemFacade } from '../src/patterns/Facade';
 import {
     DirectoryComposite,
     PlainText,
-    WordDocument,
 } from '../src/patterns/Composite';
 import { commandInvokerInstance } from '../src/patterns/Command';
 import { Clipboard } from '../src/patterns/Singleton';

@@ -2,7 +2,7 @@
 // --- Visitor Pattern 單元測試 ---
 // =============================================================================
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { StatisticsVisitor, FileSearchVisitor, FinderVisitor } from '../src/patterns/Visitor';
 import { DirectoryComposite, PlainText, WordDocument, ImageFile } from '../src/patterns/Composite';
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, HelpCircle, Calendar, User, Code, Bot, Panda, ChevronDown, ChevronUp, Copy, Check, ArrowLeft, Loader2, Lock, Unlock } from 'lucide-react';
+import { X, User, Code, Bot, Panda, ChevronDown, ChevronUp, Copy, Check, ArrowLeft, Loader2, Lock, Unlock } from 'lucide-react';
 import { CodeFetcher } from '../../data/CodeFetcher';
 import CodeBlock from './CodeBlock';
 

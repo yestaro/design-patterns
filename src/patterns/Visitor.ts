@@ -2,7 +2,7 @@
 // --- [Visitor Implementation] ---
 // =============================================================================
 
-import { Subject, NotificationEvent } from './Observer';
+import { Subject } from './Observer';
 import type { EntryComponent, FileLeaf, DirectoryComposite } from './Composite';
 
 /**
