@@ -89,7 +89,7 @@ const CodeTab: React.FC = () => {
             <p className="text-slate-600 leading-relaxed font-medium text-left">
               核心資料 <b>#children</b> 被定義為私有屬性。這<b>確保物件能完整控制其內部狀態</b>（即不變量 Invariant）。
             </p>
-            <div className="bg-slate-900 rounded-xl p-6 text-slate-300 font-mono text-xs lg:text-sm shadow-lg border border-slate-700 text-left">
+            <div className="bg-slate-900 rounded-xl p-6 text-slate-300 font-mono text-xs lg:text-sm shadow-lg border border-slate-700 text-left whitespace-pre-wrap break-words">
               <span className="text-blue-400">class</span> DirectoryComposite <span className="text-blue-400">extends</span> EntryComponent &#123;<br />
               &nbsp;&nbsp;<span className="text-pink-400">private #children</span>: EntryComponent[] = [];<br />
               &nbsp;&nbsp;<span className="text-pink-400">private #activeStrategy</span>: ISortStrategy | null = null;<br />
@@ -568,3 +568,4 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
 };
 
 export default CodeTab;
+
