@@ -397,9 +397,9 @@ const ExplorerTab: React.FC = () => {
             {/* 頂部整合工具列 */}
             <div className="bg-slate-50/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-3 text-left z-10 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] relative">
                 <div
-                    className="flex items-center gap-2 border-r border-slate-200/60 pr-4 shrink-0"
+                    className="flex items-center gap-2 border-r border-slate-200 pr-3 shrink-0"
                 >
-                    <div className="font-bold text-slate-800 flex items-center gap-3 text-left py-1.5 rounded-2xl">
+                    <div className="font-bold text-slate-800 flex items-center gap-3">
                         <PatternIconButton id="command" onClick={() => setPreviewPatternId("command")} />
                         <span className="text-sm tracking-tight opacity-90">Command</span>
                     </div>
