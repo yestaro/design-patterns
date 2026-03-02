@@ -201,7 +201,7 @@ const PatternMermaidDialog: React.FC<PatternMermaidDialogProps> = ({
                     </button>
 
                     {/* Diagram Container - Full Height */}
-                    <div className="flex-1 overflow-auto p-8 flex justify-center items-center custom-scrollbar bg-[radial-gradient(#f1f5f9_1.5px,transparent_1.5px)] [background-size:32px_32px]">
+                    <div className="flex-1 overflow-auto p-8 flex justify-center items-center custom-scrollbar">
                         <div
                             className="mermaid text-center w-full h-full flex justify-center items-center"
                             ref={mermaidRef}

@@ -1,12 +1,13 @@
-import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import mermaid from 'mermaid';
+import React, { useEffect, useRef } from 'react';
 
 const MINDMAP_DEFINITION = `
 mindmap
   root((AI 時代的<br/>開發抉擇))
-    (**技術債的權衡**)
-      (✅ 優點)
+    debt(**技術債的權衡**)
+    :::debt
+      (<span class="text-green-500 font-bold">◯</span> **優點**)
         **短期快速**
           [搶得市場先機]
           [縮短上線時間]
@@ -16,7 +17,7 @@ mindmap
         **直觀**
           [一般人即刻上手]
           [流程線性單純]
-      (❌ 缺點)
+      (<span class="text-red-500 font-bold">✕</span> **缺點**)
         **僵化**
           [高耦合 Coupling]
           [難以擴充新功能]
@@ -28,8 +29,9 @@ mindmap
           [邏輯散落各處]
           [重複造輪子]
           [只有上帝與我懂]
-    (**產品靈魂鑄造**)
-      (✅ 優點)
+    soul(**產品靈魂鑄造**)
+    :::soul
+      (<span class="text-green-500 font-bold">◯</span> **優點**)
         **彈性**
           [應對未來變化]
           [擴充功能不改舊碼]
@@ -42,7 +44,7 @@ mindmap
           [業務邏輯模組化]
           [職責定義明確]
           [容易審核 AI]
-      (❌ 缺點)
+      (<span class="text-red-500 font-bold">✕</span> **缺點**)
         **開發成本高**
           [代碼量增加]
           [檔案碎片化]
@@ -129,6 +131,27 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
                     font-size: 24px !important;
                     font-weight: 900 !important;
                     fill: #86198f !important;
+                }
+                
+                /* Custom Node Colors (Supports both text and HTML foreignObject) */
+                .mermaid .debt text,
+                .mermaid .debt span,
+                .mermaid .debt div,
+                .mermaid .debt p,
+                .mermaid .debt strong {
+                    font-size: 18px !important;
+                    fill: #ef4444 !important; /* Tailwind red-500 */
+                    color: #ef4444 !important;
+                }
+                
+                .mermaid .soul text,
+                .mermaid .soul span,
+                .mermaid .soul div,
+                .mermaid .soul p,
+                .mermaid .soul strong {
+                    font-size: 18px !important;
+                    fill: #3b82f6 !important; /* Tailwind blue-500 */
+                    color: #3b82f6 !important;
                 }
             `}</style>
 

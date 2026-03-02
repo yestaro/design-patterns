@@ -1,4 +1,4 @@
-import { Layers2, Map, Play, Share2 } from 'lucide-react';
+import { ArrowRight, Layers2, Play, Share2 } from 'lucide-react';
 import mermaid from 'mermaid';
 import React, { useEffect, useState } from 'react';
 import { patterns } from '../data/patterns';
@@ -265,7 +265,7 @@ const CodeTab: React.FC = () => {
 
 
             <h4 className="text-lg font-black text-slate-600 uppercase tracking-widest mb-8 text-center">架構分層與責任歸屬 (Clean Architecture)</h4>
-            <div className="mermaid opacity-90">
+            <div className="mermaid">
               {`sequenceDiagram
                                         autonumber
                                         
@@ -518,9 +518,9 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
                 </div>
               </div>
 
-              <div className="font-bold text-indigo-800 mt-8 text-lg bg-indigo-50 w-full px-8 py-6 rounded-2xl border-2 border-indigo-100 shadow-sm text-left relative overflow-hidden">
+              <div className="font-bold text-indigo-800 mt-8 text-xl w-full px-8 py-6 relative overflow-hidden">
                 <div className="relative z-10 flex flex-col md:flex-row gap-4 items-start md:items-center">
-                  <span className="text-3xl shrink-0">💡</span>
+                  <span className="text-4xl shrink-0">💡</span>
                   <div>
                     <span>其實，沒有人一開始就能寫出完美的架構。</span>
                     <span className="font-medium text-slate-600 text-base block mt-2">設計模式通常是在<b>「重構」</b>階段引入的——當你發現代碼開始變得難以維護時，這些模式就是你的解藥。</span>
@@ -529,22 +529,35 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
                 </div>
               </div>
 
-              <div className="pt-6 relative">
-                <span className="text-8xl text-indigo-100 absolute -top-4 -left-4 select-none opacity-50">"</span>
-                <div className="relative z-10 px-8">
-                  <span className="text-base md:text-xl text-indigo-500 font-medium block mt-3 not-italic font-sans leading-relaxed">
-                    當 AI 成為團隊超級成員，你能擔任什麼角色？難道是一起舉手<b>「我完成了，但我看不懂」</b>。
-                  </span>
+            </div>
+          </div>
+        </section>
 
-                  <button
-                    onClick={() => setIsMindMapOpen(true)}
-                    className="mt-8 px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl border-2 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 hover:scale-105 transition-all shadow-md flex items-center gap-3 mx-auto"
-                  >
-                    <Map size={20} />
-                    <span>AI 時代的開發抉擇</span>
-                  </button>
+        {/* 7. 行動呼籲 (Call to Action) */}
+        <section className="relative w-full pb-12 mt-8">
+          <div className="relative z-10 w-full bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 p-10 md:p-14 rounded-[2rem] shadow-2xl border border-indigo-700/50 overflow-hidden group">
+            {/* Decorative Background Elements */}
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-indigo-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-blue-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+
+            <div className="relative z-20 flex flex-col items-center text-center">
+              <span className="text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-blue-200 font-bold block mb-4 leading-relaxed tracking-wide">
+                當 AI 成為團隊超級成員，你能擔任什麼角色？
+              </span>
+              <span className="text-xl md:text-[24px] text-slate-400 font-medium block mb-12 leading-relaxed">
+                難道是一起舉手 <span className="text-white font-bold bg-indigo-500/20 px-4 py-2 rounded-xl border border-indigo-500/30 whitespace-nowrap shadow-sm">「我做完了，但我看不懂」</span> 嗎？
+              </span>
+
+              <button
+                onClick={() => setIsMindMapOpen(true)}
+                className="group/btn relative px-10 py-5 bg-indigo-500 text-white font-bold rounded-2xl hover:bg-indigo-400 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] hover:shadow-[0_0_60px_rgba(99,102,241,0.6)] flex items-center justify-center gap-5 hover:-translate-y-1 overflow-hidden w-full sm:w-auto"
+              >
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out"></div>
+                <span className="relative z-10 text-xl md:text-2xl tracking-wide">你需要用「規則」來引導 AI，而不是「規格」</span>
+                <div className="relative z-10 bg-indigo-600/50 p-2.5 rounded-full ml-3 border border-indigo-400/30 group-hover/btn:bg-indigo-600 transition-colors">
+                  <ArrowRight size={22} className="text-indigo-200" />
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </section>
