@@ -1,16 +1,18 @@
 import React from "react";
 import { PrismAsyncLight as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import jsx from "react-syntax-highlighter/dist/esm/languages/prism/jsx";
 import java from "react-syntax-highlighter/dist/esm/languages/prism/java";
 import javascript from "react-syntax-highlighter/dist/esm/languages/prism/javascript";
+import jsx from "react-syntax-highlighter/dist/esm/languages/prism/jsx";
+import sql from "react-syntax-highlighter/dist/esm/languages/prism/sql";
 import typescript from "react-syntax-highlighter/dist/esm/languages/prism/typescript";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // Register languages to keep bundle size small
 SyntaxHighlighter.registerLanguage("jsx", jsx);
 SyntaxHighlighter.registerLanguage("javascript", javascript);
 SyntaxHighlighter.registerLanguage("typescript", typescript);
 SyntaxHighlighter.registerLanguage("java", java);
+SyntaxHighlighter.registerLanguage("sql", sql);
 
 interface CodeBlockProps {
     code: string;
