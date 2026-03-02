@@ -1,5 +1,6 @@
-import { Database, Eye, Layers, TableProperties } from 'lucide-react';
-import React, { useState } from 'react';
+import { BookOpen, Database, Eye, Layers, TableProperties } from 'lucide-react';
+import mermaid from 'mermaid';
+import React, { useEffect, useState } from 'react';
 import CodeBlock from './shared/CodeBlock';
 
 const ERTab: React.FC = () => {
@@ -10,163 +11,133 @@ const ERTab: React.FC = () => {
     const [activeVersioning, setActiveVersioning] = useState<'shadow' | 'inline' | 'event'>('shadow');
     const [activeAudit, setActiveAudit] = useState<'embedded' | 'centralized'>('embedded');
 
+    useEffect(() => {
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: "default",
+            securityLevel: "loose",
+            themeVariables: {
+                fontFamily: "Inter, system-ui, sans-serif",
+                fontSize: "14px",
+            },
+        });
+        const renderMermaid = async () => {
+            try {
+                await new Promise(resolve => setTimeout(resolve, 50));
+                await mermaid.run({ querySelector: '.mermaid-er' });
+            } catch (e) {
+                console.warn('Mermaid render error:', e);
+            }
+        };
+        renderMermaid();
+    }, []);
+
     return (
         <div className="text-left text-base animate-in fade-in duration-500">
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8 text-left transition-all hover:shadow-md">
                 <h2 className="text-xl font-black mb-6 flex items-center gap-2"><Database className="text-blue-600" /> 混合 ER 模型 (Hybrid Model: JSON + EAV)</h2>
+                {/* ER Diagram 單欄置中 */}
+                <div className="mermaid-er text-sm w-full mx-auto flex justify-center [&>svg]:w-full [&>svg]:max-w-4xl [&>svg]:h-auto">
+                    {`erDiagram
 
-                <div className="space-y-8 mt-6">
-                    {/* Row 1: Entries & EntryAttributes */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                        {/* Entries 主表 */}
-                        <div>
-                            <div className="bg-slate-800 text-white p-4 rounded-t-2xl font-mono text-base flex items-center shadow-lg text-left">
-                                <span className="flex items-center gap-2 font-bold text-left"><Layers size={16} /> Entries (主表結構: Composite)</span>
-                            </div>
-                            <div className="border border-slate-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-slate-50 text-slate-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 text-slate-700">
-                                        <tr><td className="p-4 font-bold">EntryID</td><td className="p-4 text-blue-600 font-bold">PK</td></tr>
-                                        <tr className="bg-amber-50/30"><td className="p-4 font-bold">ParentID</td><td className="p-4 text-amber-600 font-bold italic text-xs">FK (Self)</td></tr>
-                                        <tr><td className="p-4 font-bold">Name</td><td className="p-4 text-slate-400 italic">Core Data</td></tr>
-                                        <tr><td className="p-4 font-bold">Type</td><td className="p-4 text-slate-400 italic">Core Data</td></tr>
-                                        <tr><td className="p-4 font-bold">Size</td><td className="p-4 text-slate-400 italic">Core Data</td></tr>
-                                        <tr><td className="p-4 font-bold text-slate-700">Created</td><td className="p-4 text-slate-400 italic font-mono">DateTime</td></tr>
-                                        <tr className="bg-blue-50/50">
-                                            <td className="p-4 font-bold text-blue-800 italic">Attributes (JSONB)</td>
-                                            <td className="p-4 text-blue-600 text-xs font-bold">FAST READ SNAPSHOT</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+    Entries ||--o{ EntryAttributes : "has (1:N)"
+    Entries ||--o{ EntryTags : "has (N:M)"
+    Tags ||--o{ EntryTags : "tagged in"
 
-                        {/* EntryAttributes 細節表 */}
-                        <div>
-                            <div className="bg-indigo-900 text-white p-4 rounded-t-2xl font-mono text-base flex items-center shadow-lg text-indigo-100">
-                                <span className="flex items-center gap-2 font-bold"><TableProperties size={16} /> EntryAttributes (細節表結構: SubClass)</span>
-                            </div>
-                            <div className="border border-indigo-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-indigo-50 text-indigo-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-indigo-50 text-slate-700">
-                                        <tr><td className="p-4 font-bold">AttrID</td><td className="p-4 text-blue-600 font-bold">PK</td></tr>
-                                        <tr className="bg-slate-50"><td className="p-4 font-bold">EntryID</td><td className="p-4 text-red-600 font-bold text-xs">FK (Entries)</td></tr>
-                                        <tr><td className="p-4 font-bold">AttrName</td><td className="p-4 text-indigo-700 italic font-bold">INDEXED</td></tr>
-                                        <tr><td className="p-4 font-bold">AttrValue</td><td className="p-4 text-slate-500">Value</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Row 2: EntryTags & Tags */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                        {/* EntryTags 關聯表 (Mediator) */}
-                        <div>
-                            <div className="bg-rose-900 text-white p-4 rounded-t-2xl font-mono text-base flex items-center shadow-lg text-rose-100">
-                                <span className="flex items-center gap-2 font-bold"><TableProperties size={16} /> EntryTags (關聯表: Mediator)</span>
-                            </div>
-                            <div className="border border-rose-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-rose-50 text-rose-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-rose-50 text-slate-700">
-                                        <tr><td className="p-4 font-bold">EntryID</td><td className="p-4 text-blue-600 font-bold text-xs">PK, FK(Entries)</td></tr>
-                                        <tr><td className="p-4 font-bold">TagID</td><td className="p-4 text-blue-600 font-bold text-xs">PK, FK(Tags)</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        {/* Tags 標籤表 (Flyweight) */}
-                        <div>
-                            <div className="bg-emerald-800 text-white p-4 rounded-t-2xl font-mono text-base flex items-center shadow-lg text-emerald-100">
-                                <span className="flex items-center gap-2 font-bold"><Layers size={16} /> Tags (標籤來源: Flyweight)</span>
-                            </div>
-                            <div className="border border-emerald-200 rounded-b-2xl overflow-hidden shadow-md bg-white">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-emerald-50 text-emerald-500 uppercase font-bold text-xs">
-                                        <tr><th className="p-4 text-left w-1/2">COLUMN</th><th className="p-4 text-left w-1/2">ROLE</th></tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-emerald-50 text-slate-700">
-                                        <tr><td className="p-4 font-bold">TagID</td><td className="p-4 text-blue-600 font-bold">PK</td></tr>
-                                        <tr><td className="p-4 font-bold">TagName</td><td className="p-4 text-emerald-700 italic font-bold">UNIQUE</td></tr>
-                                        <tr><td className="p-4 font-bold">Color</td><td className="p-4 text-slate-500">Style</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+    Entries["<b>Entries</b> (Composite)"] {
+        int EntryID PK
+        int ParentID FK "Self-Referencing"
+        string Name
+        string Type
+        int Size
+        datetime Created
+        jsonb Attributes "Snapshots"
+    }
+    
+    EntryAttributes["<b>EntryAttributes</b> (Extension)"] {
+        int AttrID PK
+        int EntryID FK
+        string AttrName
+        string AttrValue
+    }
+    
+    Tags["<b>Tags</b> (Flyweight)"] {
+        int TagID PK
+        string TagName UK
+        string Color
+    }
+    
+    EntryTags["<b>EntryTags</b> (Mediator)"] {
+        int EntryID FK
+        int TagID FK
+    }`}
                 </div>
             </div>
 
             {/* 範例數據 */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 mb-8 text-left transition-all hover:shadow-md">
-                <div className="flex items-center mb-6 gap-2 text-slate-800">
-                    <Eye size={24} className="text-blue-500" />
-                    <h4 className="text-xl font-bold tracking-tight">範例數據展示 (Sample Data)</h4>
-                </div>
+                <h2 className="text-xl font-black mb-6 flex items-center gap-2">
+                    <Eye className="text-blue-600" /> 範例數據展示 (Sample Data)
+                </h2>
                 <div className="space-y-8">
-                    {/* Row 1: Entries & EntryAttributes */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><Layers size={14} /> 1. Entries 主表實例</p>
-                            <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                                <table className="w-full text-sm text-slate-700">
-                                    <thead className="bg-slate-100 border-b border-slate-200 text-left">
-                                        <tr>
-                                            <th className="p-3">EntryID</th><th className="p-3">ParentID</th><th className="p-3">Name</th><th className="p-3">Type</th><th className="p-3">Size (KB)</th><th className="p-3">Created</th><th className="p-3">Attributes (JSON)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 bg-white">
-                                        <tr>
-                                            <td className="p-3 font-mono">101</td><td className="p-3 text-slate-400 font-mono">NULL</td><td className="p-3 font-bold text-blue-600 italic">根目錄 (Root)</td><td className="p-3">Dir</td><td className="p-3">0</td><td className="p-3 text-xs">2025-01-01</td><td className="p-3 text-slate-400">{"{}"}</td>
-                                        </tr>
-                                        <tr className="bg-slate-50/50">
-                                            <td className="p-3 font-mono">202</td><td className="p-3 font-mono">101</td><td className="p-3 font-bold text-blue-600 italic">專案文件 (Project_Docs)</td><td className="p-3">Dir</td><td className="p-3">0</td><td className="p-3 text-xs">2025-01-10</td><td className="p-3 text-slate-400">{"{}"}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="p-3 font-mono">303</td><td className="p-3 font-mono">202</td><td className="p-3 font-bold underline">需求規格書.docx</td><td className="p-3">Word</td><td className="p-3">500</td><td className="p-3 text-xs">2025-01-10</td><td className="p-3 text-indigo-600">{"{\"PageCount\": 15}"}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><TableProperties size={14} /> 2. EntryAttributes 細節表實例</p>
-                            <div className="overflow-x-auto rounded-xl border border-indigo-200 shadow-sm">
-                                <table className="w-full text-sm text-slate-700">
-                                    <thead className="bg-indigo-50 border-b border-indigo-100 text-left">
-                                        <tr><th className="p-3">AttrID</th><th className="p-3">EntryID</th><th className="p-3">AttrName</th><th className="p-3">AttrValue</th></tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-indigo-50 bg-white">
-                                        <tr><td className="p-3">1</td><td className="p-3 font-mono">303</td><td className="p-3 text-indigo-600 font-bold underline">PageCount</td><td className="p-3 font-mono">15</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    {/* Row 1: Entries 主表 (滿版) */}
+                    <div className="space-y-3">
+                        <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><Layers size={14} /> 1. Entries 主表實例</p>
+                        <div className="sample-table-container shadow-sm">
+                            <table className="sample-table whitespace-nowrap">
+                                <thead className="bg-slate-100/50 text-left">
+                                    <tr>
+                                        <th>EntryID</th><th>ParentID</th><th>Name</th><th>Type</th><th>Size (KB)</th><th>Created</th><th>Attributes (JSON)</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white">
+                                    <tr>
+                                        <td className="font-mono">101</td><td className="text-slate-400 font-mono">NULL</td><td className="font-bold text-blue-600 italic">我的根目錄</td><td>Dir</td><td>0</td><td className="text-xs">2025-01-01</td><td className="text-slate-400">{"{}"}</td>
+                                    </tr>
+                                    <tr className="bg-slate-50/50">
+                                        <td className="font-mono">202</td><td className="font-mono">101</td><td className="font-bold text-blue-600 italic">專案文件</td><td>Dir</td><td>0</td><td className="text-xs">2025-01-10</td><td className="text-slate-400">{"{}"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="font-mono">303</td><td className="font-mono">202</td><td className="font-bold">產品規格書.docx</td><td>Word</td><td>500</td><td className="text-xs">2025-01-10</td><td className="text-indigo-600">{"{\"PageCount\": 15}"}</td>
+                                    </tr>
+                                    <tr className="bg-slate-50/50">
+                                        <td className="font-mono">404</td><td className="font-mono">202</td><td className="font-bold">架構設計圖.png</td><td>Image</td><td>2048</td><td className="text-xs">2025-01-12</td><td className="text-indigo-600">{"{\"Width\": 1920, \"Height\": 1080}"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="font-mono">505</td><td className="font-mono">101</td><td className="font-bold">README.txt</td><td>Text</td><td>0.5</td><td className="text-xs">2025-01-01</td><td className="text-slate-400">{"{}"}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    {/* Row 2: EntryTags & Tags */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><TableProperties size={14} /> 3. EntryTags (Mediator) 實例</p>
-                            <div className="overflow-x-auto rounded-xl border border-rose-200 shadow-sm">
-                                <table className="w-full text-sm text-slate-700">
-                                    <thead className="bg-rose-50 border-b border-rose-100 text-left">
-                                        <tr><th className="p-3">EntryID (FK)</th><th className="p-3">TagID (FK)</th></tr>
+                    {/* Row 2: 三個細節/關聯表 (三等分) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="space-y-3 min-w-0">
+                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><TableProperties size={14} /> 2. EntryAttributes 細節表實例</p>
+                            <div className="sample-table-container shadow-sm border-indigo-200">
+                                <table className="sample-table whitespace-nowrap">
+                                    <thead className="bg-indigo-50/50 text-left">
+                                        <tr><th className="text-indigo-800">AttrID</th><th className="text-indigo-800">EntryID</th><th className="text-indigo-800">AttrName</th><th className="text-indigo-800">AttrValue</th></tr>
                                     </thead>
-                                    <tbody className="divide-y divide-rose-50 bg-white">
-                                        <tr><td className="p-3 font-mono">303</td><td className="p-3 font-mono">T1</td></tr>
-                                        <tr><td className="p-3 font-mono">303</td><td className="p-3 font-mono">T2</td></tr>
+                                    <tbody className="bg-white">
+                                        <tr><td>1</td><td className="font-mono">303</td><td className="text-indigo-600 font-bold underline">PageCount</td><td className="font-mono">15</td></tr>
+                                        <tr className="bg-indigo-50/30"><td>2</td><td className="font-mono">404</td><td className="text-indigo-600 font-bold underline">Width</td><td className="font-mono">1920</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 min-w-0">
+                            <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><TableProperties size={14} /> 3. EntryTags (Mediator) 實例</p>
+                            <div className="sample-table-container shadow-sm border-rose-200">
+                                <table className="sample-table whitespace-nowrap">
+                                    <thead className="bg-rose-50/50 text-left">
+                                        <tr><th className="text-rose-800">EntryID (FK)</th><th className="text-rose-800">TagID (FK)</th></tr>
+                                    </thead>
+                                    <tbody className="bg-white">
+                                        <tr><td className="font-mono">303</td><td className="font-mono">T1</td></tr>
+                                        <tr><td className="font-mono">303</td><td className="font-mono">T2</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -174,14 +145,14 @@ const ERTab: React.FC = () => {
 
                         <div className="space-y-3">
                             <p className="text-sm font-bold text-slate-600 flex items-center gap-2"><Layers size={14} /> 4. Tags (Flyweight) 實例</p>
-                            <div className="overflow-x-auto rounded-xl border border-emerald-200 shadow-sm">
-                                <table className="w-full text-sm text-slate-700">
-                                    <thead className="bg-emerald-50 border-b border-emerald-100 text-left">
-                                        <tr><th className="p-3">TagID</th><th className="p-3">TagName</th><th className="p-3">Color</th></tr>
+                            <div className="sample-table-container shadow-sm border-emerald-200">
+                                <table className="sample-table whitespace-nowrap">
+                                    <thead className="bg-emerald-50/50 text-left">
+                                        <tr><th className="text-emerald-800">TagID</th><th className="text-emerald-800">TagName</th><th className="text-emerald-800">Color</th></tr>
                                     </thead>
-                                    <tbody className="divide-y divide-emerald-50 bg-white">
-                                        <tr><td className="p-3 font-mono">T1</td><td className="p-3 text-emerald-600 font-bold">Urgent</td><td className="p-3 text-xs"><span className="px-2 py-1 rounded bg-red-100 text-red-600">red-500</span></td></tr>
-                                        <tr><td className="p-3 font-mono">T2</td><td className="p-3 text-emerald-600 font-bold">Work</td><td className="p-3 text-xs"><span className="px-2 py-1 rounded bg-blue-100 text-blue-600">blue-500</span></td></tr>
+                                    <tbody className="bg-white">
+                                        <tr><td className="font-mono">T1</td><td className="text-emerald-600 font-bold">Urgent</td><td className="text-xs"><span className="px-2 py-1 rounded bg-red-100 text-red-600">red-500</span></td></tr>
+                                        <tr><td className="font-mono">T2</td><td className="text-emerald-600 font-bold">Work</td><td className="text-xs"><span className="px-2 py-1 rounded bg-blue-100 text-blue-600">blue-500</span></td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -206,8 +177,8 @@ const ERTab: React.FC = () => {
 
             {/* 3. 模式的無所不在 (Patterns Everywhere) */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 text-left space-y-12 mt-8">
-                <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3 border-l-8 border-indigo-600 pl-4 py-1">
-                    Practical Schema Design
+                <h2 className="text-xl font-black mb-6 flex items-center gap-2">
+                    <BookOpen className="text-blue-600" /> Practical Schema Design
                 </h2>
 
                 {/* 1. Inheritance Mapping */}
@@ -216,7 +187,7 @@ const ERTab: React.FC = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3 text-slate-800">
                                 <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">1</span>
-                                <h4 className="text-xl font-bold text-slate-800">繼承映射 Inheritance Mapping</h4>
+                                <h3 className="text-lg font-bold text-slate-800">繼承映射 Inheritance Mapping</h3>
                             </div>
                             <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-600 leading-relaxed ml-11">
                                 <p className="font-bold text-indigo-800 mb-2 flex items-center gap-2">💡 情境決策指南</p>
@@ -278,9 +249,9 @@ const ERTab: React.FC = () => {
                                         <thead>
                                             <tr>
                                                 <th className="bg-slate-100/50">EntryID</th>
-                                                <th className="text-indigo-700">Type</th>
                                                 <th className="italic">ParentID</th>
                                                 <th>Name</th>
+                                                <th className="text-indigo-700">Type</th>
                                                 <th>Size</th>
                                                 <th className="bg-rose-50 text-rose-600 font-black">PageCount</th>
                                                 <th className="bg-emerald-50 text-emerald-600 font-black text-center">Width</th>
@@ -292,9 +263,9 @@ const ERTab: React.FC = () => {
                                         <tbody>
                                             <tr className="row-highlight">
                                                 <td>101</td>
-                                                <td className="font-bold text-slate-500">Dir</td>
                                                 <td className="cell-null">NULL</td>
-                                                <td className="font-black text-slate-700">根目錄 (Root)</td>
+                                                <td>我的根目錄</td>
+                                                <td className="font-bold text-slate-500">Dir</td>
                                                 <td>0</td>
                                                 <td className="cell-null">NULL</td>
                                                 <td className="cell-null">NULL</td>
@@ -304,9 +275,9 @@ const ERTab: React.FC = () => {
                                             </tr>
                                             <tr>
                                                 <td>202</td>
-                                                <td className="font-bold text-slate-500">Dir</td>
                                                 <td className="text-slate-400 italic">101</td>
-                                                <td>專案文件 (Project_Docs)</td>
+                                                <td>專案文件</td>
+                                                <td className="font-bold text-slate-500">Dir</td>
                                                 <td>0</td>
                                                 <td className="cell-null">NULL</td>
                                                 <td className="cell-null">NULL</td>
@@ -316,9 +287,9 @@ const ERTab: React.FC = () => {
                                             </tr>
                                             <tr>
                                                 <td>303</td>
-                                                <td className="font-black text-indigo-600">Word</td>
                                                 <td className="text-slate-400 italic">202</td>
-                                                <td>需求規格書.docx</td>
+                                                <td>產品規格書.docx</td>
+                                                <td className="font-black text-rose-600">Word</td>
                                                 <td>500</td>
                                                 <td className="bg-rose-50/30 font-black text-rose-700 text-center italic">15</td>
                                                 <td className="cell-null">NULL</td>
@@ -328,10 +299,10 @@ const ERTab: React.FC = () => {
                                             </tr>
                                             <tr>
                                                 <td>404</td>
-                                                <td className="font-black text-indigo-600">Image</td>
                                                 <td className="text-slate-400 italic">202</td>
-                                                <td>架構圖.png</td>
-                                                <td>2500</td>
+                                                <td>架構設計圖.png</td>
+                                                <td className="font-black text-emerald-600">Image</td>
+                                                <td>2048</td>
                                                 <td className="cell-null">NULL</td>
                                                 <td className="bg-emerald-50/30 font-black text-emerald-700 text-center">1920</td>
                                                 <td className="bg-emerald-50/30 font-black text-emerald-700 text-center">1080</td>
@@ -340,15 +311,15 @@ const ERTab: React.FC = () => {
                                             </tr>
                                             <tr>
                                                 <td>505</td>
-                                                <td className="font-black text-indigo-600">Text</td>
-                                                <td className="text-slate-400 italic">202</td>
+                                                <td className="text-slate-400 italic">101</td>
                                                 <td>README.txt</td>
-                                                <td>10</td>
+                                                <td className="font-black text-amber-600">Text</td>
+                                                <td>0.5</td>
                                                 <td className="cell-null">NULL</td>
                                                 <td className="cell-null">NULL</td>
                                                 <td className="cell-null">NULL</td>
                                                 <td className="bg-amber-50/30 font-black text-amber-700 text-center italic">UTF-8</td>
-                                                <td className="text-slate-400">2025-01-15</td>
+                                                <td className="text-slate-400">2025-01-01</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -378,11 +349,11 @@ const ERTab: React.FC = () => {
                                                 </tr>
                                             </thead>
                                             <tbody className="text-slate-700">
-                                                <tr className="row-highlight"><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">根目錄 (Root)</td><td className="font-bold text-slate-500">Dir</td><td>0</td><td className="text-slate-400 text-nowrap">2025-01-01</td></tr>
-                                                <tr><td>202</td><td className="text-slate-400 italic text-sm">101</td><td>專案文件 (Project_Docs)</td><td className="font-bold text-slate-500">Dir</td><td>0</td><td className="text-slate-400 text-nowrap">2025-01-10</td></tr>
-                                                <tr><td className="underline text-red-500">303</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">需求規格書.docx</td><td className="font-black text-indigo-600 text-sm">Word</td><td>500</td><td className="text-slate-400 text-nowrap">2025-01-10</td></tr>
-                                                <tr><td className="underline text-red-500">404</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">架構圖.png</td><td className="font-black text-indigo-600 text-sm">Image</td><td>2500</td><td className="text-slate-400 text-nowrap">2025-01-12</td></tr>
-                                                <tr><td className="underline text-red-500">505</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">README.txt</td><td className="font-black text-indigo-600 text-sm">Text</td><td>10</td><td className="text-slate-400 text-nowrap">2025-01-15</td></tr>
+                                                <tr className="row-highlight"><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">我的根目錄</td><td className="font-bold text-slate-500">Dir</td><td>0</td><td className="text-slate-400 text-nowrap">2025-01-01</td></tr>
+                                                <tr><td>202</td><td className="text-slate-400 italic text-sm">101</td><td>專案文件</td><td className="font-bold text-slate-500">Dir</td><td>0</td><td className="text-slate-400 text-nowrap">2025-01-10</td></tr>
+                                                <tr><td className="underline text-red-500">303</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">產品規格書.docx</td><td className="font-black text-rose-600 text-sm">Word</td><td>500</td><td className="text-slate-400 text-nowrap">2025-01-10</td></tr>
+                                                <tr><td className="underline text-red-500">404</td><td className="text-slate-400 italic text-sm">202</td><td className="italic">架構設計圖.png</td><td className="font-black text-emerald-600 text-sm">Image</td><td>2048</td><td className="text-slate-400 text-nowrap">2025-01-12</td></tr>
+                                                <tr><td className="underline text-red-500">505</td><td className="text-slate-400 italic text-sm">101</td><td className="italic">README.txt</td><td className="font-black text-amber-600 text-sm">Text</td><td>0.5</td><td className="text-slate-400 text-nowrap">2025-01-01</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -442,8 +413,8 @@ const ERTab: React.FC = () => {
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th>Size</th><th>Created</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700">
-                                                <tr><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">根目錄 (Root)</td><td>0</td><td className="text-slate-400 text-xs">2025-01-01</td></tr>
-                                                <tr><td>202</td><td className="text-slate-400 italic">101</td><td>專案文件 (Project_Docs)</td><td>0</td><td className="text-slate-400 text-xs">2025-01-10</td></tr>
+                                                <tr><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">我的根目錄</td><td>0</td><td className="text-slate-400 text-xs">2025-01-01</td></tr>
+                                                <tr><td>202</td><td className="text-slate-400 italic">101</td><td>專案文件</td><td>0</td><td className="text-slate-400 text-xs">2025-01-10</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -456,7 +427,7 @@ const ERTab: React.FC = () => {
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-rose-50 text-rose-600 font-black">PageCount</th><th>Size</th><th>Created</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700">
-                                                <tr><td className="font-bold underline text-red-500">303</td><td className="text-slate-400 italic">202</td><td className="italic text-rose-700">需求規格書.docx</td><td className="bg-rose-50/20 text-rose-700 font-black text-center italic underline">15</td><td>500</td><td className="text-slate-400 text-xs text-nowrap">2025-01-10</td></tr>
+                                                <tr><td className="font-bold underline text-red-500">303</td><td className="text-slate-400 italic">202</td><td className="italic text-rose-700">產品規格書.docx</td><td className="bg-rose-50/20 text-rose-700 font-black text-center italic underline">15</td><td>500</td><td className="text-slate-400 text-xs text-nowrap">2025-01-10</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -469,7 +440,7 @@ const ERTab: React.FC = () => {
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-emerald-50 text-emerald-600 font-black text-center">Width</th><th className="bg-emerald-50 text-emerald-600 font-black text-center">Height</th><th>Size</th><th>Created</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700">
-                                                <tr><td className="font-bold underline text-red-500">404</td><td className="text-slate-400 italic">202</td><td className="font-black italic text-emerald-700">架構圖.png</td><td className="bg-emerald-50/20 text-emerald-700 font-black text-center underline">1920</td><td className="bg-emerald-50/20 text-emerald-700 font-black text-center underline">1080</td><td>2500</td><td className="text-slate-400 text-xs text-nowrap">2025-01-12</td></tr>
+                                                <tr><td className="font-bold underline text-red-500">404</td><td className="text-slate-400 italic">202</td><td className="font-black italic text-emerald-700">架構設計圖.png</td><td className="bg-emerald-50/20 text-emerald-700 font-black text-center underline">1920</td><td className="bg-emerald-50/20 text-emerald-700 font-black text-center underline">1080</td><td>2048</td><td className="text-slate-400 text-xs text-nowrap">2025-01-12</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -482,7 +453,7 @@ const ERTab: React.FC = () => {
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-amber-50 text-amber-600 font-black text-center">Encoding</th><th>Size</th><th>Created</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700">
-                                                <tr><td className="font-bold underline text-red-500">505</td><td className="text-slate-400 italic">202</td><td className="italic text-amber-700">README.txt</td><td className="bg-amber-50/20 text-amber-700 font-black text-center italic underline">UTF-8</td><td>10</td><td className="text-slate-400 text-xs text-nowrap">2025-01-15</td></tr>
+                                                <tr><td className="font-bold underline text-red-500">505</td><td className="text-slate-400 italic">202</td><td className="italic text-amber-700">README.txt</td><td className="bg-amber-50/20 text-amber-700 font-black text-center italic underline">UTF-8</td><td>10</td><td className="text-slate-400 text-xs text-nowrap">2025-01-01</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -510,7 +481,7 @@ const ERTab: React.FC = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">2</span>
-                                <h4 className="text-xl font-bold text-slate-800">階層存儲模式 Hierarchy Patterns</h4>
+                                <h3 className="text-lg font-bold text-slate-800">樹狀結構 Tree Hierarchy</h3>
                             </div>
                             <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-600 leading-relaxed ml-11">
                                 <p className="font-bold text-indigo-800 mb-2 flex items-center gap-2">💡 情境決策指南</p>
@@ -570,14 +541,14 @@ const ERTab: React.FC = () => {
                                 <div className="sample-table-container shadow-lg shadow-slate-100/50">
                                     <table className="sample-table">
                                         <thead>
-                                            <tr><th className="text-red-600">EntryID(PK)</th><th className="text-slate-400 italic">ParentID(FK)</th><th>Name</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
+                                            <tr><th className="text-red-600">EntryID(PK)</th><th className="text-emerald-600 italic">ParentID(FK)</th><th>Name</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
                                         </thead>
                                         <tbody className="text-slate-700">
-                                            <tr className="row-highlight"><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">根目錄 (Root)</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
-                                            <tr><td>202</td><td className="text-slate-400 underline italic font-black">101</td><td>專案文件 (Project_Docs)</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
-                                            <tr><td>303</td><td className="text-slate-400 underline italic font-black">202</td><td className="italic">需求規格書.docx</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
-                                            <tr><td>404</td><td className="text-slate-400 underline italic font-black">202</td><td className="italic">架構圖.png</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">2</td><td>2500</td><td className="text-slate-400">2025-01-12</td></tr>
-                                            <tr><td>505</td><td className="text-slate-400 underline italic font-black">202</td><td className="italic">README.txt</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">3</td><td>10</td><td className="text-slate-400">2025-01-15</td></tr>
+                                            <tr className="row-highlight"><td>101</td><td className="cell-null">NULL</td><td className="font-black text-slate-700">我的根目錄</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
+                                            <tr><td>202</td><td className="underline italic font-black">101</td><td>專案文件</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
+                                            <tr><td>303</td><td className="underline italic font-black">202</td><td>產品規格書.docx</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
+                                            <tr><td>404</td><td className="underline italic font-black">202</td><td>架構設計圖.png</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">2</td><td>2048</td><td className="text-slate-400">2025-01-12</td></tr>
+                                            <tr><td>505</td><td className="underline italic font-black">101</td><td>README.txt</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">3</td><td>0.5</td><td className="text-slate-400">2025-01-01</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -597,11 +568,11 @@ const ERTab: React.FC = () => {
                                             <tr><th>EntryID</th><th>Name</th><th className="text-emerald-600 font-black italic">Materialized Path (Weight-Encoded)</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
                                         </thead>
                                         <tbody className="text-slate-700">
-                                            <tr className="row-highlight"><td>101</td><td className="font-black">根目錄 (Root)</td><td className="text-slate-400 font-bold">/001:101/</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
+                                            <tr className="row-highlight"><td>101</td><td className="font-black">我的根目錄</td><td className="text-slate-400 font-bold">/001:101/</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
                                             <tr><td>202</td><td>專案文件</td><td className="text-emerald-700 font-black italic">/001:101/001:202/</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
-                                            <tr><td>303</td><td className="italic">需求規格書.docx</td><td className="text-emerald-700 font-black italic">/001:101/001:202/001:303/</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
-                                            <tr><td>404</td><td className="italic">架構圖.png</td><td className="text-emerald-700 font-black italic">/001:101/001:202/002:404/</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">2</td><td>2500</td><td className="text-slate-400">2025-01-12</td></tr>
-                                            <tr><td>505</td><td className="italic">README.txt</td><td className="text-emerald-700 font-black italic">/001:101/001:202/003:505/</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">3</td><td>10</td><td className="text-slate-400">2025-01-15</td></tr>
+                                            <tr><td>303</td><td>產品規格書.docx</td><td className="text-emerald-700 font-black italic">/001:101/001:202/001:303/</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
+                                            <tr><td>404</td><td>架構設計圖.png</td><td className="text-emerald-700 font-black italic">/001:101/001:202/002:404/</td><td className="bg-slate-50/80 text-center font-bold">2</td><td>2048</td><td className="text-slate-400">2025-01-12</td></tr>
+                                            <tr><td>505</td><td>README.txt</td><td className="text-emerald-700 font-black italic">/001:101/001:202/003:505/</td><td className="bg-slate-50/80 text-center font-bold">3</td><td>0.5</td><td className="text-slate-400">2025-01-01</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -623,11 +594,11 @@ const ERTab: React.FC = () => {
                                                 <tr><th>EntryID(PK)</th><th>Name</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700 border-b border-slate-100">
-                                                <tr className="row-highlight"><td>101</td><td className="font-black">根目錄 (Root)</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
+                                                <tr className="row-highlight"><td>101</td><td className="font-black">我的根目錄</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-01</td></tr>
                                                 <tr><td>202</td><td>專案文件</td><td className="bg-slate-50/80 text-center font-bold">1</td><td>0</td><td className="text-slate-400">2025-01-10</td></tr>
-                                                <tr><td>303</td><td className="italic">需求規格書.docx</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
-                                                <tr><td>404</td><td className="italic">架構圖.png</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">2</td><td>2500</td><td className="text-slate-400">2025-01-12</td></tr>
-                                                <tr><td>505</td><td className="italic">README.txt</td><td className="bg-slate-50/80 text-center font-bold text-slate-700 underline">3</td><td>10</td><td className="text-slate-400">2025-01-15</td></tr>
+                                                <tr><td>303</td><td>產品規格書.docx</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">1</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
+                                                <tr><td>404</td><td>架構設計圖.png</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">2</td><td>2048</td><td className="text-slate-400">2025-01-12</td></tr>
+                                                <tr><td>505</td><td>README.txt</td><td className="bg-slate-50/80 text-center font-bold text-slate-700">3</td><td>0.5</td><td className="text-slate-400">2025-01-01</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -661,7 +632,7 @@ const ERTab: React.FC = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">3</span>
-                                <h4 className="text-xl font-bold text-slate-800">多型關聯模式 Polymorphic Associations</h4>
+                                <h3 className="text-lg font-bold text-slate-800">多型關聯 Polymorphic Association</h3>
                             </div>
                             <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-600 leading-relaxed ml-11">
                                 <p className="font-bold text-indigo-800 mb-2 flex items-center gap-2">💡 情境決策指南</p>
@@ -823,7 +794,7 @@ const ERTab: React.FC = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">4</span>
-                                <h4 className="text-xl font-bold text-slate-800">元數據與屬性擴充 Metadata & Attribute Patterns</h4>
+                                <h3 className="text-lg font-bold text-slate-800">元數據與屬性 Metadata / Attributes</h3>
                             </div>
                             <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-600 leading-relaxed ml-11">
                                 <p className="font-bold text-indigo-800 mb-2 flex items-center gap-2">💡 情境決策指南</p>
@@ -888,9 +859,9 @@ const ERTab: React.FC = () => {
                                             <tr><th>AttrID (PK)</th><th className="text-rose-600">EntryID (FK)</th><th className="text-indigo-600">AttrName (屬性鍵)</th><th className="text-emerald-600">AttrValue (屬性值字串)</th></tr>
                                         </thead>
                                         <tbody className="text-slate-700">
-                                            <tr><td>1001</td><td className="text-rose-700 font-bold">303</td><td className="text-indigo-700 font-bold italic">'Author'</td><td className="text-emerald-700">'John Doe'</td></tr>
-                                            <tr><td>1002</td><td className="text-rose-700 font-bold">303</td><td className="text-indigo-700 font-bold italic">'PageCount'</td><td className="text-emerald-700">'15'</td></tr>
-                                            <tr className="bg-slate-50"><td>1003</td><td className="text-rose-700 font-bold">404</td><td className="text-indigo-700 font-bold italic">'Resolution'</td><td className="text-emerald-700">'1920x1080'</td></tr>
+                                            <tr><td>1001</td><td className="text-rose-700 font-bold">303</td><td className="text-indigo-700 font-bold">Author</td><td className="text-emerald-700">John Doe</td></tr>
+                                            <tr><td>1002</td><td className="text-rose-700 font-bold">303</td><td className="text-indigo-700 font-bold">PageCount</td><td className="text-emerald-700">15</td></tr>
+                                            <tr className="bg-slate-50"><td>1003</td><td className="text-rose-700 font-bold">404</td><td className="text-indigo-700 font-bold">Width</td><td className="text-emerald-700">1920</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -909,11 +880,11 @@ const ERTab: React.FC = () => {
                                 <div className="sample-table-container shadow-lg shadow-slate-100/50">
                                     <table className="sample-table">
                                         <thead>
-                                            <tr><th className="text-blue-600">EntryID (PK)</th><th>Name</th><th className="text-blue-800 bg-blue-50/50">Attributes (JSONB 欄位)</th></tr>
+                                            <tr><th className="text-blue-600">EntryID (PK)</th><th>Name</th><th className="text-blue-600">Attributes (JSONB 欄位)</th></tr>
                                         </thead>
                                         <tbody className="text-slate-700">
-                                            <tr><td className="font-bold">303</td><td className="italic">需求規格書.docx</td><td className="font-mono text-xs text-blue-800 bg-blue-50/20">{"{ \"Author\": \"John\", \"Pages\": 15 }"}</td></tr>
-                                            <tr className="bg-slate-50"><td className="font-bold">404</td><td className="italic font-black text-slate-700">架構圖.png</td><td className="font-mono text-xs text-blue-800 bg-blue-50/20">{"{ \"Resolution\": \"1920x1080\", \"Format\": \"PNG\" }"}</td></tr>
+                                            <tr><td className="font-bold">303</td><td>產品規格書.docx</td><td className="font-mono text-xs text-blue-800 bg-blue-50/20">{"{ \"Author\": \"John\", \"Pages\": 15 }"}</td></tr>
+                                            <tr className="bg-slate-50"><td className="font-bold">404</td><td>架構設計圖.png</td><td className="font-mono text-xs text-blue-800 bg-blue-50/20">{"{ \"Width\": 1920, \"Height\": 1080 }"}</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -953,7 +924,7 @@ const ERTab: React.FC = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">5</span>
-                                <h4 className="text-xl font-bold text-slate-800">歷史版本與草稿 Versioning Patterns</h4>
+                                <h3 className="text-lg font-bold text-slate-800">版本控制 Versioning & History</h3>
                             </div>
                             <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-600 leading-relaxed ml-11">
                                 <p className="font-bold text-indigo-800 mb-2 flex items-center gap-2">💡 情境決策指南</p>
@@ -1020,7 +991,7 @@ const ERTab: React.FC = () => {
                                                 <tr><th className="text-red-500">EntryID (PK)</th><th>Name</th><th>Type</th><th>Size</th><th>Created</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700 bg-white">
-                                                <tr className="bg-slate-50"><td className="font-bold underline text-red-500">303</td><td className="font-black text-slate-700">需求規格書.docx</td><td className="text-slate-500 font-bold">Word</td><td>500</td><td className="text-slate-400">2025-01-15</td></tr>
+                                                <tr className="bg-slate-50"><td className="font-bold text-red-500">303</td><td>產品規格書.docx</td><td className="text-slate-500 font-bold">Word</td><td>500</td><td className="text-slate-400">2025-01-10</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -1031,9 +1002,9 @@ const ERTab: React.FC = () => {
                                                 <tr><th className="text-amber-700">HistoryID</th><th className="text-rose-500">EntryID (無 FK 約束)</th><th>Name</th><th>Type</th><th>Size</th><th className="text-indigo-600 font-bold">Action</th></tr>
                                             </thead>
                                             <tbody className="text-slate-700 bg-white text-xs">
-                                                <tr><td>1</td><td className="font-bold text-rose-500">303</td><td className="italic text-slate-400">規格書 V1.docx</td><td className="text-slate-500">Word</td><td className="text-slate-400">100</td><td className="text-emerald-600 font-bold">INSERT</td></tr>
+                                                <tr><td>1</td><td className="font-bold text-rose-500">303</td><td className="italic text-slate-500">規格書 V1.docx</td><td className="text-slate-500">Word</td><td className="text-slate-400">100</td><td className="text-emerald-600 font-bold">INSERT</td></tr>
                                                 <tr className="bg-slate-50"><td>2</td><td className="font-bold text-rose-500">303</td><td className="italic text-slate-500">規格書 草稿.docx</td><td className="text-slate-500">Word</td><td className="text-slate-400">350</td><td className="text-indigo-600 font-bold">UPDATE</td></tr>
-                                                <tr><td>3</td><td className="font-bold text-rose-500">404</td><td className="italic text-slate-500 line-through">舊版架構圖.png</td><td className="text-slate-500">Image</td><td className="text-slate-400">2500</td><td className="text-rose-600 font-bold">DELETE</td></tr>
+                                                <tr><td>3</td><td className="font-bold text-rose-500">404</td><td className="italic text-slate-500">舊版架構設計圖.png</td><td className="text-slate-500">Image</td><td className="text-slate-400">2048</td><td className="text-rose-600 font-bold">DELETE</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -1100,7 +1071,7 @@ const ERTab: React.FC = () => {
                         <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
                                 <span className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-black text-base">6</span>
-                                <h4 className="text-xl font-bold text-slate-800">系統共用欄位設計 Audit Fields</h4>
+                                <h3 className="text-lg font-bold text-slate-800">稽核日誌 Audit Fields</h3>
                             </div>
                             <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-sm text-slate-600 leading-relaxed ml-11">
                                 <p className="font-bold text-indigo-800 mb-2 flex items-center gap-2">💡 情境決策指南</p>
@@ -1152,7 +1123,7 @@ const ERTab: React.FC = () => {
                                         </thead>
                                         <tbody className="text-slate-700 text-sm">
                                             <tr><td>1</td><td>...</td><td className="bg-indigo-50/30 border-l-2 border-indigo-100 font-mono">U101</td><td className="bg-indigo-50/30">01-01 10:00</td><td className="bg-indigo-50/30 font-mono">U205</td><td className="bg-indigo-50/30">01-05 15:30</td><td className="bg-rose-50/30 border-l-2 border-rose-100 text-slate-400 italic">NULL</td></tr>
-                                            <tr className="bg-slate-50 opacity-60"><td>2</td><td className="line-through">...</td><td className="bg-indigo-50/30 border-l-2 border-indigo-100 font-mono">U101</td><td className="bg-indigo-50/30">01-02 08:20</td><td className="bg-indigo-50/30 font-mono">U999</td><td className="bg-indigo-50/30">01-06 09:12</td><td className="bg-rose-50/30 border-l-2 border-rose-100 font-bold text-rose-600">01-06 09:12 (已假刪除)</td></tr>
+                                            <tr className="bg-slate-50 opacity-60"><td>2</td><td>...</td><td className="bg-indigo-50/30 border-l-2 border-indigo-100 font-mono">U101</td><td className="bg-indigo-50/30">01-02 08:20</td><td className="bg-indigo-50/30 font-mono">U999</td><td className="bg-indigo-50/30">01-06 09:12</td><td className="bg-rose-50/30 border-l-2 border-rose-100 font-bold text-rose-600">01-06 09:12 (已假刪除)</td></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -1174,9 +1145,9 @@ const ERTab: React.FC = () => {
                                             <tr><th>ID</th><th className="bg-amber-50 text-amber-700 font-black">TableName</th><th className="bg-rose-50 text-rose-600 font-black">RecordID (無 FK 約束)</th><th>Action</th><th className="text-indigo-600">OldValue (JSONB)</th><th className="text-emerald-600">NewValue (JSONB)</th><th>ChangedBy</th><th>ChangedAt</th></tr>
                                         </thead>
                                         <tbody className="text-slate-700">
-                                            <tr><td>1</td><td className="bg-amber-50/30 font-bold italic border-r border-amber-100">'Users'</td><td className="bg-rose-50/30 font-bold text-rose-600 border-r border-rose-100">99</td><td className="font-bold text-indigo-600">UPDATE</td><td className="font-mono text-xs opacity-75">{"{ \"Status\": \"Active\" }"}</td><td className="font-mono text-xs">{"{ \"Status\": \"Suspended\" }"}</td><td className="font-bold text-slate-600 text-center">Admin</td><td className="text-slate-400 text-xs">2025-01-05 10:20:01</td></tr>
-                                            <tr className="bg-slate-50"><td>2</td><td className="bg-amber-50/30 font-bold italic border-r border-amber-100">'Entries'</td><td className="bg-rose-50/30 font-bold text-rose-600 border-r border-rose-100">303</td><td className="font-bold text-indigo-600">UPDATE</td><td className="font-mono text-xs opacity-75">{"{ \"Name\": \"草稿\" }"}</td><td className="font-mono text-xs">{"{ \"Name\": \"V1\" }"}</td><td className="font-bold text-slate-600 text-center">User_A</td><td className="text-slate-400 text-xs">2025-01-10 14:15:30</td></tr>
-                                            <tr><td>3</td><td className="bg-amber-50/30 font-bold italic border-r border-amber-100">'Entries'</td><td className="bg-rose-50/30 font-bold text-rose-600 border-r border-rose-100">404</td><td className="font-bold text-rose-600">DELETE</td><td className="font-mono text-xs opacity-75">{"{ \"Name\": \"圖.png\", ... }"}</td><td className="text-slate-400 italic">NULL</td><td className="font-bold text-slate-600 text-center">User_A</td><td className="text-slate-400 text-xs">2025-01-15 09:30:45</td></tr>
+                                            <tr><td>1</td><td className="bg-amber-50/30 font-bold italic border-r border-amber-100">Users</td><td className="bg-rose-50/30 font-bold text-rose-600 border-r border-rose-100">99</td><td className="font-bold text-indigo-600">UPDATE</td><td className="font-mono text-xs opacity-75">{"{ \"Status\": \"Active\" }"}</td><td className="font-mono text-xs">{"{ \"Status\": \"Suspended\" }"}</td><td className="font-bold text-slate-600 text-center">Admin</td><td className="text-slate-400 text-xs">2025-01-05 10:20:01</td></tr>
+                                            <tr className="bg-slate-50"><td>2</td><td className="bg-amber-50/30 font-bold italic border-r border-amber-100">Entries</td><td className="bg-rose-50/30 font-bold text-rose-600 border-r border-rose-100">303</td><td className="font-bold text-indigo-600">UPDATE</td><td className="font-mono text-xs opacity-75">{"{ \"Name\": \"草稿\" }"}</td><td className="font-mono text-xs">{"{ \"Name\": \"V1\" }"}</td><td className="font-bold text-slate-600 text-center">User_A</td><td className="text-slate-400 text-xs">2025-01-10 14:15:30</td></tr>
+                                            <tr><td>3</td><td className="bg-amber-50/30 font-bold italic border-r border-amber-100">Entries</td><td className="bg-rose-50/30 font-bold text-rose-600 border-r border-rose-100">404</td><td className="font-bold text-rose-600">DELETE</td><td className="font-mono text-xs opacity-75">{"{ \"Name\": \"圖.png\", ... }"}</td><td className="text-slate-400 italic">NULL</td><td className="font-bold text-slate-600 text-center">User_A</td><td className="text-slate-400 text-xs">2025-01-15 09:30:45</td></tr>
                                         </tbody>
                                     </table>
                                 </div>

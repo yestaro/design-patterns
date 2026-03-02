@@ -3,18 +3,24 @@
 // =============================================================================
 
 import {
-    TagCommand, DeleteCommand, SortCommand,
-    CopyCommand, PasteCommand, MoveCommand, commandInvokerInstance,
-    CommandInvoker, SortState
+    CommandInvoker,
+    commandInvokerInstance,
+    CopyCommand,
+    DeleteCommand,
+    MoveCommand,
+    PasteCommand,
+    SortCommand,
+    SortState,
+    TagCommand
 } from './Command';
-import { LabelSortStrategy, AttributeSortStrategy } from './Strategy';
-import { DirectoryComposite, EntryComponent, WordDocument, ImageFile, PlainText } from './Composite';
-import { tagMediator, TagMediator } from './Mediator';
-import { StatisticsVisitor, FileSearchVisitor, FinderVisitor, BaseVisitor, StatisticsResults } from './Visitor';
-import { XmlExporterTemplate } from './Template';
-import { Clipboard } from './Singleton';
-import { IObserver, NotificationEvent } from './Observer';
+import { DirectoryComposite, EntryComponent, ImageFile, PlainText, WordDocument } from './Composite';
 import { Label } from './Flyweight';
+import { tagMediator, TagMediator } from './Mediator';
+import { IObserver, NotificationEvent } from './Observer';
+import { Clipboard } from './Singleton';
+import { AttributeSortStrategy, LabelSortStrategy } from './Strategy';
+import { XmlExporterTemplate } from './Template';
+import { BaseVisitor, FileSearchVisitor, FinderVisitor, StatisticsResults, StatisticsVisitor } from './Visitor';
 
 export class FileSystemFacade {
     private invoker: CommandInvoker;
@@ -34,9 +40,9 @@ export class FileSystemFacade {
         const root = new DirectoryComposite('root', '我的根目錄', '2025-01-01');
         const d1 = new DirectoryComposite('d1', '專案文件', '2025-01-10');
 
-        d1.add(new WordDocument('f1', '產品開發規畫.docx', 500, '2025-01-10', 35));
+        d1.add(new WordDocument('f1', '產品規格書.docx', 500, '2025-01-10', 35));
         d1.add(new WordDocument('f_api', 'API介面定義書.docx', 120, '2025-01-12', 12));
-        d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-10', 1920, 1080));
+        d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-12', 1920, 1080));
 
         const d2 = new DirectoryComposite('d2', '個人備份', '2025-01-15');
         d2.add(new PlainText('f3', '密碼記事.txt', 1, '2025-01-15', 'UTF-8'));

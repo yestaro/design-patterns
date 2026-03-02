@@ -136,8 +136,8 @@ public static getSampleRoot(): EntryComponent {
     const d1 = new DirectoryComposite('d1', '專案文件', '2025-01-10');
 
     // 統一介面：對目錄新增實體檔案與子目錄，Client 操作完全一致
-    d1.add(new WordDocument('f1', '產品開發規畫.docx', 500, '2025-01-10', 35));
-    d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-10', 1920, 1080));
+    d1.add(new WordDocument('f1', '產品規格書.docx', 500, '2025-01-10', 35));
+    d1.add(new ImageFile('f2', '架構設計圖.png', 2048, '2025-01-12', 1920, 1080));
     root.add(d1);
     // ...更多檔案
     return root;
