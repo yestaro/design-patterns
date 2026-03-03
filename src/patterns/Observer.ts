@@ -49,21 +49,14 @@ export class Subject {
 // --- [Concrete Implementations] 具體實作 ---
 // =============================================================================
 
-export interface LogEntry {
-    message: string;
-}
-
 /**
  * ConsoleObserver (控制台觀察者)
  */
 export class ConsoleObserver implements IObserver {
-    constructor(private addLogFn: (entry: LogEntry) => void) { }
+    constructor(private addLogFn: (entry) => void) { }
 
     update(event: NotificationEvent): void {
-        if (event.message) {
-            this.addLogFn({
-                message: event.message
-            });
-        }
+        this.addLogFn(event);
     }
 }
+
