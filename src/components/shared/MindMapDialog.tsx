@@ -156,7 +156,7 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
             `}</style>
 
             {/* Content */}
-            <div className="relative bg-white w-full h-full md:w-11/12 md:max-w-7xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-auto md:overflow-hidden animate-premium-in border border-slate-200">
+            <div className="relative bg-white w-full h-full md:w-11/12 md:max-w-5xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-auto md:overflow-hidden animate-premium-in border border-slate-200">
 
                 {/* Header */}
                 <div className="relative flex items-center justify-center px-6 py-2 border-b border-slate-100 bg-white shrink-0">

@@ -33,7 +33,7 @@ import {
     NotificationEvent,
 } from "../patterns/Observer";
 import { Clipboard } from "../patterns/Singleton";
-import PatternMermaidDialog from "./shared/PatternMermaidDialog";
+import PatternDialog from "./shared/PatternDialog";
 import RoadmapDialog from "./shared/RoadmapDialog";
 
 export const PatternIconButton = ({
@@ -796,7 +796,7 @@ const ExplorerTab: React.FC = () => {
             </div>
 
             <RoadmapDialog isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
-            <PatternMermaidDialog
+            <PatternDialog
                 isOpen={!!previewPatternId}
                 patternId={previewPatternId}
                 onClose={() => setPreviewPatternId(null)}

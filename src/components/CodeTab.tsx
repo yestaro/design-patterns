@@ -10,6 +10,7 @@ import { MindMapDialog } from './shared/MindMapDialog';
 const CodeTab: React.FC = () => {
   const [activeTab, setActiveTab] = useState('composite');
   const [isMobile, setIsMobile] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
   const [isMindMapOpen, setIsMindMapOpen] = useState(false);
 
   // 根據 patterns 的 themeColor 自動映射出 Dock 的顏色
@@ -39,10 +40,15 @@ const CodeTab: React.FC = () => {
   };
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const checkLayout = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 1024);
+      // 當寬度小於 1400 時進入緊湊模式 (隱藏標籤、縮小間距)
+      setIsCompact(width < 1400);
+    };
+    checkLayout();
+    window.addEventListener('resize', checkLayout);
+    return () => window.removeEventListener('resize', checkLayout);
   }, []);
 
   useEffect(() => {
@@ -456,8 +462,9 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
               onSelect={setActiveTab}
               isMobile={isMobile}
               colorMap={DOCK_COLOR_MAP}
-              gap={36}
+              gap={isCompact ? 10 : 36}
               baseSize={68}
+              showLabels={!isCompact}
             />
           </div>
 
@@ -540,20 +547,22 @@ tagMediator.attach(id, "Urgent");`} language="typescript" showLineNumbers={false
             <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-indigo-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
             <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-blue-500 rounded-full blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
 
-            <div className="relative z-20 flex flex-col items-center text-center">
-              <span className="text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-blue-200 font-bold block mb-4 leading-relaxed tracking-wide">
-                當 AI 成為團隊超級成員，你能擔任什麼角色？
-              </span>
-              <span className="text-xl md:text-[24px] text-slate-400 font-medium block mb-12 leading-relaxed">
-                難道是一起舉手 <span className="text-white font-bold bg-indigo-500/20 px-4 py-2 rounded-xl border border-indigo-500/30 whitespace-nowrap shadow-sm">「我做完了，但我看不懂」</span> 嗎？
-              </span>
-
+            <div className="flex flex-col items-center text-center text-xl md:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-blue-200 font-bold block leading-relaxed tracking-wide gap-4">
+              <p>
+                你覺得看得懂 AI 的程式碼，重要嗎？
+              </p>
+              <p>
+                當 AI 一天就產出 10,000 行程式，你能看完嗎？
+              </p>
+              <p>
+                當 AI 成為團隊超級成員，你還能擔任什麼角色？
+              </p>
               <button
                 onClick={() => setIsMindMapOpen(true)}
                 className="group/btn relative px-10 py-5 bg-indigo-500 text-white font-bold rounded-2xl hover:bg-indigo-400 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] hover:shadow-[0_0_60px_rgba(99,102,241,0.6)] flex items-center justify-center gap-5 hover:-translate-y-1 overflow-hidden w-full sm:w-auto"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300 ease-out"></div>
-                <span className="relative z-10 text-xl md:text-2xl tracking-wide">你需要用「規則」來引導 AI，而不是「規格」</span>
+                <span className="relative z-10 text-xl md:text-2xl tracking-wide">Project Management Triangle</span>
                 <div className="relative z-10 bg-indigo-600/50 p-2.5 rounded-full ml-3 border border-indigo-400/30 group-hover/btn:bg-indigo-600 transition-colors">
                   <ArrowRight size={22} className="text-indigo-200" />
                 </div>

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { patterns } from "../../data/patterns";
 import CodeBlock from "./CodeBlock";
 
-interface PatternMermaidDialogProps {
+interface PatternDialogProps {
     isOpen: boolean;
     patternId: string | null;
     onClose: () => void;
@@ -12,7 +12,7 @@ interface PatternMermaidDialogProps {
 
 type DiagramType = "class" | "sequence";
 
-const PatternMermaidDialog: React.FC<PatternMermaidDialogProps> = ({
+const PatternDialog: React.FC<PatternDialogProps> = ({
     isOpen,
     patternId,
     onClose,
@@ -213,4 +213,4 @@ const PatternMermaidDialog: React.FC<PatternMermaidDialogProps> = ({
     );
 };
 
-export default PatternMermaidDialog;
+export default PatternDialog;

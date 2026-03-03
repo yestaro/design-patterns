@@ -54,9 +54,9 @@
  * />
  * ```
  */
-import React from 'react';
-import { motion, useMotionValue, MotionValue, useAnimationFrame } from 'framer-motion';
+import { motion, MotionValue, useAnimationFrame, useMotionValue } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
+import React from 'react';
 
 // ── 型別定義 ──
 export interface DockItemData {
@@ -206,8 +206,16 @@ function DockItem({
         <button
             onClick={onSelect}
             className="group relative flex flex-col items-center justify-end transition-colors duration-200 ease-out shrink-0 outline-none pb-1"
-            title={item.tooltip || item.name}
         >
+            {/* Premium Thick Glass Tooltip (Optimized for all backgrounds) */}
+            {!showLabels && (
+                <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900/60 backdrop-blur-2xl text-white text-sm font-bold rounded-md border border-white/80 shadow-[0_0_6px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 ring-1 ring-black/10">
+                    <div className="relative antialiased tracking-wide [text-shadow:0_2px_4px_rgba(0,0,0,0.8)]">
+                        {item.name}
+                    </div>
+                </div>
+            )}
+
             <motion.div
                 ref={elRef}
                 style={{ width, height: width, willChange: 'width' }}

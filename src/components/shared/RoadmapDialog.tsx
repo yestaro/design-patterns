@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, User, Code, Bot, Panda, ChevronDown, ChevronUp, Copy, Check, ArrowLeft, Loader2, Lock, Unlock } from 'lucide-react';
-import { CodeFetcher } from '../../data/CodeFetcher';
+import { ArrowLeft, Bot, Check, ChevronDown, ChevronUp, Code, Copy, Loader2, Lock, Panda, Unlock, User, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSourceCode } from '../../hooks/useSourceCode';
 import CodeBlock from './CodeBlock';
 
 // ... (interfaces)
@@ -15,7 +15,7 @@ interface RoadmapItem {
     transcript?: { speaker: string; text: string }[];
     tasks: string[];
     tasksTitle: string;
-    codeUrls?: string[];
+    sourceFiles?: string[];
     quiz?: {
         question: string;
         options: string[];
@@ -51,7 +51,7 @@ const scheduleData: RoadmapItem[] = [
             '規劃出系統的 ER Model，將來資料庫會有那些表格與欄位或關聯。',
             '不限語言，先實作出「名詞」可看到樹狀的檔案呈現即可，不用實現「動詞」的功能。'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Composite.ts'],
+        sourceFiles: ['Composite.ts'],
         quiz: {
             question: '天地會的總舵主是誰？',
             options: ['陳近南', '韋小寶', '吳三桂'],
@@ -81,7 +81,7 @@ const scheduleData: RoadmapItem[] = [
             '完成 搜尋特定關鍵字檔案 的功能',
             '完成 輸出 XML 格式的功能'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Visitor.ts'],
+        sourceFiles: ['Visitor.ts'],
         quiz: {
             question: '這就叫做專業。出自哪部電影？',
             options: ['食神', '功夫', '鹿鼎記'],
@@ -108,7 +108,7 @@ const scheduleData: RoadmapItem[] = [
             '定義 BaseExporterTemplate 基類，在 visit (骨架方法) 中處理「字元脫逸」與「縮排」。',
             '完成 JSONExporter 與 MarkdownExporter 子類別，只處理格式輸出（細節不拘）。'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Template.ts'],
+        sourceFiles: ['Template.ts'],
         quiz: {
             question: '什麼是江湖規矩？',
             options: ['單挑', '群架', '吃瓜'],
@@ -135,7 +135,7 @@ const scheduleData: RoadmapItem[] = [
             '完成接收端 ConsoleObserver 顯示日誌',
             '完成接收端 DashboardObserver 即時狀態'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Observer.ts'],
+        sourceFiles: ['Observer.ts'],
         quiz: {
             question: '打雷啦！下雨囉，收衣服呀。請配對',
             options: ['打雷啦', '下雨囉', '收衣服呀'],
@@ -162,7 +162,7 @@ const scheduleData: RoadmapItem[] = [
             '完成 各種 Decorator 偵測關鍵字變樣式',
             '完成 Adapter 介面轉換，讓儀表板顯示進度'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Decorator.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Adapter.ts'],
+        sourceFiles: ['Decorator.ts', 'Adapter.ts'],
         quiz: {
             question: '降龍十八掌是那個宗派絕學？',
             options: ['少林', '武當', '丐幫'],
@@ -194,7 +194,7 @@ const scheduleData: RoadmapItem[] = [
             '完成 CommandInvoker 紀錄操作, 可悔步',
             '完成 Clipboard 全域 Singleton 共享剪貼簿'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Command.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Strategy.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Singleton.ts'],
+        sourceFiles: ['Command.ts', 'Strategy.ts', 'Singleton.ts'],
         quiz: {
             question: '凌凌漆自彈自唱哪首歌？',
             options: ['夜來香', '李香蘭', '上海灘'],
@@ -221,7 +221,7 @@ const scheduleData: RoadmapItem[] = [
             '完成 TagMediator 管理標籤與檔案的多對多',
             '完成 Command 方式，執行貼標籤的動作'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Flyweight.ts', 'https://github.com/yestaro/design-patterns/blob/master/src/patterns/Mediator.ts'],
+        sourceFiles: ['Flyweight.ts', 'Mediator.ts'],
         quiz: {
             question: '汽車維修員，身上有什麼也是合理的？',
             options: ['扳手', '鎚子', '都合理'],
@@ -249,7 +249,7 @@ const scheduleData: RoadmapItem[] = [
             '完成 FileSystemFacade 統整所有命令介面',
             '降低 Explorer UI 對模式實體類別的直接依賴'
         ],
-        codeUrls: ['https://github.com/yestaro/design-patterns/blob/master/src/patterns/Facade.ts'],
+        sourceFiles: ['Facade.ts'],
         quiz: {
             question: '要你命3000，是誰發明的？',
             options: ['達文西', '聞西', '唐僧'],
@@ -265,13 +265,12 @@ interface RoadmapDialogProps {
 }
 
 const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
+    const { codes, isLoading: isLoadingCode, fetchCode } = useSourceCode();
     const [selectedDay, setSelectedDay] = useState(scheduleData[0]);
     const [expandedCores, setExpandedCores] = useState<number[]>([]);
     const [copied, setCopied] = useState(false);
     const [viewMode, setViewMode] = useState<'roadmap' | 'code'>('roadmap');
     const [mobileStep, setMobileStep] = useState<'grid' | 'details' | 'action'>('grid');
-    const [fetchedCodes, setFetchedCodes] = useState<Record<number, string[]>>({});
-    const [isLoadingCode, setIsLoadingCode] = useState(false);
     const [unlockedDays, setUnlockedDays] = useState<number[]>([]);
     const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
     const [selectedChoice, setSelectedChoice] = useState<string>('');
@@ -298,21 +297,15 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
     }, [selectedDay]);
 
     useEffect(() => {
-        // 如果進入程式碼模式且尚未抓取過
-        if (viewMode === 'code' && selectedDay.codeUrls && selectedDay.codeUrls.length > 0 && !fetchedCodes[selectedDay.day]) {
-            loadCode();
+        // 如果進入程式碼模式且具有來源檔
+        if (viewMode === 'code' && selectedDay.sourceFiles && selectedDay.sourceFiles.length > 0) {
+            fetchCode(selectedDay.day.toString(), selectedDay.sourceFiles);
         }
-    }, [viewMode, selectedDay.day]);
+    }, [viewMode, selectedDay.day, fetchCode, selectedDay.sourceFiles]);
 
-    const loadCode = async () => {
-        if (!selectedDay.codeUrls) return;
-        setIsLoadingCode(true);
-        try {
-            const result = await CodeFetcher.fetchMany(selectedDay.codeUrls);
-            setFetchedCodes(prev => ({ ...prev, [selectedDay.day]: result }));
-        } finally {
-            setIsLoadingCode(false);
-        }
+    const loadCode = () => {
+        if (!selectedDay.sourceFiles) return;
+        fetchCode(selectedDay.day.toString(), selectedDay.sourceFiles);
     };
 
     const toggleCore = (day: number, e: React.MouseEvent) => {
@@ -697,9 +690,9 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                                     <Loader2 size={40} className="text-blue-500 animate-spin" />
                                                     <p className="text-slate-400 font-bold animate-pulse">正在從 GitHub 傳輸原始碼...</p>
                                                 </div>
-                                            ) : fetchedCodes[selectedDay.day] ? (
+                                            ) : codes[selectedDay.day.toString()] ? (
                                                 <div className="space-y-12">
-                                                    {fetchedCodes[selectedDay.day].map((code, idx) => (
+                                                    {(codes[selectedDay.day.toString()] as string[]).map((code, idx) => (
                                                         <div key={idx} className="relative group">
                                                             <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                                                 <button
@@ -727,11 +720,11 @@ const RoadmapDialog: React.FC<RoadmapDialogProps> = ({ isOpen, onClose }) => {
                                                 <div className="p-10 border-2 border-dashed border-slate-800 rounded-3xl text-center space-y-4">
                                                     <Bot size={40} className="mx-auto text-slate-700" />
                                                     <p className="text-slate-500 font-bold">
-                                                        {selectedDay.codeUrls && selectedDay.codeUrls.length > 0
+                                                        {selectedDay.sourceFiles && selectedDay.sourceFiles.length > 0
                                                             ? '尚未載入內容，請點擊按鈕重試'
                                                             : '此章節尚未設定遠端存放路徑'}
                                                     </p>
-                                                    {selectedDay.codeUrls && (
+                                                    {selectedDay.sourceFiles && (
                                                         <button
                                                             onClick={loadCode}
                                                             className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-full text-sm font-bold transition-all"

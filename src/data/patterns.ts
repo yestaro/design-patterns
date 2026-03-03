@@ -24,6 +24,7 @@ export interface DesignPattern {
 
   mermaid: string; // UML 類別圖定義
   sequence?: string; // UML 序列圖定義 (關鍵流程)
+  sourceFile: string; // Pattern 原始碼檔案名稱 (e.g. 'Composite.ts')
 
   // DomainTab 的使用範例
   usage: {
@@ -44,6 +45,7 @@ export interface DesignPattern {
 export const patterns: DesignPattern[] = [
   {
     id: "composite",
+    sourceFile: "Composite.ts",
     name: "Composite + Prototype",
     chapter: "結構與複製",
     description:
@@ -209,6 +211,7 @@ function cloneDir(orig: any): any {
   },
   {
     id: "visitor",
+    sourceFile: "Visitor.ts",
     name: "Visitor",
     chapter: "行為分離",
     description:
@@ -342,6 +345,7 @@ function exportXML(node) {
   },
   {
     id: "template",
+    sourceFile: "Template.ts",
     name: "Template Method",
     chapter: "行為骨架",
     description:
@@ -468,6 +472,7 @@ function exportToMarkdown(dir: any): string {
   },
   {
     id: "observer",
+    sourceFile: "Observer.ts",
     name: "Observer",
     chapter: "解耦通訊",
     description:
@@ -583,6 +588,7 @@ function search(node: any, kw: string): void {
   },
   {
     id: "decorator",
+    sourceFile: "Decorator.ts",
     name: "Decorator",
     chapter: "裝飾鏈條",
     description:
@@ -718,6 +724,7 @@ function notify(msg: string, action: number, level: string, icon: boolean) {
   },
   {
     id: "adapter",
+    sourceFile: "Adapter.ts",
     name: "Adapter",
     chapter: "介面轉換",
     description:
@@ -822,6 +829,7 @@ function MonitorDashboard({ event }: { event: any }) {
   },
   {
     id: "command",
+    sourceFile: "Command.ts",
     name: "Command",
     chapter: "行為物件化",
     description:
@@ -955,6 +963,7 @@ function onPasteClick(targetId: string) {
   },
   {
     id: "strategy",
+    sourceFile: "Strategy.ts",
     name: "Strategy",
     chapter: "策略注入",
     description:
@@ -1068,6 +1077,7 @@ function sort(nodes: any[], type: 'name' | 'tag', tagManager?: any) {
   },
   {
     id: "singleton",
+    sourceFile: "Singleton.ts",
     name: "Singleton",
     chapter: "全域狀態",
     description:
@@ -1186,6 +1196,7 @@ class ContextMenu {
   },
   {
     id: "flyweight",
+    sourceFile: "Flyweight.ts",
     name: "Flyweight + Factory",
     chapter: "資源共享",
     description:
@@ -1295,6 +1306,7 @@ fileX.tags.push(new Label('Personal', 'bg-green-500'));
   },
   {
     id: "mediator",
+    sourceFile: "Mediator.ts",
     name: "Mediator",
     chapter: "關係管理",
     description:
@@ -1387,6 +1399,7 @@ const results = files.filter(f => f.tags.includes('Work'));
   },
   {
     id: "facade",
+    sourceFile: "Facade.ts",
     name: "Facade",
     chapter: "簡易存取",
     description:
