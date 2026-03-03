@@ -29,7 +29,6 @@ import { FileSystemFacade } from "../patterns/Facade";
 import {
     ConsoleObserver,
     IObserver,
-    LogEntry,
     NotificationEvent,
 } from "../patterns/Observer";
 import { Clipboard } from "../patterns/Singleton";
@@ -226,7 +225,7 @@ const RenderTree: React.FC<RenderTreeProps> = ({
 };
 
 const ExplorerTab: React.FC = () => {
-    const [visitorLogs, setVisitorLogs] = useState<LogEntry[]>([]);
+    const [visitorLogs, setVisitorLogs] = useState<NotificationEvent[]>([]);
     const [liveStats, setLiveStats] = useState<{
         name: string;
         count: number;
