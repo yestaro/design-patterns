@@ -5,15 +5,6 @@
 export type EventSource = 'command' | 'clipboard' | 'visitor' | 'system';
 export type EventType = 'executed' | 'undone' | 'redone' | 'set' | 'cleared' | 'progress';
 
-export interface NotificationPayload {
-    currentNode?: string;
-    count?: number;
-    total?: number;
-    nodeType?: string;
-    sortState?: any;
-    [key: string]: any;
-}
-
 export interface NotificationEvent {
     source: EventSource;
     type: EventType;
@@ -59,4 +50,5 @@ export class ConsoleObserver implements IObserver {
         this.addLogFn(event);
     }
 }
+
 
