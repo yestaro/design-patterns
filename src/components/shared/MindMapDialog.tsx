@@ -7,17 +7,19 @@ mindmap
   root((AI 時代的<br/>開發抉擇))
     debt(**技術債的權衡**)
     :::debt
-      (<span class="text-green-500 font-bold">◯</span> **優點**)
+      (<span class="text-blue-500 font-bold">◯</span> **優點**)
+      :::pro
         **短期快速**
-          [搶得市場先機]
+          [快速驗證結果]
           [縮短上線時間]
         **低成本**
-          [拋棄式 MVP]
-          [低風險試錯]
+          [減少人力投入]
+          [省去規劃與定義]
         **直觀**
           [一般人即刻上手]
           [流程線性單純]
       (<span class="text-red-500 font-bold">✕</span> **缺點**)
+      :::con
         **僵化**
           [高耦合 Coupling]
           [難以擴充新功能]
@@ -31,7 +33,8 @@ mindmap
           [只有上帝與我懂]
     soul(**產品靈魂鑄造**)
     :::soul
-      (<span class="text-green-500 font-bold">◯</span> **優點**)
+      (<span class="text-blue-500 font-bold">◯</span> **優點**)
+      :::pro
         **彈性**
           [應對未來變化]
           [擴充功能不改舊碼]
@@ -45,6 +48,7 @@ mindmap
           [職責定義明確]
           [容易審核 AI]
       (<span class="text-red-500 font-bold">✕</span> **缺點**)
+      :::con
         **開發成本高**
           [代碼量增加]
           [檔案碎片化]
@@ -134,24 +138,55 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
                 }
                 
                 /* Custom Node Colors (Supports both text and HTML foreignObject) */
+                .mermaid .debt rect,
+                .mermaid .debt path,
+                .mermaid .debt polygon {
+                    stroke: #d97706 !important; /* Tailwind amber-600 */
+                    stroke-width: 2px !important;
+                    fill: #fffbeb !important; /* 淺橘黃/Amber 背景 */
+                }
                 .mermaid .debt text,
                 .mermaid .debt span,
                 .mermaid .debt div,
                 .mermaid .debt p,
                 .mermaid .debt strong {
                     font-size: 18px !important;
-                    fill: #ef4444 !important; /* Tailwind red-500 */
-                    color: #ef4444 !important;
+                    fill: #d97706 !important; /* Tailwind amber-600 */
+                    color: #d97706 !important;
                 }
                 
+                .mermaid .soul rect,
+                .mermaid .soul path,
+                .mermaid .soul polygon {
+                    stroke: #16a34a !important; /* Tailwind green-600 */
+                    stroke-width: 2px !important;
+                    fill: #f0fdf4 !important; /* 淺綠背景 */
+                }
                 .mermaid .soul text,
                 .mermaid .soul span,
                 .mermaid .soul div,
                 .mermaid .soul p,
                 .mermaid .soul strong {
                     font-size: 18px !important;
-                    fill: #3b82f6 !important; /* Tailwind blue-500 */
-                    color: #3b82f6 !important;
+                    fill: #16a34a !important; /* Tailwind green-600 */
+                    color: #16a34a !important;
+                }
+
+                /* Pro and Con Node Styling */
+                .mermaid .pro rect,
+                .mermaid .pro path,
+                .mermaid .pro polygon {
+                    stroke: #3b82f6 !important; /* 藍色外框 */
+                    stroke-width: 2px !important;
+                    fill: #eff6ff !important; /* 淺藍背景 */
+                }
+                
+                .mermaid .con rect,
+                .mermaid .con path,
+                .mermaid .con polygon {
+                    stroke: #ef4444 !important; /* 紅色外框 */
+                    stroke-width: 2px !important;
+                    fill: #fef2f2 !important; /* 淺紅背景 */
                 }
             `}</style>
 
