@@ -335,9 +335,9 @@ const ERTab: React.FC = () => {
                                     <h5 className="text-lg font-black text-slate-700 italic">CTI (Class Table Inheritance) - 階層式正規化</h5>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                    <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg shadow-slate-100/50">
-                                        <div className="bg-slate-800 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Main Table: Entries_Base</div>
+                                    <div className="border border-slate-200 rounded-xl overflow-x-auto custom-scrollbar shadow-lg shadow-slate-100/50">
                                         <table className="sample-table">
+                                            <caption className="bg-slate-800 text-nowrap">Main Table: Entries_Base</caption>
                                             <thead>
                                                 <tr>
                                                     <th className="text-red-500">EntryID(PK)</th>
@@ -359,22 +359,22 @@ const ERTab: React.FC = () => {
                                     </div>
                                     <div className="grid grid-cols-1 gap-6">
                                         <div className="border border-rose-200 rounded-xl overflow-hidden shadow-lg shadow-rose-100/50">
-                                            <div className="bg-rose-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Extension: Word_Only</div>
                                             <table className="sample-table">
+                                                <caption className="bg-rose-600">Extension: Word_Only</caption>
                                                 <thead className="bg-rose-50 text-rose-600 font-black"><tr><th className="text-red-500 text-sm">EntryID(FK)</th><th>PageCount</th></tr></thead>
                                                 <tbody><tr><td className="text-red-500 font-bold px-3 py-2">303</td><td className="font-black underline text-rose-700 px-3 py-2">15</td></tr></tbody>
                                             </table>
                                         </div>
                                         <div className="border border-emerald-200 rounded-xl overflow-hidden shadow-lg shadow-emerald-100/50">
-                                            <div className="bg-emerald-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Extension: Image_Only</div>
                                             <table className="sample-table">
+                                                <caption className="bg-emerald-600">Extension: Image_Only</caption>
                                                 <thead className="bg-emerald-50 text-emerald-600 font-black"><tr><th className="text-red-500 text-sm">EntryID(FK)</th><th>Width</th><th>Height</th></tr></thead>
                                                 <tbody><tr><td className="text-red-500 font-bold px-3 py-2">404</td><td className="font-black underline text-emerald-700 px-3 py-2">1920</td><td className="font-black underline text-emerald-700 px-3 py-2">1080</td></tr></tbody>
                                             </table>
                                         </div>
                                         <div className="border border-amber-200 rounded-xl overflow-hidden shadow-lg shadow-amber-100/50">
-                                            <div className="bg-amber-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Extension: Text_Only</div>
                                             <table className="sample-table">
+                                                <caption className="bg-amber-600">Extension: Text_Only</caption>
                                                 <thead className="bg-amber-50 text-amber-600 font-black"><tr><th className="text-red-500 text-sm">EntryID(FK)</th><th>Encoding</th></tr></thead>
                                                 <tbody><tr><td className="text-red-500 font-bold px-3 py-2">505</td><td className="font-black underline text-amber-700 px-3 py-2">UTF-8</td></tr></tbody>
                                             </table>
@@ -406,9 +406,9 @@ const ERTab: React.FC = () => {
                                 </div>
                                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
                                     {/* Dirs Table */}
-                                    <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg shadow-slate-100/50">
-                                        <div className="bg-slate-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Directories_Only</div>
+                                    <div className="border border-slate-200 rounded-xl overflow-x-auto custom-scrollbar shadow-lg shadow-slate-100/50">
                                         <table className="sample-table">
+                                            <caption className="bg-slate-600 text-nowrap">Physical Table: Directories_Only</caption>
                                             <thead className="text-slate-600">
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th>Size</th><th>Created</th></tr>
                                             </thead>
@@ -421,8 +421,8 @@ const ERTab: React.FC = () => {
 
                                     {/* Words Table */}
                                     <div className="border border-rose-200 rounded-xl overflow-hidden shadow-lg shadow-rose-100/50">
-                                        <div className="bg-rose-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Words_Only</div>
                                         <table className="sample-table">
+                                            <caption className="bg-rose-600">Physical Table: Words_Only</caption>
                                             <thead className="text-rose-600">
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-rose-50 text-rose-600 font-black">PageCount</th><th>Size</th><th>Created</th></tr>
                                             </thead>
@@ -434,8 +434,8 @@ const ERTab: React.FC = () => {
 
                                     {/* Images Table */}
                                     <div className="border border-emerald-200 rounded-xl overflow-hidden shadow-lg shadow-emerald-100/50">
-                                        <div className="bg-emerald-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Images_Only</div>
                                         <table className="sample-table">
+                                            <caption className="bg-emerald-600">Physical Table: Images_Only</caption>
                                             <thead className="text-emerald-600">
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-emerald-50 text-emerald-600 font-black text-center">Width</th><th className="bg-emerald-50 text-emerald-600 font-black text-center">Height</th><th>Size</th><th>Created</th></tr>
                                             </thead>
@@ -447,8 +447,8 @@ const ERTab: React.FC = () => {
 
                                     {/* Texts Table */}
                                     <div className="border border-amber-200 rounded-xl overflow-hidden shadow-lg shadow-amber-100/50">
-                                        <div className="bg-amber-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Physical Table: Texts_Only</div>
                                         <table className="sample-table">
+                                            <caption className="bg-amber-600">Physical Table: Texts_Only</caption>
                                             <thead className="text-amber-600">
                                                 <tr><th>EntryID</th><th className="italic">ParentID</th><th>Name</th><th className="bg-amber-50 text-amber-600 font-black text-center">Encoding</th><th>Size</th><th>Created</th></tr>
                                             </thead>
@@ -587,9 +587,9 @@ const ERTab: React.FC = () => {
                                     <h5 className="text-lg font-black text-slate-700 italic">Closure Table (閉包表) - 笛卡兒積空間表</h5>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                                    <div className="border border-slate-200 rounded-xl overflow-hidden shadow-lg shadow-slate-100/50">
-                                        <div className="bg-slate-800 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Main Table: Entries_Base</div>
+                                    <div className="border border-slate-200 rounded-xl overflow-x-auto custom-scrollbar shadow-lg shadow-slate-100/50">
                                         <table className="sample-table">
+                                            <caption className="bg-slate-800 text-nowrap">Main Table: Entries_Base</caption>
                                             <thead>
                                                 <tr><th>EntryID(PK)</th><th>Name</th><th className="bg-slate-100 text-slate-700 text-center font-black">Sort</th><th>Size</th><th>Created</th></tr>
                                             </thead>
@@ -603,9 +603,9 @@ const ERTab: React.FC = () => {
                                         </table>
                                     </div>
                                     <div className="space-y-4">
-                                        <div className="sample-table-container shadow-lg shadow-indigo-100/50">
-                                            <div className="bg-indigo-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Closure Relations Table</div>
+                                        <div className="sample-table-container shadow-lg shadow-indigo-100/50 overflow-hidden">
                                             <table className="sample-table">
+                                                <caption className="bg-indigo-600">Closure Relations Table</caption>
                                                 <thead>
                                                     <tr><th className="text-rose-600">Ancestor</th><th className="text-indigo-600">Descendant</th><th className="text-center font-black">Depth</th></tr>
                                                 </thead>
@@ -689,13 +689,13 @@ const ERTab: React.FC = () => {
                                     <h5 className="text-lg font-black text-slate-700 italic">Reverse Polymorphic (交叉中間表) - 高度正規化設計</h5>
                                 </div>
                                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 mb-4">
-                                    <p className="text-sm text-slate-600 leading-relaxed"><b>情境：</b> 放棄萬用關聯表！誰要貼標籤，就為誰開一張專屬的中介表。為 Words 建立 `WordTags` 表；為 Images 建立 `ImageTags` 表。</p>
+                                    <p className="text-sm text-slate-600 leading-relaxed"><b>情境：</b> 建立專屬的關聯表！誰要貼標籤，就為誰開一張專屬的中介表。如果是採 STI/CTI，那就是ENTRYTAGS；若採Concrete Table，就為 Words 建立 `WordTags` 表；為 Images 建立 `ImageTags` 表。</p>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                                     {/* 1. EntryTags (If using Inheritance) */}
-                                    <div className="sample-table-container shadow-lg shadow-indigo-100/50">
-                                        <div className="bg-indigo-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Single/Class Table：EntryTags 表</div>
+                                    <div className="sample-table-container shadow-lg shadow-indigo-100/50 overflow-hidden">
                                         <table className="sample-table">
+                                            <caption className="bg-indigo-600">Single/Class Table：EntryTags 表</caption>
                                             <thead>
                                                 <tr><th className="text-indigo-600">EntryID (連至 Entries_Base)</th><th>TagID (連至 Tags)</th></tr>
                                             </thead>
@@ -708,9 +708,9 @@ const ERTab: React.FC = () => {
                                     </div>
 
                                     {/* 2. WordTags */}
-                                    <div className="sample-table-container shadow-lg shadow-rose-100/50">
-                                        <div className="bg-rose-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Table Inheritance: WordTags 表</div>
+                                    <div className="sample-table-container shadow-lg shadow-rose-100/50 overflow-hidden">
                                         <table className="sample-table">
+                                            <caption className="bg-rose-600">Table Inheritance: WordTags 表</caption>
                                             <thead>
                                                 <tr><th className="text-rose-600">WordID (強 FK 約束)</th><th>TagID (強 FK 約束)</th></tr>
                                             </thead>
@@ -722,9 +722,9 @@ const ERTab: React.FC = () => {
                                     </div>
 
                                     {/* 3. ImageTags */}
-                                    <div className="sample-table-container shadow-lg shadow-emerald-100/50">
-                                        <div className="bg-emerald-600 text-white px-4 py-1 font-black text-sm uppercase tracking-widest text-center italic">Table Inheritance: ImageTags 表</div>
+                                    <div className="sample-table-container shadow-lg shadow-emerald-100/50 overflow-hidden">
                                         <table className="sample-table">
+                                            <caption className="bg-emerald-600">Table Inheritance: ImageTags 表</caption>
                                             <thead>
                                                 <tr><th className="text-emerald-600">ImageID (強 FK 約束)</th><th>TagID (強 FK 約束)</th></tr>
                                             </thead>

@@ -33,4 +33,9 @@ export class DashboardAdapter implements IObserver {
         // 呼叫 Adaptee 以完成轉接
         this.updateStatsFn(adaptedStats);
     }
+
+    // 允許重置總數，讓 Adapter 實例可以重複使用
+    reset(newTotal: number): void {
+        this.total = newTotal;
+    }
 }

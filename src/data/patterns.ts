@@ -508,6 +508,7 @@ function exportToMarkdown(dir: any): string {
         -updateStatsFn
         -total
         +update(event)
+        +reset(newTotal)
     }
     
     Subject o-- IObserver : 訂閱
@@ -746,6 +747,7 @@ function notify(msg: string, action: number, level: string, icon: boolean) {
         -total
         +constructor(updateStatsFn, total)
         +update(event)
+        +reset(newTotal)
     }
 
     DashboardAdapter ..> NotificationEvent : 轉換與適配

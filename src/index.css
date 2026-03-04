@@ -77,6 +77,11 @@
   @apply w-full text-sm font-mono text-left border-collapse;
 }
 
+.sample-table caption {
+  @apply text-white px-4 py-1.5 font-black text-sm uppercase tracking-widest text-center italic;
+  /* 預設顏色，如果有特定的表(例如 Words_Only=rose-600)可以寫在 inline class 覆寫 */
+}
+
 .sample-table thead {
   @apply bg-slate-50 border-b-2 border-slate-200 font-bold uppercase text-slate-500 text-sm;
 }

@@ -20,7 +20,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
     onClose,
     initialSourceCode,
     targetClass,
-    defaultPosition = { x: 100, y: 100 }
+    defaultPosition = { x: 32, y: 100 }
 }) => {
     const popoverRef = useRef<HTMLDivElement>(null);
     const pos = useRef(defaultPosition);
@@ -52,24 +52,29 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
             // 第二層：跨檔案定位 (Meta-data Scan)
             // 尋找在哪個模式的 mermaid 定義中出現過這個類別
             // 優先找精確匹配 class ClassName
-            let owner = patterns.find(p =>
+            let owners = patterns.filter(p =>
                 p.mermaid.includes(`class ${targetName}`) ||
                 p.mermaid.includes(`interface ${targetName}`)
             );
 
             // 備援：模糊匹配
-            if (!owner) {
-                owner = patterns.find(p => p.mermaid.includes(targetName));
+            if (owners.length === 0) {
+                owners = patterns.filter(p => p.mermaid.includes(targetName));
             }
 
-            if (owner && owner.sourceFile) {
-                // 如果找到的 owner 正好就是目前的模式，代表目前檔案真的沒這段代碼，不需要再 fetch 自己
-                if (owner.sourceFile === patterns.find(p => p.mermaid.includes(initialSourceCode || ''))?.sourceFile) {
+            const validOwners = owners.filter(o => o.sourceFile);
+
+            if (validOwners.length > 0) {
+                // 如果找到的所有 owner 中，有跟目前傳入的碼在同一份檔案的，就不需要全都重抓
+                const currentPattern = patterns.find(p => p.mermaid.includes(initialSourceCode || ''));
+                if (validOwners.length === 1 && currentPattern && validOwners[0].sourceFile === currentPattern.sourceFile) {
                     return;
                 }
 
-                setStatusText(`正在獲取 ${owner.name} 的代碼...`);
-                await fetchCode(owner.id, owner.sourceFile);
+                setStatusText(`正在跨檔掃描...`);
+                await Promise.all(
+                    validOwners.map(owner => fetchCode(owner.id, owner.sourceFile))
+                );
             }
         };
 

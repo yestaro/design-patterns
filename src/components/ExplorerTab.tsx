@@ -244,7 +244,6 @@ const ExplorerTab: React.FC = () => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [, setUpdateTick] = useState(0);
     const [isHelpOpen, setIsHelpOpen] = useState(false);
-    const [showRoadmap, setShowRoadmap] = useState(true);
     const [dragOverId, setDragOverId] = useState<string | null>(null);
     const [previewPatternId, setPreviewPatternId] = useState<string | null>(null);
 
@@ -270,8 +269,7 @@ const ExplorerTab: React.FC = () => {
         [],
     );
 
-    const highlightLoggerRef = useRef<IObserver | null>(null);
-    if (!highlightLoggerRef.current) {
+    const highlightLogger = useMemo(() => {
         let logger: IObserver = new ConsoleObserver((logEntry) =>
             setVisitorLogs((prev) => [...prev, logEntry]),
         );
@@ -308,14 +306,19 @@ const ExplorerTab: React.FC = () => {
         logger = new IconDecorator(logger, "[Error]", "❌");
         logger = new IconDecorator(logger, "移動", "✂️");
 
-        highlightLoggerRef.current = logger;
-    }
+        return logger;
+    }, []);
+
+    const dashboardAdapter = useMemo(
+        () => new DashboardAdapter((stats) => setLiveStats(stats), 0),
+        []
+    );
 
     useEffect(() => {
         const clipboardObs: IObserver = {
             update: (event: NotificationEvent) => {
                 if (event.source === "clipboard" && event.type === "set") {
-                    highlightLoggerRef.current?.update(event);
+                    highlightLogger.update(event);
                     forceUpdate();
                 }
             },
@@ -327,7 +330,7 @@ const ExplorerTab: React.FC = () => {
                     canRedo: commandInvokerInstance.redoStack.length > 0,
                 });
                 if (event.message) {
-                    highlightLoggerRef.current?.update(event);
+                    highlightLogger.update(event);
                 }
                 if (event.data?.sortState) {
                     setSortState(event.data.sortState);
@@ -344,7 +347,7 @@ const ExplorerTab: React.FC = () => {
             commandInvokerInstance.notifier.unsubscribe(cmdObs);
             clipboard.notifier.unsubscribe(clipboardObs);
         };
-    }, []);
+    }, [highlightLogger]);
 
     const handleSort = (attr: string) => {
         facade.sortItems(attr, sortState);
@@ -360,27 +363,21 @@ const ExplorerTab: React.FC = () => {
 
         try {
             const totalNodes = facade.totalItems();
-            const dashboardAdapter = new DashboardAdapter(
-                (stats) => setLiveStats(stats),
-                totalNodes,
-            );
+            dashboardAdapter.reset(totalNodes);
+
             const observers: IObserver[] = [
-                highlightLoggerRef.current!,
+                highlightLogger,
                 dashboardAdapter,
             ];
 
             await analysisAction(observers);
         } catch (error: any) {
             console.error(error);
-            setVisitorLogs((prev) => [
-                ...prev,
-                {
-                    message: `[Error] ${error.message}`,
-                    highlight: "text-red-400 font-bold",
-                    icon: "",
-                    bold: false,
-                },
-            ]);
+            highlightLogger.update({
+                source: "system",
+                type: "progress",
+                message: `[Error] ${error.message}`,
+            });
         } finally {
             setIsProcessing(false);
         }
