@@ -874,7 +874,7 @@ const ERTab: React.FC = () => {
                   </div>
 
                   {/* Texts Table */}
-                  <div className="border border-amber-200 rounded-xl overflow-hidden shadow-lg shadow-amber-100/50">
+                  <div className="border border-amber-200 rounded-xl overflow-x-auto custom-scrollbar shadow-lg shadow-amber-100/50">
                     <table className="sample-table">
                       <caption className="bg-amber-600">
                         Physical Table: Texts_Only
