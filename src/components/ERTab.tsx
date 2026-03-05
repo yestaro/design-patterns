@@ -790,7 +790,7 @@ const ERTab: React.FC = () => {
                   </div>
 
                   {/* Words Table */}
-                  <div className="border border-rose-200 rounded-xl shadow-lg shadow-rose-100/50">
+                  <div className="border border-rose-200 rounded-xl overflow-x-auto custom-scrollbar shadow-lg shadow-rose-100/50">
                     <table className="sample-table">
                       <caption className="bg-rose-600">
                         Physical Table: Words_Only
@@ -829,7 +829,7 @@ const ERTab: React.FC = () => {
                   </div>
 
                   {/* Images Table */}
-                  <div className="border border-emerald-200 rounded-xl shadow-lg shadow-emerald-100/50">
+                  <div className="border border-emerald-200 rounded-xl overflow-x-auto custom-scrollbar shadow-lg shadow-emerald-100/50">
                     <table className="sample-table">
                       <caption className="bg-emerald-600">
                         Physical Table: Images_Only
