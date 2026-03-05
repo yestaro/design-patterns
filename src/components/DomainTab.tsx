@@ -38,7 +38,7 @@ const DomainTab: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const [isCompact, setIsCompact] = useState(false);
+  const [isCompact, setIsCompact] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
 
   useEffect(() => {
@@ -77,6 +77,9 @@ const DomainTab: React.FC = () => {
       }
     }
 
+    // 避免在手機版折疊 (display: none) 狀態下呼叫 mermaid.run()，否則會算出寬高為 0 而無法顯示
+    if (isCompact && !showMobileDetail) return;
+
     requestAnimationFrame(async () => {
       try {
         const mermaidElements = document.querySelectorAll(".mermaid");
@@ -98,7 +101,7 @@ const DomainTab: React.FC = () => {
 
     // Reset selection when changing type
     setSelectedNodeId(null);
-  }, [activeTab, diagramType]);
+  }, [activeTab, diagramType, isCompact, showMobileDetail]);
 
   const currentPattern = patterns.find((p) => p.id === activeTab);
   const currentCode = codes[activeTab] as string;
@@ -320,7 +323,7 @@ const DomainTab: React.FC = () => {
 
                 <div
                   className="mermaid min-w-[300px] [&_.classGroup]:cursor-pointer [&_.classGroup_*]:cursor-pointer [&_.node]:cursor-pointer [&_.node_*]:cursor-pointer [&_.actor]:cursor-pointer [&_.actor_*]:cursor-pointer"
-                  key={`${activeTab}-${diagramType}`}
+                  key={`${activeTab}-${diagramType}-${isCompact ? 'mobile' : 'desktop'}-${showMobileDetail ? 'show' : 'hide'}`}
                   onClick={handleMermaidClick}
                 >
                   {diagramType === "class" ? currentPattern.mermaid : (currentPattern.sequence || "graph TD\\n    A[尚未提供序列圖]")}
