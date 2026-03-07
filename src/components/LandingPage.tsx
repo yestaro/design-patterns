@@ -1,51 +1,43 @@
+import { ArrowRight, LoaderPinwheel, Route, Sparkles, UserRound } from 'lucide-react';
 import React, { useState } from 'react';
-import { LoaderPinwheel, UserRound, Route, Sparkles, ArrowRight } from 'lucide-react';
 import RoadmapDialog from './shared/RoadmapDialog';
 
-/** Landing Page 的四張價值卡片資料 */
-const valueCards = [
-    {
-        label: 'WHY',
-        labelColor: 'text-emerald-400',
-        iconBg: 'bg-emerald-500/20',
-        iconColor: 'text-emerald-400',
-        glowColor: 'bg-emerald-500/40',
-        Icon: LoaderPinwheel,
-        title: '為什麼要懂設計',
-        body: '麵條式的代碼混亂…AI 的 Code 像天書？批評別人的代碼很容易，但你有能力規劃的更好嗎？',
-    },
-    {
-        label: 'WHO',
-        labelColor: 'text-blue-400',
-        iconBg: 'bg-blue-500/20',
-        iconColor: 'text-blue-400',
-        glowColor: 'bg-blue-500/40',
-        Icon: UserRound,
-        title: '你不只是碼農',
-        body: '忙於 CRUD，複製貼上，數年如一日。什麼才是有價值的開發經驗？AI 時代，想想你的定位在哪。',
-    },
-    {
-        label: 'HOW',
-        labelColor: 'text-amber-400',
-        iconBg: 'bg-amber-500/20',
-        iconColor: 'text-amber-400',
-        glowColor: 'bg-amber-500/40',
-        Icon: Route,
-        id: 'how',
-        title: '貫穿思維原則',
-        body: '',
-    },
-    {
-        label: 'WHAT',
-        labelColor: 'text-purple-400',
-        iconBg: 'bg-purple-500/20',
-        iconColor: 'text-purple-400',
-        glowColor: 'bg-purple-500/40',
-        Icon: Sparkles,
-        title: '讓品味跟隨你',
-        body: '理解模式的「設計」，留下符合現代的心法而不是守舊套路。從物件到微服務架構都能受用。',
-    },
-];
+/** 價值卡片的封裝組件 (容器) */
+const ValueCardItem: React.FC<{
+    label: string;
+    labelColor: string;
+    iconBg: string;
+    iconColor: string;
+    glowColor: string;
+    Icon: React.ElementType;
+    title: React.ReactNode;
+    children: React.ReactNode;
+}> = ({ label, labelColor, iconBg, iconColor, glowColor, Icon, title, children }) => (
+    <div className="group relative p-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] hover:bg-white/[0.10] hover:border-white/[0.20] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300 cursor-default overflow-hidden">
+        {/* Icon 打光 */}
+        <div className={`absolute -top-8 -left-8 w-32 h-32 ${glowColor} rounded-full blur-2xl pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity duration-300`} />
+
+        {/* Icon + Label */}
+        <div className="flex items-center gap-3 mb-4">
+            <div className={`w-12 h-12 rounded-full ${iconBg} flex items-center justify-center`}>
+                <Icon size={32} className={iconColor} />
+            </div>
+            <span className={`text-base font-black uppercase tracking-wider ${labelColor}`}>
+                {label}
+            </span>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-lg font-bold text-white mb-3 leading-snug tracking-widest">
+            {title}
+        </h3>
+
+        {/* Body (直接吃內容) */}
+        <div className="text-sm text-slate-400 leading-relaxed">
+            {children}
+        </div>
+    </div>
+);
 
 interface LandingPageProps {
     /** 點擊 CTA 後的回呼 */
@@ -206,37 +198,76 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
                 {/* 四張價值卡片 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-16 mb-16">
-                    {valueCards.map((card) => (
-                        <div
-                            key={card.label}
-                            className="group relative p-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] hover:bg-white/[0.10] hover:border-white/[0.20] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300 cursor-default overflow-hidden"
+                    <ValueCardItem
+                        label="WHY"
+                        labelColor="text-emerald-400"
+                        iconBg="bg-emerald-500/20"
+                        iconColor="text-emerald-400"
+                        glowColor="bg-emerald-500/40"
+                        Icon={LoaderPinwheel}
+                        title={
+                            <>
+                                為什麼要<span className="text-4xl font-black">懂</span>設計
+                            </>
+                        }
+                    >
+                        麵條式的代碼混亂…AI 的 Code 像天書？批評別人的代碼很容易，但你有能力規劃的更好嗎？
+                    </ValueCardItem>
+
+                    <ValueCardItem
+                        label="WHO"
+                        labelColor="text-blue-400"
+                        iconBg="bg-blue-500/20"
+                        iconColor="text-blue-400"
+                        glowColor="bg-blue-500/40"
+                        Icon={UserRound}
+                        title={
+                            <>
+                                你不只是<span className="text-4xl font-black">碼農</span>
+                            </>
+                        }
+                    >
+                        忙於 CRUD，複製貼上，數年如一日。什麼才是有價值的開發經驗？AI 時代，想想你的定位在哪。
+                    </ValueCardItem>
+
+                    <ValueCardItem
+                        label="HOW"
+                        labelColor="text-amber-400"
+                        iconBg="bg-amber-500/20"
+                        iconColor="text-amber-400"
+                        glowColor="bg-amber-500/40"
+                        Icon={Route}
+                        title={
+                            <>
+                                貫穿<span className="text-4xl font-black">思維</span>原則
+                            </>
+                        }
+                    >
+                        用一個「
+                        <button
+                            onClick={() => setIsRoadmapOpen(true)}
+                            className="text-amber-300 underline underline-offset-2 decoration-amber-500/40 hover:text-amber-200 hover:decoration-amber-400 transition-colors cursor-pointer"
                         >
-                            {/* Icon 打光 */}
-                            <div className={`absolute -top-8 -left-8 w-32 h-32 ${card.glowColor} rounded-full blur-2xl pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity duration-300`} />
+                            檔案管理系統
+                        </button>
+                        」實戰 12 個設計模式的應用場景，理解每個設計決策背後的為什麼。
+                    </ValueCardItem>
 
-                            {/* Icon + Label */}
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className={`w-12 h-12 rounded-full ${card.iconBg} flex items-center justify-center`}>
-                                    <card.Icon size={32} className={card.iconColor} />
-                                </div>
-                                <span className={`text-sm font-bold uppercase tracking-wider ${card.labelColor}`}>
-                                    {card.label}
-                                </span>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="text-lg font-bold text-white mb-3 leading-snug">
-                                {card.title}
-                            </h3>
-
-                            {/* Body */}
-                            <p className="text-sm text-slate-400 leading-relaxed">
-                                {card.id === 'how' ? (
-                                    <>用一個「<button onClick={() => setIsRoadmapOpen(true)} className="text-amber-300 underline underline-offset-2 decoration-amber-500/40 hover:text-amber-200 hover:decoration-amber-400 transition-colors cursor-pointer">檔案管理系統</button>」實戰 12 個設計模式的應用場景，理解每個設計決策背後的為什麼。</>
-                                ) : card.body}
-                            </p>
-                        </div>
-                    ))}
+                    <ValueCardItem
+                        label="WHAT"
+                        labelColor="text-purple-400"
+                        iconBg="bg-purple-500/20"
+                        iconColor="text-purple-400"
+                        glowColor="bg-purple-500/40"
+                        Icon={Sparkles}
+                        title={
+                            <>
+                                讓<span className="text-4xl font-black">品味</span>跟隨你
+                            </>
+                        }
+                    >
+                        理解模式的「設計」，留下符合現代的心法而不是守舊套路。從物件到微服務架構都能受用。
+                    </ValueCardItem>
                 </div>
 
                 {/* CTA 按鈕 */}

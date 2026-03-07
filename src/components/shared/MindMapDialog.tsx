@@ -60,6 +60,57 @@ mindmap
           [需懂抽象思維]
 `;
 
+const DIAGRAM_DEFINITION = `
+sequenceDiagram
+    actor Human as 🧑‍💻 Team Lead
+    
+    box rgb(238, 242, 255) 🤖 AI Teams 生產線
+        participant Analyst as 分析<br/>Analyst
+        participant Designer as 設計<br/>Designer
+        participant Dev as 實作<br/>Implementer
+        participant Reviewer as 審查<br/>Reviewer
+        participant QA as 測試<br/>QA
+    end
+    
+    participant KB as 🗂️ Git 知識庫(md)
+
+    Note over Human,KB: 1. 需求分析 (Analyst)
+    Human->>Analyst: 需求問答-Why&Who
+    Analyst-->>Human: 產出 Spec 草案與 Test Cases
+    Human->>Analyst: 糾正與對齊商業方向
+    Analyst->>KB: 寫入【專案 Spec】【專案 Test Cases】與【通用：業務知識】
+
+    Note over Human,KB: 2. 架構設計 (Designer)
+    Designer->>KB: 讀取【專案 Spec】與【通用：設計原則】DDD | SOLID | Clean Architecture
+    Designer-->>Human: 產出架構與介面設計草案
+    Human->>Designer: 修正技術選型與邊界
+    Designer->>KB: 寫入【專案 Design】與【通用：設計原則】修正
+
+    Note over Human,KB: 3. 程式實作 (Implementer)
+    Dev->>KB: 讀取【專案 Spec】、【專案 Design】與【通用：撰寫指南】Coding Standard | Tech Stack | Framework
+    Dev->>Dev: 撰寫功能、單元測試
+    Dev->>Reviewer: 執行單元測試OK，提交 Source Code 進入審查
+
+    Note over Human,KB: 4. 代碼審查 (Reviewer - AI 互相監察)
+    Reviewer->>KB: 讀取【專案 Spec】、【專案 Design】與【通用：撰寫指南】
+    alt 發現壞味道 (不符規範)
+        Reviewer->>Dev: 退件重工 (附帶修改建議)
+        Dev->>Reviewer: 【重新提交】修正後的 Code
+    else 符合規範
+        Reviewer->>QA: 放行 Code 進入測試階段
+    end
+
+    Note over Human,KB: 5. 品質測試 (QA)
+    QA->>KB: 讀取【專案 Test Cases】
+    QA->>QA: 執行【整合測試】
+    alt 發現 Bug (測試失敗)
+        QA->>Dev: 退件重工 (附帶 Bug Report)
+    else 測試通過
+        QA-->>Human: 產出 Test Report 與最終版本
+        Human->>QA: 確認報告，給予最終審查或放行
+    end
+`;
+
 interface MindMapDialogProps {
     isOpen: boolean;
     onClose: () => void;
@@ -74,9 +125,6 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
                 startOnLoad: false,
                 theme: 'default',
                 securityLevel: 'loose',
-                mindmap: {
-                    useMaxWidth: true,
-                }
             });
 
             const renderMermaid = async () => {
@@ -85,7 +133,7 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
 
                 if (mermaidRef.current) {
                     try {
-                        mermaidRef.current.innerHTML = MINDMAP_DEFINITION;
+                        mermaidRef.current.innerHTML = DIAGRAM_DEFINITION;
                         mermaidRef.current.removeAttribute('data-processed');
                         await mermaid.run({ nodes: [mermaidRef.current] });
                     } catch (error) {
@@ -109,104 +157,45 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
             ></div>
 
             <style>{`
-                /* Default (Mobile): Scrollable with min-width to ensure readability */
-                .mermaid svg { 
-                    min-width: 800px;
+                /* Size Management for Sequence Diagram */
+                .mermaid-container {
+                    width: 100%;
+                    height: 100%;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                }
+                
+                .mermaid svg {
+                    min-width: 1400px;
+                    width: 100%;
                     height: auto;
                 }
-                
-                /* Desktop: Scale to fit without scrollbars */
-                @media (min-width: 768px) {
-                    .mermaid svg { 
-                        min-width: auto;
-                        max-width: 100%; 
-                        max-height: 100%; 
-                        height: 100%;
-                    }
-                }
 
-                /* Root Node Styling Override - Make it POP */
-                .mermaid .root circle {
-                    fill: #fdf4ff !important;
-                    stroke: #d946ef !important;
-                    stroke-width: 4px !important;
+                /* Sequence Diagram Enhancements */
+                .mermaid text.actor > tspan {
+                    font-weight: bold !important;
+                    font-size: 16px !important;
                 }
-                .mermaid .root text {
-                    font-size: 24px !important;
-                    font-weight: 900 !important;
-                    fill: #86198f !important;
+                .mermaid .messageText {
+                    font-weight: bold !important;
+                    fill: #334155 !important; /* slate-700 */
                 }
-                
-                /* Custom Node Colors (Supports both text and HTML foreignObject) */
-                .mermaid .debt rect,
-                .mermaid .debt path,
-                .mermaid .debt polygon {
-                    stroke: #d97706 !important; /* Tailwind amber-600 */
-                    stroke-width: 2px !important;
-                    fill: #fffbeb !important; /* 淺橘黃/Amber 背景 */
-                }
-                .mermaid .debt text,
-                .mermaid .debt span,
-                .mermaid .debt div,
-                .mermaid .debt p,
-                .mermaid .debt strong {
-                    font-size: 18px !important;
-                    fill: #d97706 !important; /* Tailwind amber-600 */
-                    color: #d97706 !important;
-                }
-                
-                .mermaid .soul rect,
-                .mermaid .soul path,
-                .mermaid .soul polygon {
-                    stroke: #16a34a !important; /* Tailwind green-600 */
-                    stroke-width: 2px !important;
-                    fill: #f0fdf4 !important; /* 淺綠背景 */
-                }
-                .mermaid .soul text,
-                .mermaid .soul span,
-                .mermaid .soul div,
-                .mermaid .soul p,
-                .mermaid .soul strong {
-                    font-size: 18px !important;
-                    fill: #16a34a !important; /* Tailwind green-600 */
-                    color: #16a34a !important;
-                }
-
-                /* Pro and Con Node Styling */
-                .mermaid .pro rect,
-                .mermaid .pro path,
-                .mermaid .pro polygon {
-                    stroke: #3b82f6 !important; /* 藍色外框 */
-                    stroke-width: 2px !important;
-                    fill: #eff6ff !important; /* 淺藍背景 */
-                }
-                
-                .mermaid .con rect,
-                .mermaid .con path,
-                .mermaid .con polygon {
-                    stroke: #ef4444 !important; /* 紅色外框 */
-                    stroke-width: 2px !important;
-                    fill: #fef2f2 !important; /* 淺紅背景 */
+                .mermaid .noteText {
+                    font-weight: bold !important;
                 }
             `}</style>
 
             {/* Content */}
-            <div className="relative bg-white w-full h-full md:w-11/12 md:max-w-5xl md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-auto md:overflow-hidden animate-premium-in border border-slate-200">
+            <div className="relative bg-white w-full h-full md:w-[95vw] md:max-w-none md:h-[92vh] md:max-h-[1080px] rounded-none md:rounded-2xl shadow-2xl z-10 flex flex-col overflow-auto md:overflow-hidden animate-premium-in border border-slate-200">
 
                 {/* Header */}
                 <div className="relative flex items-center justify-center px-6 py-2 border-b border-slate-100 bg-white shrink-0">
                     <div className="flex items-center gap-6">
-                        {/* Iron Triangle Visualization */}
                         <svg width="80" height="70" viewBox="0 0 100 90" className="flex-shrink-0 drop-shadow-sm">
-                            {/* Triangle */}
                             <path d="M50 35 L65 60 L35 60 Z" fill="none" stroke="#64748b" strokeWidth="3" strokeLinejoin="round" />
-
-                            {/* Vertices Dots */}
-                            <circle cx="50" cy="35" r="8" fill="#8b5cf6" /> {/* Top: Quality */}
-                            <circle cx="65" cy="60" r="8" fill="#3b82f6" /> {/* Right: Time */}
-                            <circle cx="35" cy="60" r="8" fill="#22c55e" /> {/* Left: Cost */}
-
-                            {/* Labels */}
+                            <circle cx="50" cy="35" r="8" fill="#8b5cf6" />
+                            <circle cx="65" cy="60" r="8" fill="#3b82f6" />
+                            <circle cx="35" cy="60" r="8" fill="#22c55e" />
                             <text x="50" y="20" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#64748b">Quality</text>
                             <text x="65" y="78" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#64748b">Time</text>
                             <text x="35" y="78" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#64748b">Cost</text>
@@ -231,9 +220,11 @@ export const MindMapDialog: React.FC<MindMapDialogProps> = ({ isOpen, onClose })
                 </div>
 
                 {/* Body */}
-                <div className="flex-1 overflow-auto md:overflow-hidden bg-slate-50 relative p-8 flex items-center justify-center">
-                    <div className="mermaid w-full h-full flex items-center justify-center" ref={mermaidRef}>
-                        {MINDMAP_DEFINITION}
+                <div className="flex-1 overflow-hidden bg-slate-50 relative p-8">
+                    <div className="mermaid-container flex justify-center">
+                        <div className="mermaid" ref={mermaidRef}>
+                            {DIAGRAM_DEFINITION}
+                        </div>
                     </div>
                 </div>
             </div>
