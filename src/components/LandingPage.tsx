@@ -13,7 +13,7 @@ const ValueCardItem: React.FC<{
     title: React.ReactNode;
     children: React.ReactNode;
 }> = ({ label, labelColor, iconBg, iconColor, glowColor, Icon, title, children }) => (
-    <div className="group relative p-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] hover:bg-white/[0.10] hover:border-white/[0.20] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300 cursor-default overflow-hidden">
+    <div className="h-full flex flex-col group relative p-6 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] hover:bg-white/[0.10] hover:border-white/[0.20] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15),0_8px_32px_rgba(0,0,0,0.2)] transition-all duration-300 cursor-default overflow-hidden">
         {/* Icon 打光 */}
         <div className={`absolute -top-8 -left-8 w-32 h-32 ${glowColor} rounded-full blur-2xl pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity duration-300`} />
 
@@ -32,8 +32,8 @@ const ValueCardItem: React.FC<{
             {title}
         </h3>
 
-        {/* Body (直接吃內容) */}
-        <div className="text-sm text-slate-400 leading-relaxed">
+        {/* Body (直接吃內容，加 flex-1 填滿剩下空間) */}
+        <div className="flex-1 text-sm text-slate-400 leading-relaxed">
             {children}
         </div>
     </div>
@@ -49,7 +49,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
     const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#0A0E27] text-white relative overflow-hidden flex flex-col items-center justify-center selection:bg-blue-500/30">
+        <div className="min-h-screen bg-[#0A0E27] text-white relative overflow-hidden flex flex-col items-center justify-center selection:bg-blue-500/30 antialiased" style={{ textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased', MozOsxFontSmoothing: 'grayscale' }}>
 
             {/* 背景 Aurora Glow */}
             <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-br from-blue-600/15 to-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
@@ -178,8 +178,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
 
 
                 {/* Hero 標題 */}
-                <div className="text-center mb-8">
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[1.1] mb-6">
+                <div className="text-center">
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-black md:font-extrabold tracking-tight leading-tight mb-6 text-white drop-shadow-sm">
                         <span className="block">寫程式的人很多</span>
                         <span className="block">
                             懂
@@ -197,7 +197,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onEnter }) => {
                 </div>
 
                 {/* 四張價值卡片 */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-16 mb-16">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12 mb-12">
                     <ValueCardItem
                         label="WHY"
                         labelColor="text-emerald-400"
